@@ -77,15 +77,15 @@ si_rad_eta_ar_num = 100
 
 si_layer = np.logspace(-6, -2, num=si_layer_num) * 1e6
 
-si_rad_eta_ar = np.logspace(-6, 0, num=si_rad_eta_ar_num)
+si_rad_eta_ar = np.logspace(-7, 0, num=si_rad_eta_ar_num)
 
-iii_v_rad_eta_ar = np.logspace(-5, 0, num=si_rad_eta_ar_num)
+iii_v_rad_eta_ar = np.logspace(-7, 0, num=si_rad_eta_ar_num)
 
 
 # gaas_eta = [calc_si_iv(s * 1e-6, 1.42, top_cell_qe=0.69) for s in si_layer]
 
 
-ingap_eta_voc = [calc_si_iv(100 * 1e-6, s, 1.87, top_cell_rad_eta=t) for s in si_rad_eta_ar for t in iii_v_rad_eta_ar]
+ingap_eta_voc = [calc_si_iv(1000 * 1e-6, s, 1.7, top_cell_rad_eta=t) for s in si_rad_eta_ar for t in iii_v_rad_eta_ar]
 
 ingap_eta = [w[0] for w in ingap_eta_voc]
 si_voc = [float(w[1]) for w in ingap_eta_voc]
@@ -96,7 +96,7 @@ ingap_eta = np.array(ingap_eta).reshape((iii_v_rad_eta_ar.shape[0], si_rad_eta_a
 ingap_voc = np.array(ingap_voc).reshape((iii_v_rad_eta_ar.shape[0], si_rad_eta_ar_num))
 
 
-np.savez("radeta.npz",eta=ingap_eta,voc_y=si_voc,voc_x=ingap_voc)
+np.savez("radeta_1.7.npz",eta=ingap_eta,voc_y=si_voc,voc_x=ingap_voc)
 
 # plt.semilogx(si_layer, gaas_eta, label="GaAs (69% QE)", hold=True)
 # plt.semilogx(si_rad_eta_ar, ingap_eta[:,0], 'o',label="InGaP (100% QE)")
