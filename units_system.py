@@ -1,27 +1,25 @@
 from collections import defaultdict
 import re
 
-from solcore3.source_managed_class import SourceManagedClass
-from solcore3.constants import *
-import solcore3.constants
-from solcore3.plugin_system import SolcoreBasePlugin, RegisterPluginType
+import constants
+import pickle
 
-from solcore3.singleton import Singleton
 import numpy
+
+import os.path
+
+import scipy.constants as sc
+
+
 """Constants used commonly in solcore
 """
 
-@RegisterPluginType     # make the solcore plugin system aware of the parameter library plugins, eg: vurgaftman
-class UnitsLibrary(SolcoreBasePlugin):
+class UnitsLibrary():
     def load(self):
         u = UnitsSystem()
-        for name, path in self.sources.items():
-            u.add_source(name,path)
-            
+
     def unload(self):
         u = UnitsSystem()
-        for name in self.sources.keys():
-            u.remove_source(name, reread=False)
         UnitsSystem.read()
         
 
@@ -52,18 +50,17 @@ def generateConversionDictForSISuffix(suffix, centi = False, deci = False, non_b
     
     return dict(zip(unitNames, conversion))
 
-@Singleton.breakoutFunctions(solcore3)
-class UnitsSystem(SourceManagedClass):
+class UnitsSystem():
     def __init__(self):
-        SourceManagedClass.__init__(self)
         self.separate_value_and_unit_RE = re.compile(u"([-+]?[0-9]*\.?[0-9]+(?:[eE][-+]?[0-9]+)?)(?:[ \t]*(.*))?")
         self.split_units_RE = re.compile(u"(?:([^ \+\-\^\.0-9]+)[\^]?([\-\+]?[^ \-\+]*)?)")
         self.siConversions = {}
         self.dimensions = defaultdict(dict)
+        self.read(name="defaultunits")
 
         
     def read(self, name=None):
-        SourceManagedClass.read(self, name)
+        self.read_database()
         self.si_conversions = {}
         for dimension in self.database.sections():
             units = self.database.options(dimension)
@@ -86,11 +83,21 @@ class UnitsSystem(SourceManagedClass):
                 string_expression = self.database.get(dimension,unit)
                 self.siConversions[unit] = self.safe_eval(string_expression)
                 self.dimensions[dimension][unit]= self.siConversions[unit]
-    
+
+    def read_database(self):
+        work_dir=os.path.dirname(os.path.realpath(__file__))
+        fp=open(work_dir+"/databasedump.pkl","rb")
+        self.database=pickle.load(fp)
+        fp.close()
+
+    def write_database(self):
+        fp=open("databasedump.pkl","wb")
+        pickle.dump(self.database,fp)
+        fp.close()
+
     def safe_eval(self, string_expression):
-        return eval(string_expression,{"__builtins__":{}},{"constants":solcore3.constants})
+        return eval(string_expression,{"__builtins__":{}},{"constants":constants})
     
-    @Singleton.breakout
     def siUnits(self, value, unit):
         """convert value from unit to equivalent si-unit
         >>> print siUnits(1,"mm") # yields meters
@@ -107,7 +114,6 @@ class UnitsSystem(SourceManagedClass):
             value = value * numpy.power((self.siConversions[unit]),power) ### caution, *= is WRONG because it modifies original obj. DO NOT WANT
 
         return value
-    @Singleton.breakout
     def asUnit(self, value, unit, dimension=None):
         """ converts from si unit to other unit
         >>> print asUnit(1, "mA") # print 1A in mA.
@@ -122,13 +128,11 @@ class UnitsSystem(SourceManagedClass):
             value = value / (self.siConversions[unit])**power ### caution, /= is WRONG because it modifies original obj. DO NOT WANT
 
         return value
-    @Singleton.breakout
     def si(self, *args):
         """ Utility function that forwards to either siUnit or siUnitFromString"""
         if type(args[0]) == str:
             return self.siUnitFromString(*args)
         return self.siUnits(*args)
-    @Singleton.breakout
     def siUnitFromString(self,string):
         """ converts a string of a number with units into si units of that quantity
 
@@ -154,7 +158,6 @@ class UnitsSystem(SourceManagedClass):
             value *= (self.siConversions[unit])**power
         return value
     
-    @Singleton.breakout
     def convert(self, value, from_unit, to_unit):
         """ converts between comparable units, does NOT check if units are comparable.
         >>> print convert(1, "nm", "mm")
@@ -165,7 +168,6 @@ class UnitsSystem(SourceManagedClass):
         0.036
         """
         return self.asUnit(self.siUnits(value, from_unit), to_unit)
-    @Singleton.breakout
     def eVnm(self,value):
         """ Bi-directional conversion between nm and eV.
     
@@ -180,9 +182,8 @@ class UnitsSystem(SourceManagedClass):
         >>> print '%i'%round(eVnm(1))
         1240
         """
-        factor = self.asUnit(h, "eV") * self.asUnit(c, "nm")
+        factor = self.asUnit(sc.h, "eV") * self.asUnit(sc.c, "nm")
         return factor / value
-    @Singleton.breakout
     def nmJ(self,value):
         """ Bi-directional conversion between nm and eV.
     
@@ -197,9 +198,8 @@ class UnitsSystem(SourceManagedClass):
         >>> print '%i'%round(eVnm(1))
         1240
         """
-        factor = h  * c
+        factor = sc.h  * sc.c
         return factor / self.siUnits(value,"nm")
-    @Singleton.breakout
     def mJ(self,value):
         """ Bi-directional conversion between nm and eV.
     
@@ -214,10 +214,9 @@ class UnitsSystem(SourceManagedClass):
         >>> print '%i'%round(eVnm(1))
         1240
         """
-        factor = h  * c
+        factor = sc.h  * sc.c
         return factor / value
 
-    @Singleton.breakout
     def nmHz(self, value):
         """Bi-directional conversion between nm and Hz.
     
@@ -227,9 +226,8 @@ class UnitsSystem(SourceManagedClass):
         Returns:
         Either a number which is the conversion [nm] --> [Hz] or [Hz] --> [nm]
         """
-        factor = self.asUnit(c, "nm s-1")
+        factor = self.asUnit(sc.c, "nm s-1")
         return factor / value
-    @Singleton.breakout
     def spectral_conversion_nm_ev(self, x, y):
         """Bi-directional conversion between a spectrum per nanometer and a spectrum per electronvolt.
     
@@ -268,12 +266,11 @@ class UnitsSystem(SourceManagedClass):
         True
         """
         x_prime = self.eVnm(x)
-        conversion_constant = self.asUnit(h, "eV s") * self.asUnit(c, "nm s-1")
+        conversion_constant = self.asUnit(sc.h, "eV s") * self.asUnit(sc.c, "nm s-1")
         y_prime = y * conversion_constant / x_prime**2
         y_prime = reverse(y_prime) # Wavelength ascends as electronvolts decends therefore reverse arrays
         x_prime = reverse(x_prime)
         return (x_prime, y_prime)
-    @Singleton.breakout
     def spectral_conversion_nm_hz(self, x, y):
         """Bi-directional conversion between a spectrum per nanometer and a spectrum per Hertz.
     
@@ -312,12 +309,11 @@ class UnitsSystem(SourceManagedClass):
         True
         """
         x_prime = self.nmHz(x)
-        conversion_constant = self.asUnit(c, "nm s-1")
+        conversion_constant = self.asUnit(sc.c, "nm s-1")
         y_prime = y * conversion_constant / x_prime**2
         y_prime = reverse(y_prime) # Wavelength ascends as frequency decends therefore reverse arrays
         x_prime = reverse(x_prime)
         return (x_prime, y_prime)
-    @Singleton.breakout
     def sensibleUnits(self, value, dimension, precision=2):
         """ attempt to convert a physical quantity of a particular dimension to the most sensible units
         >>> print sensibleUnits(0.001,"length",0)
@@ -340,10 +336,8 @@ class UnitsSystem(SourceManagedClass):
         allValues = [abs(log10(asUnit(value, unit))) for unit in possibleUnits]
         bestUnit = possibleUnits[allValues.index(min(allValues))]
         return formatting%(asUnit(value, bestUnit), bestUnit)
-    @Singleton.breakout
     def eV(self, e,f=3):
         return "%.3f eV"%self.asUnit(e,"eV")
-    @Singleton.breakout
     def guess_dimension(self, unit):
         """
         >>> print guess_dimension("nm")

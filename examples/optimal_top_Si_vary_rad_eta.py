@@ -53,7 +53,7 @@ def plot_voc(top_voc, bot_voc, eta,top_cell_bg=1.87,bot_cell_bg=1.1):
     # plt.legend(loc="best")
     plt.xlim([np.min(top_cell_bg-top_voc),np.max(top_cell_bg-top_voc)])
     plt.ylim([np.min(bot_cell_bg-bot_voc),np.max(bot_cell_bg-bot_voc)])
-    plt.xlabel("Eg/q-Voc (InGaP top cell)")
+    plt.xlabel("Eg/q-Voc (1.7eV top cell)")
     plt.ylabel("Eg/q-Voc (Si bottom cell)")
     plt.savefig("voc_dep_eta.pdf")
     plt.close()
@@ -67,13 +67,13 @@ def plot_rad_eta(top_rad_eta, bot_rad_eta, eta):
     plt.colorbar()
 
     # plt.legend(loc="best")
-    plt.xlabel("radiative efficiency (InGaP top cell)")
+    plt.xlabel("radiative efficiency (1.7eV top cell)")
     plt.ylabel("radiative efficiency (Si bottom cell)")
     plt.savefig("radeta_dep_eta.pdf")
 
 
 si_layer_num = 100
-si_rad_eta_ar_num = 100
+si_rad_eta_ar_num = 50
 
 si_layer = np.logspace(-6, -2, num=si_layer_num) * 1e6
 
