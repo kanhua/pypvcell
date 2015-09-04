@@ -1,8 +1,9 @@
 import numpy as np
 import scipy.constants as sc
-from solcore3 import convert, siUnits, asUnit
+from units_system import UnitsSystem
 import copy
 
+us=UnitsSystem()
 
 class spectrum_base(object):
     def __init__(self):
@@ -36,7 +37,7 @@ class spectrum_base(object):
         if wavelength_unit in length_wavelength_unit_factor:
 
             # Convert [flux]/[Area][Length] to [Flux]/[m^2][m]
-            self.core_spec = convert(spectrum, area_unit + " " + wavelength_unit + "-1", "m-2 m-1")
+            self.core_spec = us.convert(spectrum, area_unit + " " + wavelength_unit + "-1", "m-2 m-1")
 
             # Convert wavelength unit to [m]
             self.core_wl = self._conv_wl_to_si(wavelength, wavelength_unit)
@@ -45,10 +46,10 @@ class spectrum_base(object):
             self.core_wl = self._conv_wl_to_si(wavelength, wavelength_unit)
 
             # Convert [flux]/[Area][Energy] to [flux]/[Area][J] first, and then convert [flux]/[Area][J] to []/[Area][m]
-            self.core_spec = convert(spectrum, wavelength_unit + '-1', 'J-1') * sc.h * sc.c / np.power(self.core_wl, 2)
+            self.core_spec = us.convert(spectrum, wavelength_unit + '-1', 'J-1') * sc.h * sc.c / np.power(self.core_wl, 2)
 
             # Convert [flux]/[Area][Energy] to [flux]/[m^2][J]
-            self.core_spec = convert(self.core_spec, area_unit, "m-2")
+            self.core_spec = us.convert(self.core_spec, area_unit, "m-2")
 
         if is_photon_flux:
             self.core_spec = self._as_energy(self.core_wl, self.core_spec)
@@ -89,17 +90,17 @@ class spectrum_base(object):
         spectrum = np.zeros((self.core_wl.shape[0], 2))
 
         if wavelength_unit in length_wavelength_unit_factor:
-            spectrum[:, 0] = asUnit(self.core_wl, wavelength_unit)
-            spectrum[:, 1] = convert(self.core_spec, 'm-2', area_unit)
-            spectrum[:, 1] = convert(spectrum[:, 1], 'm-1', wavelength_unit + '-1')
+            spectrum[:, 0] = us.asUnit(self.core_wl, wavelength_unit)
+            spectrum[:, 1] = us.convert(self.core_spec, 'm-2', area_unit)
+            spectrum[:, 1] = us.convert(spectrum[:, 1], 'm-1', wavelength_unit + '-1')
 
         elif wavelength_unit in energy_wavelength_unit_factor.keys():
             spectrum[:, 0] = sc.h * sc.c / self.core_wl
-            spectrum[:, 0] = convert(spectrum[:, 0], 'J', wavelength_unit)
+            spectrum[:, 0] = us.convert(spectrum[:, 0], 'J', wavelength_unit)
 
-            spectrum[:, 1] = convert(self.core_spec, 'm-2', area_unit)
+            spectrum[:, 1] = us.convert(self.core_spec, 'm-2', area_unit)
             spectrum[:, 1] = spectrum[:, 1] * np.power(self.core_wl, 2) / (sc.h * sc.c)
-            spectrum[:, 1] = convert(spectrum[:, 1], 'J-1', wavelength_unit + '-1')
+            spectrum[:, 1] = us.convert(spectrum[:, 1], 'J-1', wavelength_unit + '-1')
 
         # convert the spectrum to photon flux if necessary
         if flux == "photon":
@@ -121,11 +122,11 @@ class spectrum_base(object):
         spectrum = np.zeros((self.core_wl.shape[0], 2))
 
         if wavelength_unit in length_wavelength_unit_factor:
-            spectrum[:, 0] = asUnit(self.core_wl, wavelength_unit)
+            spectrum[:, 0] = us.asUnit(self.core_wl, wavelength_unit)
 
         elif wavelength_unit in energy_wavelength_unit_factor.keys():
             spectrum[:, 0] = sc.h * sc.c / self.core_wl
-            spectrum[:, 0] = convert(spectrum[:, 0], 'J', wavelength_unit)
+            spectrum[:, 0] = us.convert(spectrum[:, 0], 'J', wavelength_unit)
 
         spectrum[:, 1] = self.core_spec
 
@@ -207,18 +208,18 @@ class spectrum_base(object):
             # self.wl_in_eV = sc.h * sc.c / (self.wl * sc.e)
             new_wl = sc.h * sc.c / (wavelength * energy_unit[unit])
         else:
-            new_wl = siUnits(wavelength, unit)
+            new_wl = us.siUnits(wavelength, unit)
 
         return new_wl
 
 
 if __name__ == "__main__":
     test_spec = spectrum_base()
-    from solcore3.beta.illumination import illumination
+    from illumination import illumination
 
     ill = illumination()
 
-    test_spec.set_spectrum_density(asUnit(ill.wl, 'nm'), ill.photon_flux_in_W / 1e9, "m-2", "nm")
+    test_spec.set_spectrum_density(us.asUnit(ill.wl, 'nm'), ill.photon_flux_in_W / 1e9, "m-2", "nm")
 
     test_spec.set_spectrum_density(ill.wl_in_eV, ill.photon_flux_in_W_perEV, "m-2", "eV")
 

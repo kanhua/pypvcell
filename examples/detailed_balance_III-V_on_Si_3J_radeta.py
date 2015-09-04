@@ -30,8 +30,8 @@ def calc_4j_eta(top_cell_eta,mid_cell_eta, concentration,top_band_gap=1.87, mid_
     return calc_mj_eta(subcell_eg,subcell_qe,subcell_rad_eff,cell_temperature,concentration=concentration),\
            top_voc,mid_voc,bot_voc
 
-test_top_eta=np.logspace(-7,0,num=40,endpoint=True)
-test_mid_eta=np.logspace(-7,0,num=40,endpoint=True)
+test_top_eta=np.logspace(-7,0,num=60,endpoint=True)
+test_mid_eta=np.logspace(-7,0,num=60,endpoint=True)
 
 eta_array_1eV_1sun = [calc_4j_eta(eg, eg2, concentration=1,top_band_gap=top_bg,mid_band_gap=mid_bg) for eg2 in test_mid_eta for eg in test_top_eta]
 

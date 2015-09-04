@@ -3,9 +3,10 @@ from scipy.interpolate import interp1d
 from scipy.optimize import newton_krylov
 import scipy.constants as sc
 from spectrum_base import spectrum_base
-from solcore3 import eVnm
+from units_system import UnitsSystem
 import copy
 
+us=UnitsSystem()
 
 def gen_rec_iv(j01, j02, n1, n2, temperature, rshunt, voltage, jsc=0):
     current = (j01 * (np.exp(sc.e * voltage / (n1 * sc.k * temperature)) - 1)
