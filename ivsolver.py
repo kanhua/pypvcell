@@ -124,7 +124,7 @@ def gen_rec_iv_with_rs_by_newton(j01, j02, n1, n2, temperature, rshunt, rseries,
     return voltage, np.array(solved_current)
 
 
-def calculate_j01_from_qe(qe,threshold=1e-3,step_in_ev=1e-5):
+def calculate_j01_from_qe(qe,threshold=1e-3,step_in_ev=1e-5,lead_term=None):
     """
     Calculate j01 from absorptivity (QE).
     :param qe: QE or absorptivity. A spectrum_base class
@@ -138,7 +138,8 @@ def calculate_j01_from_qe(qe,threshold=1e-3,step_in_ev=1e-5):
     T = 300
     #lead_term = np.power(sc.e,4) * 2 * (n_c ** 2) / (np.power(sc.h, 3) * np.power(sc.c, 2) * 2 * np.power(sc.pi,2))
 
-    lead_term=np.power(sc.e,4)*4*sc.pi*(n_c**2)/(np.power(sc.c,2)*np.power(sc.h,3))
+    if lead_term is None:
+        lead_term=np.power(sc.e,4)*4*sc.pi*(n_c**2)/(np.power(sc.c,2)*np.power(sc.h,3))
 
     qe_a = qe.get_spectrum(wavelength_unit='eV')
 
@@ -270,3 +271,5 @@ def solve_mj_iv(voltage_current_tuple, i_max=None):
         current_range = np.hstack(([current_range[0] * (1 - 0.0001)], current_range))
 
     return voltage_sum, current_range
+
+
