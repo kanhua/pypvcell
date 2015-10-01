@@ -73,7 +73,7 @@ def calc_ere(qe, voc, T=300, ill=illumination("AM1.5g", concentration=1)):
 
 
 def calc_mj_eta(subcell_eg, subcell_qe, subcell_rad_eff, cell_temperature, concentration=1,
-                rs=0, replace_iv=None, replace_qe=None):
+                rs=0, replace_iv=None, replace_qe=None, verbose=0):
     subcell_eg = np.array(subcell_eg)
     subcell_qe = np.array(subcell_qe)
     subcell_rad_eff = np.array(subcell_rad_eff)
@@ -103,7 +103,8 @@ def calc_mj_eta(subcell_eg, subcell_qe, subcell_rad_eff, cell_temperature, conce
 
     subcell_jsc = [calc_jsc(subcell_ill[i], subcell_qe[i]) for i, _ in enumerate(subcell_qe)]
 
-    print(subcell_jsc)
+    if verbose > 0:
+        print(subcell_jsc)
     iv_list = [gen_rec_iv(subcell_j01[i], subcell_j02[i], 1, 2, cell_temperature, 1e15, subcell_voltage, subcell_jsc[i]) \
                for i, _ in enumerate(subcell_eg)]
 
@@ -118,7 +119,7 @@ def calc_mj_eta(subcell_eg, subcell_qe, subcell_rad_eff, cell_temperature, conce
                                                   1, 2, cell_temperature, 1e15, rs, subcell_voltage, subcell_jsc[0])
 
     # plt.plot(iv_list[0][0],iv_list[0][1],'o')
-    #plt.show()
+    # plt.show()
     #plt.close()
 
 

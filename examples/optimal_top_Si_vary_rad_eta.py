@@ -97,10 +97,10 @@ ingap_voc = np.array(ingap_voc).reshape((iii_v_rad_eta_ar.shape[0], si_rad_eta_a
 
 
 np.savez("radeta_1.7.npz",eta=ingap_eta,voc_y=si_voc,voc_x=ingap_voc)
+np.savez("radeta_1.7_radeta.npz",eta=ingap_eta,ere_y=si_rad_eta_ar,ere_x=iii_v_rad_eta_ar)
 
 # plt.semilogx(si_layer, gaas_eta, label="GaAs (69% QE)", hold=True)
 # plt.semilogx(si_rad_eta_ar, ingap_eta[:,0], 'o',label="InGaP (100% QE)")
-
 #plt.semilogx(si_rad_eta_ar, ingap_eta[:,4], 'o',label="InGaP (100% QE)")
 
 print(ingap_eta)

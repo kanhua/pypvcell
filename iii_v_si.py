@@ -12,7 +12,7 @@ from scipy.interpolate import interp2d
 
 
 
-def calc_2j_si_iv(si_layer_t, si_rad_eta, top_cell_bg, top_cell_qe=1, top_cell_rad_eta=1):
+def calc_2j_si_eta(si_layer_t, si_rad_eta, top_cell_bg, top_cell_qe=1, top_cell_rad_eta=1):
     """
     Calculate the efficiency of dual-junction solar cell with silicon bottom cell
     :param si_layer_t: thickness of silicon cell in (m)
