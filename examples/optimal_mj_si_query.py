@@ -14,12 +14,12 @@ print(eta,top_voc,si_voc)
 
 
 # State-of-the-art 3J
-eta,top_voc,mid_voc,bot_voc=calc_3j_si_eta(1e-4,5e-3,1,top_band_gap=1.97,mid_band_gap=1.48)
+eta,top_voc,mid_voc,bot_voc= calc_3j_si_eta(1e-4, 5e-3, 1, top_band_gap=1.97, mid_band_gap=1.48)
 
 print(eta,top_voc,mid_voc,bot_voc)
 
 # improved state-of-the-art 3J
-eta,top_voc,mid_voc,bot_voc=calc_3j_si_eta(1e-3,5e-3,1,top_band_gap=1.97,mid_band_gap=1.48)
+eta,top_voc,mid_voc,bot_voc= calc_3j_si_eta(1e-3, 5e-3, 1, top_band_gap=1.97, mid_band_gap=1.48)
 
 print(eta,top_voc,mid_voc,bot_voc)
 

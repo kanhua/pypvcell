@@ -26,8 +26,8 @@ def calc_2j_eta_array(iii_v_rad_eta_ar, top_cell_bg, top_cell_qe):
 def calc_3j_eta_array(iii_v_rad_eta, top_cell_bg, top_cell_qe, mid_cell_bg, mid_cell_qe):
     eta_arr = list()
     for r in iii_v_rad_eta_ar:
-        eta, _, _, _ = calc_3j_si_eta(r, r, 1, top_band_gap=top_cell_bg, mid_band_gap=mid_cell_bg,
-                                      top_cell_qe=top_cell_qe, mid_cell_qe=mid_cell_qe)
+        eta, _, _, _ = calc_3j_si_eta(r, r, 1, top_band_gap=top_cell_bg, top_cell_qe=top_cell_qe,
+                                      mid_band_gap=mid_cell_bg, mid_cell_qe=mid_cell_qe)
         # calc_2j_si_eta(si_layer_t=1000e-6, si_rad_eta=0.005, top_cell_bg=top_cell_bg,
         #                       top_cell_qe=top_cell_qe, top_cell_rad_eta=r)
         eta_arr.append(eta)
