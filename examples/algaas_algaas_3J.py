@@ -29,6 +29,5 @@ if __name__=="__main__":
     plt.ylabel("band gap of top cell (eV)")
     plt.xlim([np.min(algaas_bg_mid),np.max(algaas_bg_mid)])
     plt.ylim([np.min(algaas_bg_top),np.max(algaas_bg_top)])
-
     plt.savefig("algaas_algaas_3J.pdf")
     plt.show()

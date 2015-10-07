@@ -50,11 +50,11 @@ def calc_2j_si_eta(si_layer_t, si_rad_eta, top_cell_bg, top_cell_qe=1, top_cell_
 
 
 def calc_3j_si_eta(top_cell_eta, mid_cell_eta, concentration, top_band_gap=1.87, top_cell_qe=1, mid_band_gap=1.42,
-                   mid_cell_qe=1, bot_cell_eta=0.005):
+                   mid_cell_qe=1, bot_cell_eta=0.005, bot_cell_qe=1):
     si_bg = 1.12
     cell_temperature = 300
     subcell_eg = np.array([top_band_gap, mid_band_gap, si_bg])
-    subcell_qe = np.array([top_cell_qe, mid_cell_qe, 1])
+    subcell_qe = np.array([top_cell_qe, mid_cell_qe, bot_cell_qe])
     subcell_rad_eff = np.array([top_cell_eta, mid_cell_eta, bot_cell_eta])
 
     top_voc = rad_to_voc(top_cell_eta, gen_square_qe(top_band_gap, subcell_qe[0]))
