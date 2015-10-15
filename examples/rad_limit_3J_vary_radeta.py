@@ -15,8 +15,8 @@ mpl.rc('font', **font)
 
 if __name__=="__main__":
 
-    topmid_radeta=np.logspace(-5,0,num=10)
-    bot_rad_eta=np.logspace(-6,0,num=10)
+    topmid_radeta=np.logspace(-5,0,num=50)
+    bot_rad_eta=np.logspace(-6,0,num=50)
 
     eta_array=np.zeros((topmid_radeta.shape[0],bot_rad_eta.shape[0]))
 
