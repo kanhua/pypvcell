@@ -1,6 +1,5 @@
 __author__ = 'kanhua'
 
-
 import numpy as np
 from scipy.interpolate import interp2d
 import matplotlib.pyplot as plt
@@ -9,8 +8,8 @@ from iii_v_si import calc_2j_si_eta, calc_3j_si_eta
 
 
 if __name__=="__main__":
-    algaas_top_ere=np.logspace(-7,0,num=10)
-    algaas_mid_ere=np.logspace(-7,0,num=10)
+    algaas_top_ere=np.logspace(-7,0,num=50)
+    algaas_mid_ere=np.logspace(-7,0,num=50)
 
     eta_array=np.zeros((algaas_top_ere.shape[0],algaas_mid_ere.shape[0]))
 
