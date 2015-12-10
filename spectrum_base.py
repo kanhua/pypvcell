@@ -65,7 +65,7 @@ class spectrum_base(object):
         :param spectrum: an ndarray that stores the spectral density
         :param wavelength_unit: length units (m, nm, ...) or "J" or "eV"
         """
-        length_wavelength_unit_factor = ('m', 'cm', 'nm')
+        length_wavelength_unit_factor = ('m', 'cm', 'nm','um')
         energy_wavelength_unit_factor = {"J": 1, "eV": sc.e}
 
         # Convert everything to photon energy : w/m^2-m

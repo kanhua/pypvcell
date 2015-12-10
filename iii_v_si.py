@@ -22,7 +22,7 @@ def calc_2j_si_eta(si_layer_t, si_rad_eta, top_cell_bg, top_cell_qe=1, top_cell_
     :return: efficiency, voc of silicon cell, voc of bottom cell
     """
     si_layer = si_layer_t
-    abs_file = "/Users/kanhua/Dropbox/Documents in Dropbox/Programming projects/Python/pypvcell/examples/si_alpha.csv"
+    abs_file = "/Users/kanhua/Dropbox/DDocuments/Programming projects/Python/pypvcell/examples/si_alpha.csv"
 
     si_alpha = np.loadtxt(abs_file, delimiter=',')
 
@@ -63,3 +63,4 @@ def calc_3j_si_eta(top_cell_eta, mid_cell_eta, concentration, top_band_gap=1.87,
 
     return calc_mj_eta(subcell_eg, subcell_qe, subcell_rad_eff, cell_temperature, concentration=concentration), \
            top_voc, mid_voc, bot_voc
+
