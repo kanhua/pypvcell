@@ -8,7 +8,7 @@ us = UnitsSystem()
 
 
 class illumination(spectrum_base):
-    def __init__(self, spectrum="AM1.5d", concentration=1):
+    def __init__(self, spectrum="AM1.5g", concentration=1):
 
         """
         Initialise a standard spectrum.
