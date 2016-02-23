@@ -31,8 +31,8 @@ if __name__=="__main__":
 
             subcell_eg[0]=t
             subcell_eg[3]=b
-            eta_array[i,j]=calc_mj_eta(subcell_eg, subcell_qe, subcell_rad_eff,
-                                       cell_temperature, concentration=concentration)
+            eta_array[i,j]= calc_mj_eta(subcell_eg, subcell_qe, subcell_rad_eff, cell_temperature,
+                                        concentration=concentration)
 
     maxidx_0=eta_array.argmax(axis=0)
     maxidx_1=eta_array[maxidx_0].argmax()

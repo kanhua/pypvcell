@@ -6,11 +6,18 @@ from spectrum_base import spectrum_base
 from units_system import UnitsSystem
 import copy
 
-us=UnitsSystem()
+us = UnitsSystem()
+
 
 def gen_rec_iv(j01, j02, n1, n2, temperature, rshunt, voltage, jsc=0):
     current = (j01 * (np.exp(sc.e * voltage / (n1 * sc.k * temperature)) - 1)
                + j02 * (np.exp(sc.e * voltage / (n2 * sc.k * temperature)) - 1) +
+               voltage / rshunt) - jsc
+    return (voltage, current)
+
+
+def gen_rec_iv_by_rad_eta(j01,rad_eta,n1,temperature,rshunt,voltage,jsc=0):
+    current = (j01/rad_eta * (np.exp(sc.e * voltage / (n1 * sc.k * temperature)) - 1)+
                voltage / rshunt) - jsc
     return (voltage, current)
 
@@ -124,7 +131,7 @@ def gen_rec_iv_with_rs_by_newton(j01, j02, n1, n2, temperature, rshunt, rseries,
     return voltage, np.array(solved_current)
 
 
-def calculate_j01_from_qe(qe,threshold=1e-3,step_in_ev=1e-5,lead_term=None):
+def calculate_j01_from_qe(qe, threshold=1e-3, step_in_ev=1e-5, lead_term=None):
     """
     Calculate j01 from absorptivity (QE).
     :param qe: QE or absorptivity. A spectrum_base class
@@ -136,40 +143,40 @@ def calculate_j01_from_qe(qe,threshold=1e-3,step_in_ev=1e-5,lead_term=None):
 
     n_c = 3.5
     T = 300
-    #lead_term = np.power(sc.e,4) * 2 * (n_c ** 2) / (np.power(sc.h, 3) * np.power(sc.c, 2) * 2 * np.power(sc.pi,2))
+    # lead_term = np.power(sc.e,4) * 2 * (n_c ** 2) / (np.power(sc.h, 3) * np.power(sc.c, 2) * 2 * np.power(sc.pi,2))
 
     if lead_term is None:
-        lead_term=np.power(sc.e,4)*4*sc.pi*(n_c**2)/(np.power(sc.c,2)*np.power(sc.h,3))
+        # the additional sc.e^3 comes from the unit of E. We use the unit of eV to do the integration
+        # of Planck's spectrum. Note that the term E^2*dE gives three q in total.
+        lead_term = np.power(sc.e, 4) * 2 * sc.pi * (n_c ** 2) / (np.power(sc.c, 2) * np.power(sc.h, 3))
 
     qe_a = qe.get_spectrum(wavelength_unit='eV')
 
-    qe_a=qe.get_interp_spectrum(np.arange(np.min(qe_a[:,0]),np.max(qe_a[:,0]),step=step_in_ev),'eV')
+    qe_a = qe.get_interp_spectrum(np.arange(np.min(qe_a[:, 0]), np.max(qe_a[:, 0]), step=step_in_ev), 'eV')
 
-    qe_a=qe_a[qe_a[:,1]>threshold,:]
+    qe_a = qe_a[qe_a[:, 1] > threshold, :]
 
-    v_t=sc.k*T/sc.e
+    v_t = sc.k * T / sc.e
 
     j01 = lead_term * np.trapz(qe_a[:, 1] * np.power(qe_a[:, 0], 2) / (np.exp(qe_a[:, 0] / v_t) - 1), qe_a[:, 0])
 
     return j01
 
-def calculate_bed(qe,T=300):
 
-    assert isinstance(qe,spectrum_base)
+def calculate_bed(qe, T=300):
+    assert isinstance(qe, spectrum_base)
 
     qe_a = qe.get_spectrum(wavelength_unit='eV')
 
-    qe_a=qe.get_interp_spectrum(np.arange(np.min(qe_a[:,0]),np.max(qe_a[:,0]),step=1e-6),'eV')
+    qe_a = qe.get_interp_spectrum(np.arange(np.min(qe_a[:, 0]), np.max(qe_a[:, 0]), step=1e-6), 'eV')
 
-    v_t=sc.k*T/sc.e
+    v_t = sc.k * T / sc.e
 
-    y=qe_a[:, 1] * np.power(qe_a[:, 0], 2) / (np.exp(qe_a[:, 0] / v_t) - 1)
+    y = qe_a[:, 1] * np.power(qe_a[:, 0], 2) / (np.exp(qe_a[:, 0] / v_t) - 1)
 
-    x=qe_a[:,0]
+    x = qe_a[:, 0]
 
-
-    return x,y
-
+    return x, y
 
 
 def get_v_from_j(voltage, current, target_current):
@@ -194,9 +201,9 @@ def calculate_j02_from_voc(j01, jsc, voc, t, n2):
     # extracts j02 from an iv curve
     # verified as identical to idl
     term1 = jsc - (j01 * np.exp(sc.e * voc / (sc.k * t)))
-    #print term1
+    # print term1
     term2 = np.exp(sc.e * voc / (n2 * sc.k * t))
-    #print term2
+    # print term2
 
     j02 = term1 / term2
     return j02
@@ -271,5 +278,3 @@ def solve_mj_iv(voltage_current_tuple, i_max=None):
         current_range = np.hstack(([current_range[0] * (1 - 0.0001)], current_range))
 
     return voltage_sum, current_range
-
-

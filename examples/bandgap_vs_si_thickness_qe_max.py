@@ -16,7 +16,7 @@ def calculate():
 
     for i, bg in enumerate(top_cell_gap):
         for j, t in enumerate(si_layer):
-            test_eta_arr=[calc_2j_si_eta(t*1e-6, 1, bg, top_cell_qe=q, top_cell_rad_eta=1e-3)[0] for q in qe_range]
+            test_eta_arr=[calc_2j_si_eta(t * 1e-6, 1, bg, top_cell_qe=q, top_cell_rad_eta=1e-3)[0] for q in qe_range]
             eta_array[i][j]= np.max(test_eta_arr)
 
     np.savez("bg_vs_t_qe_opt_1e-3.npz",tbg=si_layer,mbg=top_cell_gap,eta=eta_array)

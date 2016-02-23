@@ -16,8 +16,8 @@ def calc_std_3J():
 
     for i,teg in enumerate(algaas_bg_top):
         for j,meg in enumerate(algaas_bg_mid):
-            eta,_,_,_= calc_3j_si_eta(1, 1, 240/0.9, top_band_gap=teg, top_cell_qe=1, mid_band_gap=meg,
-                                      mid_cell_qe=1,bot_cell_qe=1,bot_band_gap=0.67,bot_cell_eta=1)
+            eta,_,_,_= calc_3j_si_eta(1, 1, 240 / 0.9, top_band_gap=teg, top_cell_qe=1, mid_band_gap=meg, mid_cell_qe=1,
+                                      bot_cell_eta=1, bot_cell_qe=1, bot_band_gap=0.67)
             eta_array[i,j]=eta
 
 

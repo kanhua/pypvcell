@@ -4,10 +4,15 @@ __author__ = 'kanhua'
 import numpy as np
 from scipy.interpolate import interp1d
 
+import matplotlib.pyplot as plt
+
 
 def voc(voltage, current):
     assert isinstance(voltage, np.ndarray)
     assert isinstance(current, np.ndarray)
+
+    #plt.plot(voltage,current)
+    #plt.show()
 
     interp = interp1d(x=current, y=voltage)
 

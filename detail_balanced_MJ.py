@@ -8,7 +8,7 @@ from illumination import qe_filter, illumination
 from fom import voc
 from ivsolver import calculate_j01, calculate_j02_from_rad_eff, \
     gen_rec_iv, gen_rec_iv_with_rs_by_newton, solve_mj_iv, \
-    calculate_j01_from_qe
+    calculate_j01_from_qe,gen_rec_iv_by_rad_eta
 from fom import max_power
 from photocurrent import gen_square_qe, calc_jsc
 import scipy.constants as sc
@@ -72,8 +72,8 @@ def calc_ere(qe, voc, T=300, ill=illumination("AM1.5g", concentration=1)):
     return ere
 
 
-def calc_mj_eta(subcell_eg, subcell_qe, subcell_rad_eff, cell_temperature, concentration=1,
-                rs=0, replace_iv=None, replace_qe=None, verbose=0):
+def calc_mj_eta(subcell_eg, subcell_qe, subcell_rad_eff, cell_temperature, concentration=1, rs=0, replace_iv=None,
+                replace_qe=None, verbose=0, spectrum="AM1.5g"):
     subcell_eg = np.array(subcell_eg)
     subcell_qe = np.array(subcell_qe)
     subcell_rad_eff = np.array(subcell_rad_eff)
@@ -95,8 +95,7 @@ def calc_mj_eta(subcell_eg, subcell_qe, subcell_rad_eff, cell_temperature, conce
 
 
     # calculate photocurrent for each subcell
-
-    input_ill = illumination(concentration=concentration)
+    input_ill = illumination(concentration=concentration, spectrum=spectrum)
     subcell_filter = [qe_filter(qe.core_wl, qe.core_spec, 'm') for qe in subcell_qe]
 
     # initialise illumination spectrum for each subcell
@@ -106,8 +105,13 @@ def calc_mj_eta(subcell_eg, subcell_qe, subcell_rad_eff, cell_temperature, conce
 
     if verbose > 0:
         print(subcell_jsc)
-    iv_list = [gen_rec_iv(subcell_j01[i], subcell_j02[i], 1, 2, cell_temperature, 1e15, subcell_voltage, subcell_jsc[i]) \
+
+    #iv_list = [gen_rec_iv(subcell_j01[i], subcell_j02[i], 1, 2, cell_temperature, 1e15, subcell_voltage, subcell_jsc[i]) \
+    #           for i, _ in enumerate(subcell_eg)]
+
+    iv_list = [gen_rec_iv_by_rad_eta(subcell_j01[i], subcell_rad_eff[i], 1, cell_temperature, 1e15, subcell_voltage, subcell_jsc[i]) \
                for i, _ in enumerate(subcell_eg)]
+
 
     if replace_iv != None:
         tmpvolt, tmpcurrent = replace_iv[1]

@@ -3,12 +3,13 @@ from iii_v_si import calc_2j_si_eta,calc_3j_si_eta
 
 
 # State-of-the-art 2J
-eta,si_voc,top_voc=calc_2j_si_eta(1000*1e-6, si_rad_eta=5e-3, top_cell_bg=1.7, top_cell_qe=1, top_cell_rad_eta=1.9e-3)
+eta,si_voc,top_voc= calc_2j_si_eta(1000 * 1e-6, si_rad_eta=5e-3, top_cell_bg=1.7, top_cell_qe=1,
+                                   top_cell_rad_eta=1.9e-3)
 
 print(eta,top_voc,si_voc)
 
 # imporved state-of-the-art 2J
-eta,si_voc,top_voc=calc_2j_si_eta(1000*1e-6, si_rad_eta=5e-3, top_cell_bg=1.7, top_cell_qe=1, top_cell_rad_eta=1e-2)
+eta,si_voc,top_voc= calc_2j_si_eta(1000 * 1e-6, si_rad_eta=5e-3, top_cell_bg=1.7, top_cell_qe=1, top_cell_rad_eta=1e-2)
 
 print(eta,top_voc,si_voc)
 

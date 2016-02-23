@@ -17,7 +17,7 @@ if __name__=="__main__":
     for i,teg in enumerate(algaas_bg_top):
         for j,meg in enumerate(algaas_bg_mid):
             eta,_,_,_= calc_3j_si_eta(1e-4, 1e-4, 1, top_band_gap=teg, top_cell_qe=0.8, mid_band_gap=meg,
-                                      mid_cell_qe=0.8,bot_cell_qe=0.9)
+                                      mid_cell_qe=0.8, bot_cell_qe=0.9)
             eta_array[i,j]=eta
 
 

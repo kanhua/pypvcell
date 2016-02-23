@@ -112,7 +112,7 @@ class MyTestCase(unittest.TestCase):
         v,i=gen_rec_iv(j01,0,1,2,300,1e10,test_voltage)
 
 
-        eta=calc_mj_eta([1.42,1.1],[1,1],[1,1],300,replace_iv=(1,(v,i)))
+        eta= calc_mj_eta([1.42, 1.1], [1, 1], [1, 1], 300, replace_iv=(1, (v, i)))
 
 
         print(eta)

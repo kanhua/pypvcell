@@ -15,9 +15,9 @@ from iii_v_si import calc_2j_si_eta, calc_3j_si_eta
 si_layer = np.logspace(-6, -2, num=100) * 1e6
 
 
-gaas_eta=[calc_2j_si_eta(s*1e-6, 1, 1.42, top_cell_qe=1, top_cell_rad_eta=1)[0] for s in si_layer]
-ingap_eta=[calc_2j_si_eta(s*1e-6, 1, 1.87, top_cell_qe=1, top_cell_rad_eta=1)[0] for s in si_layer]
-ingap2_eta=[calc_2j_si_eta(s*1e-6, 0.005, 1.87, top_cell_qe=1, top_cell_rad_eta=1)[0] for s in si_layer]
+gaas_eta=[calc_2j_si_eta(s * 1e-6, 1, 1.42, top_cell_qe=1, top_cell_rad_eta=1)[0] for s in si_layer]
+ingap_eta=[calc_2j_si_eta(s * 1e-6, 1, 1.87, top_cell_qe=1, top_cell_rad_eta=1)[0] for s in si_layer]
+ingap2_eta=[calc_2j_si_eta(s * 1e-6, 0.005, 1.87, top_cell_qe=1, top_cell_rad_eta=1)[0] for s in si_layer]
 
 
 #plt.semilogx(si_layer, gaas_eta, label="GaAs (69% QE)", hold=True)

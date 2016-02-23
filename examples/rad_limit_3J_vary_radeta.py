@@ -22,8 +22,8 @@ if __name__=="__main__":
 
     for i,teg in enumerate(topmid_radeta):
         for j,meg in enumerate(bot_rad_eta):
-            eta,_,_,_= calc_3j_si_eta(teg, teg, 1, top_band_gap=1.97, top_cell_qe=1, mid_band_gap=1.48,
-                                      mid_cell_qe=1,bot_cell_eta=meg,bot_band_gap=1.12)
+            eta,_,_,_= calc_3j_si_eta(teg, teg, 1, top_band_gap=1.97, top_cell_qe=1, mid_band_gap=1.48, mid_cell_qe=1,
+                                      bot_cell_eta=meg, bot_band_gap=1.12)
             eta_array[i,j]=eta
 
 

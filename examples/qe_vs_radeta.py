@@ -16,15 +16,15 @@ if __name__=="__main__":
 
     eta_arr=list()
     for t_eqe in top_eqe:
-        eta,_,_,_= calc_3j_si_eta(1, 1, 1, top_band_gap=1.87, top_cell_qe=t_eqe, mid_band_gap=1.42,
-                                  mid_cell_qe=t_eqe,bot_cell_eta=1,bot_band_gap=1.12)
+        eta,_,_,_= calc_3j_si_eta(1, 1, 1, top_band_gap=1.87, top_cell_qe=t_eqe, mid_band_gap=1.42, mid_cell_qe=t_eqe,
+                                  bot_cell_eta=1, bot_band_gap=1.12)
         eta_arr.append(eta)
 
 
     eta_arr2=list()
     for t_eqe in top_eqe:
         eta,_,_,_= calc_3j_si_eta(0.01, 0.01, 1, top_band_gap=1.87, top_cell_qe=t_eqe, mid_band_gap=1.42,
-                                  mid_cell_qe=t_eqe,bot_cell_eta=0.005,bot_band_gap=1.12)
+                                  mid_cell_qe=t_eqe, bot_cell_eta=0.005, bot_band_gap=1.12)
         eta_arr2.append(eta)
 
 

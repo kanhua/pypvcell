@@ -27,8 +27,8 @@ def calc_4j_eta(top_cell_eta,mid_cell_eta, concentration,top_band_gap=1.87, mid_
     bot_voc=rad_to_voc(mid_cell_eta,gen_square_qe(si_bg,subcell_qe[2]))
 
 
-    return calc_mj_eta(subcell_eg,subcell_qe,subcell_rad_eff,cell_temperature,concentration=concentration),\
-           top_voc,mid_voc,bot_voc
+    return calc_mj_eta(subcell_eg, subcell_qe, subcell_rad_eff, cell_temperature, concentration=concentration), \
+           top_voc, mid_voc, bot_voc
 
 test_top_eta=np.logspace(-7,0,num=60,endpoint=True)
 test_mid_eta=np.logspace(-7,0,num=60,endpoint=True)

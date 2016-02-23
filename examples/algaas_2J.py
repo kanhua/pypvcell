@@ -15,7 +15,7 @@ if __name__=="__main__":
 
     for i,r in enumerate(algaas_ere):
         for j,bg in enumerate(algaas_bg):
-            eta,_,_=calc_2j_si_eta(1000e-6,0.005,bg,top_cell_qe=0.8,top_cell_rad_eta=r)
+            eta,_,_= calc_2j_si_eta(1000e-6, 0.005, bg, top_cell_qe=0.8, top_cell_rad_eta=r)
             eta_array[i,j]=eta
 
 

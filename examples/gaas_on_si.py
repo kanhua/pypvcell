@@ -25,7 +25,7 @@ def calc_4j_eta(top_band_gap, top_band_dislocation, concentration):
     subcell_qe = np.array([0.69, 1])
     subcell_rad_eff = np.array([1, rad_eff(top_band_dislocation)])
 
-    return calc_mj_eta(subcell_eg,subcell_qe,subcell_rad_eff,cell_temperature,concentration=concentration)
+    return calc_mj_eta(subcell_eg, subcell_qe, subcell_rad_eff, cell_temperature, concentration=concentration)
 
 
 test_nd=np.logspace(3,6,num=100)

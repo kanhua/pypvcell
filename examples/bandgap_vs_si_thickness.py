@@ -16,7 +16,7 @@ def calculate():
 
     for i, bg in enumerate(top_cell_gap):
         for j, t in enumerate(si_layer):
-           eta_array[i][j]= calc_2j_si_eta(t*1e-6, 1, bg, top_cell_qe=1, top_cell_rad_eta=1)[0]
+           eta_array[i][j]= calc_2j_si_eta(t * 1e-6, 1, bg, top_cell_qe=1, top_cell_rad_eta=1)[0]
 
     np.savez("bg_vs_t.npz",tbg=si_layer,mbg=top_cell_gap,eta=eta_array)
 

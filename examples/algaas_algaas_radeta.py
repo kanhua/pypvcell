@@ -16,7 +16,7 @@ def calc_eta():
     for i,teg in enumerate(algaas_top_ere):
         for j,meg in enumerate(algaas_mid_ere):
             eta,_,_,_= calc_3j_si_eta(teg, meg, 1, top_band_gap=1.85, top_cell_qe=0.8, mid_band_gap=1.42,
-                                      mid_cell_qe=0.8,bot_cell_qe=0.9)
+                                      mid_cell_qe=0.8, bot_cell_qe=0.9)
             eta_array[i,j]=eta
 
     np.savez("algaas_algaas_ere_3J.npz",tbg=algaas_top_ere,mbg=algaas_mid_ere,eta=eta_array)
