@@ -8,10 +8,11 @@ from illumination import qe_filter, illumination
 from fom import voc
 from ivsolver import calculate_j01, calculate_j02_from_rad_eff, \
     gen_rec_iv, gen_rec_iv_with_rs_by_newton, solve_mj_iv, \
-    calculate_j01_from_qe,gen_rec_iv_by_rad_eta
+    calculate_j01_from_qe, gen_rec_iv_by_rad_eta
 from fom import max_power
 from photocurrent import gen_square_qe, calc_jsc
 import scipy.constants as sc
+from spectrum_base import spectrum_base
 
 
 def set_subcell_spectrum(input_ill, subcell_eg, subcell_filter):
@@ -28,22 +29,40 @@ def set_subcell_spectrum(input_ill, subcell_eg, subcell_filter):
     return subcell_ill
 
 
-def rad_to_voc(rad_eta, qe):
-    test_voltage = np.linspace(-0.5, 1.8, num=300)
+def rad_to_voc(rad_eta, qe, max_voltage=1.9,spectrum="AM1.5g"):
+    """
+    Calculate Voc from given radiative efficiency
+    :param rad_eta: radiative efficiency (in ratio)
+    :param qe: quantum efficiency, a spectrum_base instance
+    :param max_voltage: the maximum voltage of the dark-IV, the default value is 1.9. A safe way is set it to the value of the band gap
+    :return: the calculated Voc
+    """
+
+    assert isinstance(qe, spectrum_base)
+    test_voltage = np.linspace(-0.5, max_voltage, num=300)
 
     j01_t = calculate_j01_from_qe(qe)
 
-    j02_t = calculate_j02_from_rad_eff(j01_t, rad_eta, test_voltage, 300, n2=2)
+    # j02_t = calculate_j02_from_rad_eff(j01_t, rad_eta, test_voltage, 300, n2=2)
 
-    v_top, i_top = gen_rec_iv(j01_t, j02_t, 1, 2, 300, 1e10, test_voltage)
+    v_top, i_top = gen_rec_iv_by_rad_eta(j01_t, rad_eta, 1, 300, 1e10, test_voltage)
 
-    top_voc = extract_voc(v_top, i_top, qe)
+    top_voc = extract_voc(v_top, i_top, qe,spectrum=spectrum)
 
     return top_voc
 
 
-def extract_voc(voltage, current, qe):
-    input_ill = illumination(concentration=1)
+def extract_voc(voltage, current, qe, spectrum="AM1.5g"):
+    """
+    Calculate Voc from given dark I-V
+    :param voltage: voltage array of dark I-V
+    :param current: current array of dark I-V
+    :param qe: quantum efficiency, a spectrum_base instance
+    :param spectrum: can be "AM1.5g", "AM1.5d"
+    :return: the calculated Voc
+    """
+
+    input_ill = illumination(concentration=1,spectrum=spectrum)
     jsc = calc_jsc(input_ill, qe=qe)
 
     gen_current = current - jsc
@@ -80,19 +99,17 @@ def calc_mj_eta(subcell_eg, subcell_qe, subcell_rad_eff, cell_temperature, conce
 
     subcell_voltage = np.linspace(-0.5, 1.9, num=300)
 
-
     # calculate j01 and j02 for each subcell
 
     subcell_qe = [gen_square_qe(subcell_eg[i], subcell_qe[i]) for i, _ in enumerate(subcell_eg)]
 
-    subcell_j01= [calculate_j01_from_qe(qe) for qe in subcell_qe]
+    subcell_j01 = [calculate_j01_from_qe(qe) for qe in subcell_qe]
 
     subcell_j02 = [calculate_j02_from_rad_eff(subcell_j01[i], subcell_rad_eff[i], subcell_voltage, cell_temperature,
                                               2) for i, _ in enumerate(subcell_eg)]
 
     if replace_qe != None:
         subcell_qe[replace_qe[0]] = replace_qe[1]
-
 
     # calculate photocurrent for each subcell
     input_ill = illumination(concentration=concentration, spectrum=spectrum)
@@ -106,12 +123,12 @@ def calc_mj_eta(subcell_eg, subcell_qe, subcell_rad_eff, cell_temperature, conce
     if verbose > 0:
         print(subcell_jsc)
 
-    #iv_list = [gen_rec_iv(subcell_j01[i], subcell_j02[i], 1, 2, cell_temperature, 1e15, subcell_voltage, subcell_jsc[i]) \
+    # iv_list = [gen_rec_iv(subcell_j01[i], subcell_j02[i], 1, 2, cell_temperature, 1e15, subcell_voltage, subcell_jsc[i]) \
     #           for i, _ in enumerate(subcell_eg)]
 
-    iv_list = [gen_rec_iv_by_rad_eta(subcell_j01[i], subcell_rad_eff[i], 1, cell_temperature, 1e15, subcell_voltage, subcell_jsc[i]) \
+    iv_list = [gen_rec_iv_by_rad_eta(subcell_j01[i], subcell_rad_eff[i], 1, cell_temperature, 1e15, subcell_voltage,
+                                     subcell_jsc[i]) \
                for i, _ in enumerate(subcell_eg)]
-
 
     if replace_iv != None:
         tmpvolt, tmpcurrent = replace_iv[1]
@@ -125,22 +142,22 @@ def calc_mj_eta(subcell_eg, subcell_qe, subcell_rad_eff, cell_temperature, conce
 
     # plt.plot(iv_list[0][0],iv_list[0][1],'o')
     # plt.show()
-    #plt.close()
+    # plt.close()
 
 
     v, i = solve_mj_iv(iv_list, i_max=20)
 
-    #plt.plot(v,i,'o')
-    #plt.xlim([-1,10])
-    #plt.show()
+    # plt.plot(v,i,'o')
+    # plt.xlim([-1,10])
+    # plt.show()
 
-    #for iv in iv_list:
+    # for iv in iv_list:
     #    plt.plot(iv[0], iv[1], '*', hold=True)
-    #plt.plot(v, i, 'o-')
-    #plt.ylim((-200, 0))
-    #plt.show()
-    #plt.savefig("result_iv.pdf")
-    #plt.close()
+    # plt.plot(v, i, 'o-')
+    # plt.ylim((-200, 0))
+    # plt.show()
+    # plt.savefig("result_iv.pdf")
+    # plt.close()
     conv_efficiency = max_power(v, i) / input_ill.total_power()
 
     return conv_efficiency

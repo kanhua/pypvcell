@@ -58,9 +58,9 @@ def calc_3j_si_eta(top_cell_eta, mid_cell_eta, concentration, top_band_gap=1.87,
     subcell_qe = np.array([top_cell_qe, mid_cell_qe, bot_cell_qe])
     subcell_rad_eff = np.array([top_cell_eta, mid_cell_eta, bot_cell_eta])
 
-    top_voc = rad_to_voc(top_cell_eta, gen_square_qe(top_band_gap, subcell_qe[0]))
-    mid_voc = rad_to_voc(top_cell_eta, gen_square_qe(mid_band_gap, subcell_qe[1]))
-    bot_voc = rad_to_voc(mid_cell_eta, gen_square_qe(si_bg, subcell_qe[2]))
+    top_voc = rad_to_voc(top_cell_eta, gen_square_qe(top_band_gap, subcell_qe[0]),max_voltage=subcell_eg[0])
+    mid_voc = rad_to_voc(top_cell_eta, gen_square_qe(mid_band_gap, subcell_qe[1]),max_voltage=subcell_eg[1])
+    bot_voc = rad_to_voc(mid_cell_eta, gen_square_qe(si_bg, subcell_qe[2]),max_voltage=subcell_eg[2])
 
     return calc_mj_eta(subcell_eg, subcell_qe, subcell_rad_eff, cell_temperature, concentration=concentration,
                        spectrum=spectrum), \
