@@ -148,7 +148,7 @@ def calculate_j01_from_qe(qe, threshold=1e-3, step_in_ev=1e-5, lead_term=None):
     if lead_term is None:
         # the additional sc.e^3 comes from the unit of E. We use the unit of eV to do the integration
         # of Planck's spectrum. Note that the term E^2*dE gives three q in total.
-        lead_term = np.power(sc.e, 4) * 2 * sc.pi * (n_c ** 2) / (np.power(sc.c, 2) * np.power(sc.h, 3))
+        lead_term = np.power(sc.e, 4) * 4 * sc.pi * (n_c ** 2) / (np.power(sc.c, 2) * np.power(sc.h, 3))
 
     qe_a = qe.get_spectrum(wavelength_unit='eV')
 
