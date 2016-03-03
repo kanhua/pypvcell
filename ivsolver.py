@@ -131,9 +131,11 @@ def gen_rec_iv_with_rs_by_newton(j01, j02, n1, n2, temperature, rshunt, rseries,
     return voltage, np.array(solved_current)
 
 
-def calculate_j01_from_qe(qe, threshold=1e-3, step_in_ev=1e-5, lead_term=None):
+def calculate_j01_from_qe(qe, n_c=3.5, n_s=1, threshold=1e-3, step_in_ev=1e-5, lead_term=None):
     """
     Calculate j01 from absorptivity (QE).
+    :param n_c: the refractive index of the material
+    :param n_s: the refractive index of surroundings
     :param qe: QE or absorptivity. A spectrum_base class
     :param threshold: ignore the QE whose values are under the threshold
     :param step_in_ev: meshgrid size when doing numerical integration trapz()
@@ -141,14 +143,13 @@ def calculate_j01_from_qe(qe, threshold=1e-3, step_in_ev=1e-5, lead_term=None):
     """
     assert isinstance(qe, spectrum_base)
 
-    n_c = 3.5
     T = 300
     # lead_term = np.power(sc.e,4) * 2 * (n_c ** 2) / (np.power(sc.h, 3) * np.power(sc.c, 2) * 2 * np.power(sc.pi,2))
 
     if lead_term is None:
         # the additional sc.e^3 comes from the unit of E. We use the unit of eV to do the integration
         # of Planck's spectrum. Note that the term E^2*dE gives three q in total.
-        lead_term = np.power(sc.e, 4) * 4 * sc.pi * (n_c ** 2) / (np.power(sc.c, 2) * np.power(sc.h, 3))
+        lead_term = np.power(sc.e, 4) * 2 * sc.pi * (n_c ** 2+n_s**2) / (np.power(sc.c, 2) * np.power(sc.h, 3))
 
     qe_a = qe.get_spectrum(wavelength_unit='eV')
 

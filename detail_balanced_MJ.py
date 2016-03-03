@@ -103,10 +103,20 @@ def calc_mj_eta(subcell_eg, subcell_qe, subcell_rad_eff, cell_temperature, conce
 
     subcell_qe = [gen_square_qe(subcell_eg[i], subcell_qe[i]) for i, _ in enumerate(subcell_eg)]
 
-    subcell_j01 = [calculate_j01_from_qe(qe) for qe in subcell_qe]
 
-    subcell_j02 = [calculate_j02_from_rad_eff(subcell_j01[i], subcell_rad_eff[i], subcell_voltage, cell_temperature,
-                                              2) for i, _ in enumerate(subcell_eg)]
+    #subcell_j01 = [calculate_j01_from_qe(qe) for i,qe in enumerate(subcell_qe)]
+
+    subcell_j01=[]
+    for i, qe in enumerate(subcell_qe):
+        if i==0:
+            subcell_j01.append(calculate_j01_from_qe(qe))
+        else:
+            subcell_j01.append(calculate_j01_from_qe(qe,n_s=3.5))
+
+
+
+    #subcell_j02 = [calculate_j02_from_rad_eff(subcell_j01[i], subcell_rad_eff[i], subcell_voltage, cell_temperature,
+    #                                          2) for i, _ in enumerate(subcell_eg)]
 
     if replace_qe != None:
         subcell_qe[replace_qe[0]] = replace_qe[1]

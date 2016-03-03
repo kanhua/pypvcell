@@ -61,7 +61,7 @@ class MyTestCase(unittest.TestCase):
         for i,t in enumerate(self.layer_set):
 
             qe=gen_qe_from_abs(self.si_alpha_sp,t)
-            j01=calculate_j01_from_qe(qe)
+            j01= calculate_j01_from_qe(qe)
             v,i=gen_rec_iv(j01,0,1,2,300,1e10,test_v,jsc=self.jsc_arr[i])
             self.eta_arr.append(fom.max_power(v,i)/illumination().total_power())
             self.voc_arr.append(fom.voc(v,i))
@@ -80,7 +80,7 @@ class MyTestCase(unittest.TestCase):
         test_v=np.linspace(-0.5,2,num=200)
         for i,t in enumerate(self.layer_set):
             qe=gen_qe_from_abs(self.si_alpha_sp,t)
-            j01=calculate_j01_from_qe(qe)
+            j01= calculate_j01_from_qe(qe)
             v,i=gen_rec_iv(j01,0,1,2,300,1e10,test_v,jsc=self.jsc_arr[i])
             self.eta_arr.append(fom.max_power(v,i)/illumination().total_power())
 
@@ -102,7 +102,7 @@ class MyTestCase(unittest.TestCase):
 
         qe2=gen_square_qe(1.1,1,qe_below_edge=0)
 
-        j01=calculate_j01_from_qe(qe2)
+        j01= calculate_j01_from_qe(qe2)
 
         j01_2=calculate_j01(1.1,300,1)
 
