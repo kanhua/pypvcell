@@ -123,6 +123,23 @@ class qe_filter(spectrum_base):
     def __init__(self, qe_wavelength, qe_in_ratio, wavelength_unit):
         self.set_spectrum(qe_wavelength, 1 - qe_in_ratio, wavelength_unit=wavelength_unit)
 
+if __name__=="__main__":
 
+    cache_spectrum={}
+    this_dir = os.path.split(__file__)[0]
+    spectrumfile = np.loadtxt(os.path.join(this_dir, "astmg173.csv"),
+                              dtype=float, delimiter=',', skiprows=2)
 
+    wl = spectrumfile[:, 0]
+
+    cache_spectrum["wl"]=spectrumfile[:,0]
+    cache_spectrum["AM1.5g"]=spectrumfile[:,2]
+    cache_spectrum["AM1.5d"]=spectrumfile[:,3]
+    cache_spectrum["AM0"]=spectrumfile[:,1]
+
+    import pickle
+
+    with open(os.path.join(this_dir,'spec_data.pickle'), 'wb') as f:
+    # Pickle the 'data' dictionary using the highest protocol available.
+        pickle.dump(cache_spectrum, f, pickle.HIGHEST_PROTOCOL)
 

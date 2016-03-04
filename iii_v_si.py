@@ -51,7 +51,7 @@ def calc_2j_si_eta(si_layer_t, si_rad_eta, top_cell_bg, top_cell_qe=1, top_cell_
 
 
 def calc_2j_si_eta_direct(top_eg=1.87, top_rad_eta=1, top_qe=1, bot_eg=1.12, bot_rad_eta=0.005, bot_qe=1,
-                          spectrum="AM1.5g", concentration=1):
+                          spectrum="AM1.5g", concentration=1,n_s=1):
     """
     Calculate the the efficiency of 2J III-V/Si solar cell. This calculation assumes direct band gap in silicon.
     :param top_eg:
@@ -74,7 +74,7 @@ def calc_2j_si_eta_direct(top_eg=1.87, top_rad_eta=1, top_qe=1, bot_eg=1.12, bot
     bot_voc = rad_to_voc(bot_rad_eta, gen_square_qe(si_bg, subcell_qe[1]), max_voltage=subcell_eg[1])
 
     return calc_mj_eta(subcell_eg, subcell_qe, subcell_rad_eff, cell_temperature, concentration=concentration,
-                       spectrum=spectrum), \
+                       spectrum=spectrum,n_s=n_s), \
            bot_voc, top_voc
 
 

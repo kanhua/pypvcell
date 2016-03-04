@@ -125,7 +125,7 @@ def calc_1j_eta(eg,qe,r_eta,cell_temperature=300, n_c=3.5,n_s=1,
 
 
 def calc_mj_eta(subcell_eg, subcell_qe, subcell_rad_eff, cell_temperature, concentration=1, rs=0, replace_iv=None,
-                replace_qe=None, verbose=0, spectrum="AM1.5g"):
+                replace_qe=None, verbose=0, spectrum="AM1.5g",n_s=1):
     subcell_eg = np.array(subcell_eg)
     subcell_qe = np.array(subcell_qe)
     subcell_rad_eff = np.array(subcell_rad_eff)
@@ -142,7 +142,7 @@ def calc_mj_eta(subcell_eg, subcell_qe, subcell_rad_eff, cell_temperature, conce
     subcell_j01=[]
     for i, qe in enumerate(subcell_qe):
         if i==0:
-            subcell_j01.append(calculate_j01_from_qe(qe))
+            subcell_j01.append(calculate_j01_from_qe(qe,n_s=n_s))
         else:
             subcell_j01.append(calculate_j01_from_qe(qe,n_s=3.5))
 
