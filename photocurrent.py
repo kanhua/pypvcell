@@ -24,6 +24,7 @@ def gen_square_qe(bandEdge_in_eV, qe_in_ratio,qe_below_edge=1e-4,wl_bound=(0.01,
 def gen_qe_from_abs(absorption,layer_thickness):
     """
     Calculate the QE (absorptivity) from absorption coefficient and layer_thickness
+
     :param absorption: spectrum_base class, the unit of absorption: 1/m
     :param layer_thickness: layer thickness, unit: m
     :return: QE, as spectrum_base class
@@ -43,6 +44,13 @@ def gen_qe_from_abs(absorption,layer_thickness):
 
 
 def calc_jsc(input_illumination,qe):
+    """
+    Calculate Jsc from given QE
+
+    :param input_illumination: illumination spectrum, an spectrum_base object
+    :param qe: QE, an spectrum_base object
+    :return: value of Jsc (A/m^2)
+    """
 
     assert isinstance(input_illumination,illumination)
     assert isinstance(qe,spectrum_base)
@@ -54,3 +62,23 @@ def calc_jsc(input_illumination,qe):
     qe_array=qe.get_interp_spectrum(ill_array[:,0],'eV')
 
     return sc.e*np.trapz(ill_array[:,1]*qe_array[:,1],ill_array[:,0])
+
+
+def calc_jsc_from_eg(input_illumination,eg):
+    """
+    Calculate the Jsc by assuming 100% above-band-gap EQE
+
+    :param input_illumination: illumination (class)
+    :param eg: Band gap of the material (in eV)
+    :return: value of Jsc (A/m^2)
+    """
+
+    assert isinstance(input_illumination,illumination)
+
+    ill_array=input_illumination.get_spectrum_density('m-2','eV',flux="photon")
+
+    ill_array=input_illumination.get_interp_spectrum_density(np.linspace(eg,ill_array[:,0].max(),num=100),"m-2","eV",flux="photon")
+
+    jsc=sc.e*np.trapz(ill_array[:,1],ill_array[:,0])
+
+    return jsc

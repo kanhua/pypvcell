@@ -10,7 +10,7 @@ from ivsolver import calculate_j01, calculate_j02_from_rad_eff, \
     gen_rec_iv, gen_rec_iv_with_rs_by_newton, solve_mj_iv, \
     calculate_j01_from_qe, gen_rec_iv_by_rad_eta
 from fom import max_power
-from photocurrent import gen_square_qe, calc_jsc
+from photocurrent import gen_square_qe, calc_jsc,calc_jsc_from_eg
 import scipy.constants as sc
 from spectrum_base import spectrum_base
 
@@ -89,6 +89,39 @@ def calc_ere(qe, voc, T=300, ill=illumination("AM1.5g", concentration=1)):
     ere = np.exp(sc.e * voc / (sc.k * T)) * jd / jsc / (3.5 ** 2 * 2)
 
     return ere
+
+def calc_1j_eta(eg,qe,r_eta,cell_temperature=300, n_c=3.5,n_s=1,
+                concentration=1, spectrum="AM1.5g",
+                j01_method="qe"):
+    """
+    Calculate the 1J efficiency from given band gap and qe values
+
+    :param eg: The band gap of material
+    :param qe: A single value. We assume flat, step-like QE.
+    :param r_eta: Radiative efficiency
+    :param cell_temperature: default to 300K
+    :param n_c: the refractive index of the semiconductor material, default is 3.5
+    :param n_s: the refractiv index of surrouding material, default is 1
+    :param concentration: default value is 1
+    :param spectrum: default value is "AM1.5g"
+    :return: the calculated efficiency
+    """
+    volt = np.linspace(-0.5, eg, num=300)
+    qe_spec=gen_square_qe(eg,qe)
+
+    ill=illumination(concentration=concentration,spectrum=spectrum)
+
+    if j01_method=="qe":
+        j01=calculate_j01_from_qe(qe_spec,n_c=n_c,n_s=n_s)
+        jsc=calc_jsc(ill,qe_spec)
+    elif j01_method=="eg":
+        j01=calculate_j01(eg,temperature=cell_temperature,n1=1,n_c=n_c,n_s=n_s)
+        jsc=calc_jsc_from_eg(ill,eg)
+
+    volt,current=gen_rec_iv_by_rad_eta(j01,r_eta,1,cell_temperature,1e15,voltage=volt,jsc=jsc)
+
+    return max_power(volt,current)/ill.total_power()
+
 
 
 def calc_mj_eta(subcell_eg, subcell_qe, subcell_rad_eff, cell_temperature, concentration=1, rs=0, replace_iv=None,
