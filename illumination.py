@@ -3,8 +3,15 @@ import os
 from scipy.interpolate import interp1d
 from units_system import UnitsSystem
 from spectrum_base import spectrum_base
+import pickle
+
 
 us = UnitsSystem()
+
+this_dir = os.path.split(__file__)[0]
+
+with open(os.path.join(this_dir,'spec_data.pickle'), 'rb') as f:
+    spec_data=pickle.load(f)
 
 
 class illumination(spectrum_base):
@@ -14,6 +21,16 @@ class illumination(spectrum_base):
         Initialise a standard spectrum.
         """
 
+
+        #flux, wl = self.read_from_csv(spectrum)
+
+        wl=spec_data["wl"]
+        flux=spec_data[spectrum]
+
+        self.set_spectrum_density(wl, flux, "m-2", "nm")
+        self.core_spec = self.core_spec * concentration
+
+    def read_from_csv(self, spectrum):
         if spectrum in ["AM1.5g", "AM1.5d", "AM0"]:
             this_dir = os.path.split(__file__)[0]
             spectrumfile = np.loadtxt(os.path.join(this_dir, "astmg173.csv"),
@@ -27,10 +44,7 @@ class illumination(spectrum_base):
                 flux = spectrumfile[:, 1]
             elif spectrum == "AM1.5d":
                 flux = spectrumfile[:, 3]
-
-        self.set_spectrum_density(wl, flux, "m-2", "nm")
-        self.core_spec = self.core_spec * concentration
-
+        return flux, wl
 
     def total_power(self):
 
@@ -126,7 +140,6 @@ class qe_filter(spectrum_base):
 if __name__=="__main__":
 
     cache_spectrum={}
-    this_dir = os.path.split(__file__)[0]
     spectrumfile = np.loadtxt(os.path.join(this_dir, "astmg173.csv"),
                               dtype=float, delimiter=',', skiprows=2)
 
@@ -137,9 +150,8 @@ if __name__=="__main__":
     cache_spectrum["AM1.5d"]=spectrumfile[:,3]
     cache_spectrum["AM0"]=spectrumfile[:,1]
 
-    import pickle
 
     with open(os.path.join(this_dir,'spec_data.pickle'), 'wb') as f:
     # Pickle the 'data' dictionary using the highest protocol available.
-        pickle.dump(cache_spectrum, f, pickle.HIGHEST_PROTOCOL)
+        pickle.dump(cache_spectrum, f)
 

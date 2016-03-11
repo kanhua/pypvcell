@@ -18,7 +18,7 @@ def calc_gaas(n_s=1):
         # eta[p], _, _ = calc_2j_si_eta(1000e-6, 1, GaAs_eg, top_cell_qe=topcell_eqe[p], top_cell_rad_eta=1,
         #                              spectrum="AM1.5g")
         eta[p], _, _ = calc_2j_si_eta_direct(top_eg=GaAs_eg, top_rad_eta=1, top_qe=topcell_eqe[p], bot_rad_eta=1,
-                                             bot_qe=1,n_s=n_s)
+                                             bot_qe=1, n_s=n_s)
 
     print("At AM1.5g, direct band gap assumption of silicon")
     print("gaas max eta %s:" % eta.max())

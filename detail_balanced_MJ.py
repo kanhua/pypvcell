@@ -8,7 +8,7 @@ from illumination import qe_filter, illumination
 from fom import voc
 from ivsolver import calculate_j01, calculate_j02_from_rad_eff, \
     gen_rec_iv, gen_rec_iv_with_rs_by_newton, solve_mj_iv, \
-    calculate_j01_from_qe, gen_rec_iv_by_rad_eta
+    calculate_j01_from_qe, gen_rec_iv_by_rad_eta,solve_ms_mj_iv
 from fom import max_power
 from photocurrent import gen_square_qe, calc_jsc,calc_jsc_from_eg
 import scipy.constants as sc
@@ -125,7 +125,23 @@ def calc_1j_eta(eg,qe,r_eta,cell_temperature=300, n_c=3.5,n_s=1,
 
 
 def calc_mj_eta(subcell_eg, subcell_qe, subcell_rad_eff, cell_temperature, concentration=1, rs=0, replace_iv=None,
-                replace_qe=None, verbose=0, spectrum="AM1.5g",n_s=1):
+                replace_qe=None, verbose=0, spectrum="AM1.5g", n_s=1, mj="2T"):
+    """
+
+    :param subcell_eg:
+    :param subcell_qe:
+    :param subcell_rad_eff:
+    :param cell_temperature:
+    :param concentration:
+    :param rs:
+    :param replace_iv:
+    :param replace_qe:
+    :param verbose:
+    :param spectrum:
+    :param n_s:
+    :param mj: "2T" for two terminal device. "MS" for multi-terminal mechanical stack.
+    :return:
+    """
     subcell_eg = np.array(subcell_eg)
     subcell_qe = np.array(subcell_qe)
     subcell_rad_eff = np.array(subcell_rad_eff)
@@ -187,8 +203,11 @@ def calc_mj_eta(subcell_eg, subcell_qe, subcell_rad_eff, cell_temperature, conce
     # plt.show()
     # plt.close()
 
-
-    v, i = solve_mj_iv(iv_list, i_max=20)
+    if mj=="2T":
+        v, i = solve_mj_iv(iv_list, i_max=20)
+        conv_efficiency = max_power(v, i) / input_ill.total_power()
+    elif mj=="MS":
+        conv_efficiency=solve_ms_mj_iv(iv_list,input_ill.total_power())
 
     # plt.plot(v,i,'o')
     # plt.xlim([-1,10])
@@ -201,7 +220,7 @@ def calc_mj_eta(subcell_eg, subcell_qe, subcell_rad_eff, cell_temperature, conce
     # plt.show()
     # plt.savefig("result_iv.pdf")
     # plt.close()
-    conv_efficiency = max_power(v, i) / input_ill.total_power()
+
 
     return conv_efficiency
 

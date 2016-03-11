@@ -11,9 +11,10 @@ from illumination import illumination, bp_filter
 from scipy.interpolate import interp2d
 
 
-def calc_2j_si_eta(si_layer_t, si_rad_eta, top_cell_bg, top_cell_qe=1, top_cell_rad_eta=1, spectrum="AM1.5g"):
+def calc_2j_si_eta(si_layer_t, si_rad_eta, top_cell_bg, top_cell_qe=1, top_cell_rad_eta=1, spectrum="AM1.5g", mj="2T"):
     """
     Calculate the efficiency of dual-junction solar cell with silicon bottom cell
+    :param mj:
     :param spectrum:
     :param si_layer_t: thickness of silicon cell in (m)
     :param si_rad_eta:
@@ -45,15 +46,16 @@ def calc_2j_si_eta(si_layer_t, si_rad_eta, top_cell_bg, top_cell_qe=1, top_cell_
     top_voc = rad_to_voc(top_cell_rad_eta, gen_square_qe(top_cell_bg, top_cell_qe))
 
     eta = calc_mj_eta([top_cell_bg, 1.1], [top_cell_qe, 1], [top_cell_rad_eta, si_rad_eta], 300, replace_iv=(1, (v, i)),
-                      replace_qe=(1, qe), spectrum=spectrum)
+                      replace_qe=(1, qe), spectrum=spectrum,mj=mj)
 
     return eta, si_voc, top_voc
 
 
 def calc_2j_si_eta_direct(top_eg=1.87, top_rad_eta=1, top_qe=1, bot_eg=1.12, bot_rad_eta=0.005, bot_qe=1,
-                          spectrum="AM1.5g", concentration=1,n_s=1):
+                          spectrum="AM1.5g", concentration=1, n_s=1, mj="2T"):
     """
     Calculate the the efficiency of 2J III-V/Si solar cell. This calculation assumes direct band gap in silicon.
+    :param mj:
     :param top_eg:
     :param top_rad_eta:
     :param top_qe:
@@ -70,12 +72,11 @@ def calc_2j_si_eta_direct(top_eg=1.87, top_rad_eta=1, top_qe=1, bot_eg=1.12, bot
     subcell_qe = np.array([top_qe, bot_qe])
     subcell_rad_eff = np.array([top_rad_eta, bot_rad_eta])
 
-    top_voc = rad_to_voc(top_rad_eta, gen_square_qe(top_eg, subcell_qe[0]), max_voltage=subcell_eg[0])
-    bot_voc = rad_to_voc(bot_rad_eta, gen_square_qe(si_bg, subcell_qe[1]), max_voltage=subcell_eg[1])
+    #top_voc = rad_to_voc(top_rad_eta, gen_square_qe(top_eg, subcell_qe[0]), max_voltage=subcell_eg[0])
+    #bot_voc = rad_to_voc(bot_rad_eta, gen_square_qe(si_bg, subcell_qe[1]), max_voltage=subcell_eg[1])
 
     return calc_mj_eta(subcell_eg, subcell_qe, subcell_rad_eff, cell_temperature, concentration=concentration,
-                       spectrum=spectrum,n_s=n_s), \
-           bot_voc, top_voc
+                       spectrum=spectrum, n_s=n_s,mj=mj)
 
 
 def calc_3j_si_eta(top_cell_eta, mid_cell_eta, concentration, top_band_gap=1.87, top_cell_qe=1, mid_band_gap=1.42,

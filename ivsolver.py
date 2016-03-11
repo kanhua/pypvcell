@@ -5,6 +5,7 @@ import scipy.constants as sc
 from spectrum_base import spectrum_base
 from units_system import UnitsSystem
 import copy
+from fom import max_power
 
 us = UnitsSystem()
 
@@ -131,6 +132,9 @@ def gen_rec_iv_with_rs_by_newton(j01, j02, n1, n2, temperature, rshunt, rseries,
     return voltage, np.array(solved_current)
 
 
+j01_lead_term=np.power(sc.e, 4) * 2 * sc.pi / (np.power(sc.c, 2) * np.power(sc.h, 3))
+
+
 def calculate_j01_from_qe(qe, n_c=3.5, n_s=1, threshold=1e-3, step_in_ev=1e-5, lead_term=None):
     """
     Calculate j01 from absorptivity (QE).
@@ -149,7 +153,8 @@ def calculate_j01_from_qe(qe, n_c=3.5, n_s=1, threshold=1e-3, step_in_ev=1e-5, l
     if lead_term is None:
         # the additional sc.e^3 comes from the unit of E. We use the unit of eV to do the integration
         # of Planck's spectrum. Note that the term E^2*dE gives three q in total.
-        lead_term = np.power(sc.e, 4) * 2 * sc.pi * (n_c ** 2+n_s**2) / (np.power(sc.c, 2) * np.power(sc.h, 3))
+        #lead_term = np.power(sc.e, 4) * 2 * sc.pi * (n_c ** 2+n_s**2) / (np.power(sc.c, 2) * np.power(sc.h, 3))
+        lead_term=j01_lead_term*(n_c ** 2+n_s**2)
 
     qe_a = qe.get_spectrum(wavelength_unit='eV')
 
@@ -219,6 +224,25 @@ def calculate_j02_from_rad_eff(j01, radiative_efficiency, voltage, temperature, 
     j02 = term1 * term2
 
     return j02
+
+
+def solve_ms_mj_iv(v_i,ill_power):
+    """
+    Calculate the efficiency of mechanical stack solar cell
+
+    :param v_i: a list of (voltage,current) tuple. Voltage and current are 1D np arrays. The current density is in W/m^2
+    :param ill_power: the illumnation power in W/m^2
+    :return: efficiency
+    """
+
+    max_p_list=[]
+    for v, i in v_i:
+
+        max_p_list.append(max_power(v,i))
+
+    return np.sum(max_p_list)/ill_power
+
+
 
 
 def solve_mj_iv(voltage_current_tuple, i_max=None):
