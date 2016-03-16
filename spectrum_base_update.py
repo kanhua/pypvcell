@@ -7,8 +7,8 @@ us=UnitsSystem()
 
 class Spectrum(object):
     def __init__(self,wavelength,spectrum,wavelength_unit,area_unit=None,is_photon_flux=False):
-        self.core_wl = np.zeros((1,))
-        self.core_spec = np.zeros((1,))
+        self.core_wl = None
+        self.core_spec = None
 
         if area_unit is None:
             self.set_spectrum(wavelength=wavelength,spectrum=spectrum,wavelength_unit=wavelength_unit,is_photon_flux=is_photon_flux)
