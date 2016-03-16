@@ -23,30 +23,30 @@ class spectrum_base_test_case(unittest.TestCase):
 
     def test_1(self):
         spectrum = self.spec_base.get_spectrum_density("m-2", "nm")
-        assert np.all(np.isclose(spectrum[:, 0], self.init_wl))
-        assert np.all(np.isclose(spectrum[:, 1], self.init_spec))
+        assert np.all(np.isclose(spectrum[0,:], self.init_wl))
+        assert np.all(np.isclose(spectrum[1,:], self.init_spec))
 
     def test_2(self):
         spectrum = self.spec_base.get_spectrum_density("cm-2", 'nm')
-        assert np.all(np.isclose(spectrum[:, 0], self.init_wl))
-        assert np.all(np.isclose(spectrum[:, 1], self.init_spec / 1e4))
+        assert np.all(np.isclose(spectrum[0,:], self.init_wl))
+        assert np.all(np.isclose(spectrum[1,:], self.init_spec / 1e4))
 
     def test_3(self):
         spectrum = self.spec_base.get_spectrum_density("cm-2", 'm')
-        assert np.all(np.isclose(spectrum[:, 0], self.init_wl / 1e9))
-        assert np.all(np.isclose(spectrum[:, 1], self.init_spec / 1e4 * 1e9))
+        assert np.all(np.isclose(spectrum[0,:], self.init_wl / 1e9))
+        assert np.all(np.isclose(spectrum[1,:], self.init_spec / 1e4 * 1e9))
 
     def test_4(self):
         spectrum = self.spec_base2.get_spectrum_density("m-2", 'nm')
 
-        assert np.all(np.isclose(spectrum[:, 0], np.sort(us.eVnm(self.init_wl2))))
-        assert np.isclose(np.trapz(spectrum[:, 1], spectrum[:, 0]), np.trapz(self.init_spec2, self.init_wl2))
+        assert np.all(np.isclose(spectrum[0,:], np.sort(us.eVnm(self.init_wl2))))
+        assert np.isclose(np.trapz(spectrum[1,:], spectrum[0,:]), np.trapz(self.init_spec2, self.init_wl2))
 
     def test_5(self):
         spectrum = self.spec_base2.get_spectrum_density("m-2", 'J')
 
-        assert np.all(np.isclose(spectrum[:, 0], np.sort(self.init_wl2) * sc.e))
-        assert np.isclose(np.trapz(spectrum[:, 1], spectrum[:, 0]), np.trapz(self.init_spec2, self.init_wl2))
+        assert np.all(np.isclose(spectrum[0,:], np.sort(self.init_wl2) * sc.e))
+        assert np.isclose(np.trapz(spectrum[1,:], spectrum[0,:]), np.trapz(self.init_spec2, self.init_wl2))
 
     def test_6(self):
         init_wl = np.linspace(1, 5, num=10)
@@ -55,7 +55,7 @@ class spectrum_base_test_case(unittest.TestCase):
         test_spec_base = Spectrum(wavelength=init_wl, spectrum=init_spec, wavelength_unit='eV')
         spectrum = test_spec_base.get_spectrum('nm')
 
-        assert np.all(np.isclose(spectrum[:, 0], np.sort(us.eVnm(init_wl))))
+        assert np.all(np.isclose(spectrum[0,:], np.sort(us.eVnm(init_wl))))
 
     def test_7(self):
         """
@@ -73,7 +73,7 @@ class spectrum_base_test_case(unittest.TestCase):
 
         # Since the values of the spectrum are very small, causing the errors in np.isclose()
         # ( both are in the order of ~1e-19) Need renormalise them for proper comparison.
-        assert np.all(np.isclose(spectrum[:, 1] * 1e19, expect_spec * 1e19))
+        assert np.all(np.isclose(spectrum[1,:] * 1e19, expect_spec * 1e19))
 
     def test_8(self):
         """
@@ -88,8 +88,10 @@ class spectrum_base_test_case(unittest.TestCase):
 
         expect_spec = init_spec / (sc.h * sc.c / us.siUnits(init_wl, 'nm'))
 
-        assert np.all(np.isclose(spectrum[:, 1], expect_spec))
+        assert np.all(np.isclose(spectrum[1,:], expect_spec))
 
 
 if __name__ == '__main__':
-    unittest.main()
+
+    for i in range(1000):
+        unittest.main()
