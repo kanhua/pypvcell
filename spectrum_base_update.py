@@ -92,30 +92,31 @@ class Spectrum(object):
         length_wavelength_unit_factor = ('m', 'cm', 'nm')
         energy_wavelength_unit_factor = {"J": 1, "eV": sc.e}
 
-        spectrum = np.zeros((2, self.core_wl.shape[0]))
+        wl = None
+        spec = None
 
         if wavelength_unit in length_wavelength_unit_factor:
-            spectrum[0, :] = us.asUnit(self.core_wl, wavelength_unit)
-            spectrum[1, :] = us.convert(self.core_spec, 'm-2', area_unit)
-            spectrum[1, :] = us.convert(spectrum[1, :], 'm-1', wavelength_unit + '-1')
+            wl = us.asUnit(self.core_wl, wavelength_unit)
+            spec = us.convert(self.core_spec, 'm-2', area_unit)
+            spec = us.convert(spec, 'm-1', wavelength_unit + '-1')
 
         elif wavelength_unit in energy_wavelength_unit_factor.keys():
-            spectrum[0, :] = sc.h * sc.c / self.core_wl
-            spectrum[0, :] = us.convert(spectrum[0, :], 'J', wavelength_unit)
+            wl = sc.h * sc.c / self.core_wl
+            wl = us.convert(wl, 'J', wavelength_unit)
 
-            spectrum[1, :] = us.convert(self.core_spec, 'm-2', area_unit)
-            spectrum[1, :] = spectrum[1, :] * np.power(self.core_wl, 2) / (sc.h * sc.c)
-            spectrum[1, :] = us.convert(spectrum[1, :], 'J-1', wavelength_unit + '-1')
+            spec = us.convert(self.core_spec, 'm-2', area_unit)
+            spec = spec * np.power(self.core_wl, 2) / (sc.h * sc.c)
+            spec = us.convert(spec, 'J-1', wavelength_unit + '-1')
 
         # convert the spectrum to photon flux if necessary
         if flux == "photon":
-            spectrum[1, :] = self._as_photon_flux(self.core_wl, spectrum[1,:])
+            spec = self._as_photon_flux(self.core_wl, spec)
 
         # Sort the spectrum by wavelength
-        sorted_idx = np.argsort(spectrum[0, :])
-        spectrum = spectrum[:, sorted_idx]
+        sorted_idx = np.argsort(spec)
+        spec = spec[sorted_idx]
 
-        return spectrum
+        return wl, spec
 
     def get_spectrum(self, wavelength_unit, flux="energy"):
 

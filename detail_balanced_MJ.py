@@ -31,7 +31,7 @@ def set_subcell_spectrum(input_ill, subcell_eg, subcell_filter):
 
 def rad_to_voc(rad_eta, qe, max_voltage=1.9,spectrum="AM1.5g"):
     """
-    Calculate Voc from given radiative efficiency
+    Calculate Voc from given radiative efficiency numerically
     :param rad_eta: radiative efficiency (in ratio)
     :param qe: quantum efficiency, a spectrum_base instance
     :param max_voltage: the maximum voltage of the dark-IV, the default value is 1.9. A safe way is set it to the value of the band gap
@@ -50,6 +50,31 @@ def rad_to_voc(rad_eta, qe, max_voltage=1.9,spectrum="AM1.5g"):
     top_voc = extract_voc(v_top, i_top, qe,spectrum=spectrum)
 
     return top_voc
+
+
+def rad_to_voc_fast(rad_eta, qe, spectrum="AM1.5g", T=300):
+    """
+    Calculate Voc from given radiative efficiency analytically
+    :param rad_eta: radiative efficiency (in ratio)
+    :param qe: quantum efficiency, a spectrum_base instance
+    :param max_voltage: the maximum voltage of the dark-IV, the default value is 1.9. A safe way is set it to the value of the band gap
+    :return: the calculated Voc
+    """
+
+    assert isinstance(qe, spectrum_base)
+
+    j01_t = calculate_j01_from_qe(qe, T=T)
+
+    # j02_t = calculate_j02_from_rad_eff(j01_t, rad_eta, test_voltage, 300, n2=2)
+
+
+    jsc = calc_jsc(input_illumination=illumination(spectrum), qe=qe)
+
+    voc = np.log(rad_eta * jsc / j01_t) * (sc.k * T / sc.e)
+
+    return voc
+
+
 
 
 def extract_voc(voltage, current, qe, spectrum="AM1.5g"):
@@ -112,7 +137,7 @@ def calc_1j_eta(eg,qe,r_eta,cell_temperature=300, n_c=3.5,n_s=1,
     ill=illumination(concentration=concentration,spectrum=spectrum)
 
     if j01_method=="qe":
-        j01=calculate_j01_from_qe(qe_spec,n_c=n_c,n_s=n_s)
+        j01 = calculate_j01_from_qe(qe_spec, n_c=n_c, n_s=n_s)
         jsc=calc_jsc(ill,qe_spec)
     elif j01_method=="eg":
         j01=calculate_j01(eg,temperature=cell_temperature,n1=1,n_c=n_c,n_s=n_s)
@@ -158,9 +183,9 @@ def calc_mj_eta(subcell_eg, subcell_qe, subcell_rad_eff, cell_temperature, conce
     subcell_j01=[]
     for i, qe in enumerate(subcell_qe):
         if i==0:
-            subcell_j01.append(calculate_j01_from_qe(qe,n_s=n_s))
+            subcell_j01.append(calculate_j01_from_qe(qe, n_s=n_s))
         else:
-            subcell_j01.append(calculate_j01_from_qe(qe,n_s=3.5))
+            subcell_j01.append(calculate_j01_from_qe(qe, n_s=3.5))
 
 
 

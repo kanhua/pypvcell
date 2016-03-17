@@ -3,9 +3,10 @@ __author__ = 'kanhua'
 import unittest
 import numpy as np
 from spectrum_base import spectrum_base
-from solcore3 import eVnm,siUnits
 import scipy.constants as sc
+from units_system import UnitsSystem
 
+us = UnitsSystem()
 
 class spectrum_base_test_case(unittest.TestCase):
 
@@ -47,7 +48,7 @@ class spectrum_base_test_case(unittest.TestCase):
 
         spectrum=self.spec_base2.get_spectrum_density("m-2",'nm')
 
-        assert np.all(np.isclose(spectrum[:,0],np.sort(eVnm(self.init_wl2))))
+        assert np.all(np.isclose(spectrum[:, 0], np.sort(us.eVnm(self.init_wl2))))
         assert np.isclose(np.trapz(spectrum[:,1],spectrum[:,0]),np.trapz(self.init_spec2,self.init_wl2))
 
     def test_5(self):
@@ -66,7 +67,7 @@ class spectrum_base_test_case(unittest.TestCase):
         test_spec_base.set_spectrum(init_wl,init_spec,'eV')
         spectrum=test_spec_base.get_spectrum('nm')
 
-        assert np.all(np.isclose(spectrum[:,0],np.sort(eVnm(init_wl))))
+        assert np.all(np.isclose(spectrum[:, 0], np.sort(us.eVnm(init_wl))))
 
 
     def test_7(self):
@@ -83,7 +84,7 @@ class spectrum_base_test_case(unittest.TestCase):
         spectrum=test_spec_base.get_spectrum('nm')
 
         # Prepare an expected spectrum for comparsion
-        expect_spec=init_spec*sc.h*sc.c/siUnits(init_wl,'nm')
+        expect_spec = init_spec * sc.h * sc.c / us.siUnits(init_wl, 'nm')
 
 
         # Since the values of the spectrum are very small, causing the errors in np.isclose()
@@ -105,7 +106,7 @@ class spectrum_base_test_case(unittest.TestCase):
         test_spec_base.set_spectrum(init_wl,init_spec,'nm',is_photon_flux=False)
         spectrum=test_spec_base.get_spectrum('nm',flux="photon")
 
-        expect_spec=init_spec/(sc.h*sc.c/siUnits(init_wl,'nm'))
+        expect_spec = init_spec / (sc.h * sc.c / us.siUnits(init_wl, 'nm'))
 
         assert np.all(np.isclose(spectrum[:,1],expect_spec))
 

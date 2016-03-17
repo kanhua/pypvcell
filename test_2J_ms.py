@@ -22,8 +22,8 @@ def calc_gaas(n_s=1):
     for p in range(topcell_eqe.shape[0]):
         # eta[p], _, _ = calc_2j_si_eta(1000e-6, 1, GaAs_eg, top_cell_qe=topcell_eqe[p], top_cell_rad_eta=1,
         #                              spectrum="AM1.5g")
-        eta[p] = calc_2j_si_eta_direct(top_eg=GaAs_eg, top_rad_eta=1, top_qe=topcell_eqe[p], bot_rad_eta=1,
-                                             bot_qe=1, n_s=n_s,mj="MS")
+        eta[p] = calc_2j_si_eta_direct(top_eg=GaAs_eg, top_rad_eta=1, top_qe=topcell_eqe[p], bot_rad_eta=1, bot_qe=1,
+                                       n_s=n_s, mj="MS")
 
 
     plt.plot(topcell_eqe,eta)
@@ -43,8 +43,8 @@ def vary_top_eg(n_s=1):
     for p in range(topcell_eg.shape[0]):
         # eta[p], _, _ = calc_2j_si_eta(1000e-6, 1, GaAs_eg, top_cell_qe=topcell_eqe[p], top_cell_rad_eta=1,
         #                              spectrum="AM1.5g")
-        eta[p] = calc_2j_si_eta_direct(top_eg=topcell_eg[p], top_rad_eta=1, top_qe=0.01, bot_rad_eta=1,
-                                       bot_qe=1, n_s=n_s, mj="MS")
+        eta[p] = calc_2j_si_eta_direct(top_eg=topcell_eg[p], top_rad_eta=1, top_qe=0.01, bot_rad_eta=1, bot_qe=1,
+                                       n_s=n_s, mj="MS")
 
 
     plt.plot(topcell_eg,eta)

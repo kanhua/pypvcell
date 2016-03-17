@@ -16,11 +16,11 @@ for i in range(30000):
     init_spec = np.ones(init_wl.shape)
 
     test_spec_base=Spectrum(init_wl, init_spec, 'nm', is_photon_flux=False)
-    spectrum = test_spec_base.get_spectrum('nm', flux="photon")
+    wl, spec = test_spec_base.get_spectrum('nm', flux="photon")
 
     expect_spec = init_spec / (sc.h * sc.c / us.siUnits(init_wl, 'nm'))
 
-    assert np.all(np.isclose(spectrum[1,:], expect_spec))
+    assert np.all(np.isclose(spec, expect_spec))
 
 print("time spent:%s"%(time.time()-ts))
 
