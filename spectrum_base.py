@@ -7,6 +7,8 @@ us=UnitsSystem()
 
 class spectrum_base(object):
     def __init__(self):
+
+        raise DeprecationWarning("spectrum_base is deprecating")
         self.core_wl = np.zeros((1,))
         self.core_spec = np.zeros((1,))
         pass
