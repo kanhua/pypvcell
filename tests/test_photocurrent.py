@@ -1,7 +1,8 @@
 __author__ = 'kanhua'
 
 import unittest
-from photocurrent import gen_qe_from_abs
+from photocurrent import gen_qe_from_abs, calc_jsc, gen_square_qe, calc_jsc_from_eg
+from illumination import illumination
 from spectrum_base_update import Spectrum
 import numpy as np
 import matplotlib.pyplot as plt
@@ -39,7 +40,19 @@ class MyTestCase(unittest.TestCase):
 
         plt.plot(qe_1_a[0, :], qe_1_a[1, :], hold=True)
         plt.plot(qe_2_b[0, :], qe_2_b[1, :])
-        plt.show()
+        plt.savefig("./test.png")
+
+    def test_calc_jsc(self):
+        ill = illumination(spectrum="AM1.5g")
+        qe = gen_square_qe(1.42, 1)
+
+        jsc = calc_jsc(ill, qe)
+
+        jsc2 = calc_jsc_from_eg(ill, 1.42)
+
+        print(jsc)
+        print(jsc2)
+
 
 
 

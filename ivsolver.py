@@ -161,11 +161,6 @@ def calculate_j01_from_qe(qe, n_c=3.5, n_s=1, threshold=1e-3, step_in_ev=1e-5, l
 
     qe_a = qe.get_interp_spectrum(np.arange(np.min(qe_a[0, :]), np.max(qe_a[0, :]), step=step_in_ev), 'eV')
 
-    import matplotlib.pyplot as plt
-
-    plt.plot(qe_a[0, :], qe_a[1, :])
-    plt.show()
-
     qe_a = qe_a[:, qe_a[1, :] > threshold]
 
     v_t = sc.k * T / sc.e
