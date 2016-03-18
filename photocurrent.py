@@ -57,9 +57,9 @@ def calc_jsc(input_illumination,qe):
 
     ill_array=input_illumination.get_spectrum_density('m-2','eV',flux="photon")
 
-    qe_array=qe.get_interp_spectrum(ill_array[:,0],'eV')
+    qe_array = qe.get_interp_spectrum(ill_array[0, :], 'eV')
 
-    return sc.e*np.trapz(ill_array[:,1]*qe_array[:,1],ill_array[:,0])
+    return sc.e * np.trapz(ill_array[1, :] * qe_array[1, :], ill_array[0, :])
 
 
 def calc_jsc_from_eg(input_illumination,eg):
@@ -75,8 +75,9 @@ def calc_jsc_from_eg(input_illumination,eg):
 
     ill_array=input_illumination.get_spectrum_density('m-2','eV',flux="photon")
 
-    ill_array=input_illumination.get_interp_spectrum_density(np.linspace(eg,ill_array[:,0].max(),num=100),"m-2","eV",flux="photon")
+    ill_array = input_illumination.get_interp_spectrum_density(np.linspace(eg, ill_array[0, :].max(), num=100), "m-2",
+                                                               "eV", flux="photon")
 
-    jsc=sc.e*np.trapz(ill_array[:,1],ill_array[:,0])
+    jsc = sc.e * np.trapz(ill_array[1, :], ill_array[0, :])
 
     return jsc
