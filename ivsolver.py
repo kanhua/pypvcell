@@ -3,6 +3,7 @@ from scipy.interpolate import interp1d
 from scipy.optimize import newton_krylov
 import scipy.constants as sc
 from spectrum_base import spectrum_base
+from spectrum_base_update import Spectrum
 from units_system import UnitsSystem
 import copy
 from fom import max_power
@@ -146,7 +147,7 @@ def calculate_j01_from_qe(qe, n_c=3.5, n_s=1, threshold=1e-3, step_in_ev=1e-5, l
     :param step_in_ev: meshgrid size when doing numerical integration trapz()
     :return: j01
     """
-    assert isinstance(qe, spectrum_base)
+    assert isinstance(qe, (Spectrum, spectrum_base))
 
     # lead_term = np.power(sc.e,4) * 2 * (n_c ** 2) / (np.power(sc.h, 3) * np.power(sc.c, 2) * 2 * np.power(sc.pi,2))
 
@@ -158,29 +159,34 @@ def calculate_j01_from_qe(qe, n_c=3.5, n_s=1, threshold=1e-3, step_in_ev=1e-5, l
 
     qe_a = qe.get_spectrum(wavelength_unit='eV')
 
-    qe_a = qe.get_interp_spectrum(np.arange(np.min(qe_a[:, 0]), np.max(qe_a[:, 0]), step=step_in_ev), 'eV')
+    qe_a = qe.get_interp_spectrum(np.arange(np.min(qe_a[0, :]), np.max(qe_a[0, :]), step=step_in_ev), 'eV')
 
-    qe_a = qe_a[qe_a[:, 1] > threshold, :]
+    import matplotlib.pyplot as plt
+
+    plt.plot(qe_a[0, :], qe_a[1, :])
+    plt.show()
+
+    qe_a = qe_a[:, qe_a[1, :] > threshold]
 
     v_t = sc.k * T / sc.e
 
-    j01 = lead_term * np.trapz(qe_a[:, 1] * np.power(qe_a[:, 0], 2) / (np.exp(qe_a[:, 0] / v_t) - 1), qe_a[:, 0])
+    j01 = lead_term * np.trapz(qe_a[1, :] * np.power(qe_a[0, :], 2) / (np.exp(qe_a[0, :] / v_t) - 1), qe_a[0, :])
 
     return j01
 
 
 def calculate_bed(qe, T=300):
-    assert isinstance(qe, spectrum_base)
+    assert isinstance(qe, Spectrum)
 
     qe_a = qe.get_spectrum(wavelength_unit='eV')
 
-    qe_a = qe.get_interp_spectrum(np.arange(np.min(qe_a[:, 0]), np.max(qe_a[:, 0]), step=1e-6), 'eV')
+    qe_a = qe.get_interp_spectrum(np.arange(np.min(qe_a[0, :]), np.max(qe_a[0, :]), step=1e-6), 'eV')
 
     v_t = sc.k * T / sc.e
 
-    y = qe_a[:, 1] * np.power(qe_a[:, 0], 2) / (np.exp(qe_a[:, 0] / v_t) - 1)
+    y = qe_a[1, :] * np.power(qe_a[0, :], 2) / (np.exp(qe_a[0, :] / v_t) - 1)
 
-    x = qe_a[:, 0]
+    x = qe_a[0, :]
 
     return x, y
 

@@ -2,6 +2,7 @@ __author__ = 'kanhua'
 
 import unittest
 from spectrum_base import spectrum_base
+from spectrum_base_update import Spectrum
 from photocurrent import gen_square_qe
 from ivsolver import calculate_j01_from_qe, calculate_j01, calculate_bed,gen_rec_iv
 import numpy as np
@@ -18,18 +19,14 @@ class MyTestCase(unittest.TestCase):
 
         band_edge = 0.8
 
-        qe_wl = np.array([band_edge, 5])
-        qe_qe = np.array([1, 1])
-
-        unity_eqe = spectrum_base()
-        unity_eqe.set_spectrum(qe_wl, qe_qe, wavelength_unit='eV')
+        unity_eqe = gen_square_qe(band_edge, 1)
 
         a = calculate_j01_from_qe(unity_eqe)
 
         b = calculate_j01(band_edge, 300, 1)
 
-        # print(a)
-        #print(b)
+        print(a)
+        print(b)
 
         assert np.isclose(a, b)
 

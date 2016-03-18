@@ -7,8 +7,6 @@ from scipy.interpolate import interp1d
 import scipy.constants as sc
 
 
-
-
 def test_materialFilter():
     testIll = illumination()
 

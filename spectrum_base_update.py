@@ -149,7 +149,7 @@ class Spectrum(object):
 
         orig_spectrum = self.get_spectrum(wavelength_unit, flux)
 
-        output_spectrum = np.zeros((wavelength.shape[0], 2))
+        output_spectrum = np.zeros((2, wavelength.shape[0]))
 
         output_spectrum[0,:] = wavelength
         output_spectrum[1,:] = np.interp(wavelength, orig_spectrum[0,:], orig_spectrum[1,:])
@@ -160,7 +160,7 @@ class Spectrum(object):
 
         orig_spectral_density = self.get_spectrum_density(area_unit, wavelength_unit, flux=flux)
 
-        output_spectrum = np.zeros((wavelength.shape[0], 2))
+        output_spectrum = np.zeros((2, wavelength.shape[0]))
 
         output_spectrum[0,:] = wavelength
         output_spectrum[1,:] = np.interp(wavelength,
