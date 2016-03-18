@@ -2,7 +2,7 @@ import numpy as np
 import scipy.interpolate
 import scipy.constants as sc
 from illumination import illumination
-from spectrum_base import spectrum_base
+from spectrum_base_update import Spectrum
 
 def gen_square_qe_array(bandEdge_in_eV, qe_in_ratio,qe_below_edge=1e-3,wl_bound=(0.01,5)):
 
@@ -15,8 +15,7 @@ def gen_square_qe(bandEdge_in_eV, qe_in_ratio,qe_below_edge=1e-4,wl_bound=(0.01,
     qe_array=gen_square_qe_array(bandEdge_in_eV, qe_in_ratio,
                         qe_below_edge=qe_below_edge,wl_bound=wl_bound)
 
-    output_spec=spectrum_base()
-    output_spec.set_spectrum(qe_array[:,0],qe_array[:,1],'eV')
+    output_spec = Spectrum(wavelength=qe_array[:, 0], spectrum=qe_array[:, 1], wavelength_unit="eV")
 
     return output_spec
 
@@ -30,14 +29,13 @@ def gen_qe_from_abs(absorption,layer_thickness):
     :return: QE, as spectrum_base class
     """
 
-    assert isinstance(absorption,spectrum_base)
+    assert isinstance(absorption, Spectrum)
 
-    alpha_array=absorption.get_spectrum('m')
+    wl, alpha = absorption.get_spectrum('m')
 
-    abty=1-np.exp(-alpha_array[:,1]*layer_thickness)
+    abty = 1 - np.exp(-alpha * layer_thickness)
 
-    qe=spectrum_base()
-    qe.set_spectrum(alpha_array[:,0],abty,'m')
+    qe = Spectrum(wavelength=wl, spectrum=abty, wavelength_unit='m')
 
     return qe
 
@@ -53,7 +51,7 @@ def calc_jsc(input_illumination,qe):
     """
 
     assert isinstance(input_illumination,illumination)
-    assert isinstance(qe,spectrum_base)
+    assert isinstance(qe, Spectrum)
 
     # initialise a QE interp object
 

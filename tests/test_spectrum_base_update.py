@@ -92,6 +92,4 @@ class spectrum_base_test_case(unittest.TestCase):
 
 
 if __name__ == '__main__':
-
-    for i in range(1000):
-        unittest.main()
+    unittest.main()

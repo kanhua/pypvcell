@@ -11,11 +11,13 @@ us=UnitsSystem()
 
 
 ts=time.time()
-for i in range(30000):
-    init_wl = np.linspace(300, 500, num=10)
-    init_spec = np.ones(init_wl.shape)
+init_wl = np.linspace(300, 500, num=10)
+init_spec = np.ones(init_wl.shape)
 
-    test_spec_base=Spectrum(init_wl, init_spec, 'nm', is_photon_flux=False)
+test_spec_base = Spectrum(init_wl, init_spec, 'nm', is_photon_flux=False)
+
+for i in range(30000):
+
     wl, spec = test_spec_base.get_spectrum('nm', flux="photon")
 
     expect_spec = init_spec / (sc.h * sc.c / us.siUnits(init_wl, 'nm'))
@@ -27,12 +29,14 @@ print("time spent:%s"%(time.time()-ts))
 
 
 ts=time.time()
-for i in range(30000):
-    test_spec_base=spectrum_base()
-    init_wl=np.linspace(300,500,num=10)
-    init_spec=np.ones(init_wl.shape)
 
-    test_spec_base.set_spectrum(init_wl,init_spec,'nm',is_photon_flux=False)
+test_spec_base = spectrum_base()
+init_wl = np.linspace(300, 500, num=10)
+init_spec = np.ones(init_wl.shape)
+test_spec_base.set_spectrum(init_wl, init_spec, 'nm', is_photon_flux=False)
+
+for i in range(30000):
+
     spectrum=test_spec_base.get_spectrum('nm',flux="photon")
 
     expect_spec=init_spec/(sc.h*sc.c/us.siUnits(init_wl,'nm'))

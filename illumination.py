@@ -15,7 +15,7 @@ with open(os.path.join(this_dir,'spec_data.pickle'), 'rb') as f:
     spec_data=pickle.load(f)
 
 
-class illumination(spectrum_base):
+class illumination(Spectrum):
     def __init__(self, spectrum="AM1.5g", concentration=1):
 
         """
@@ -80,7 +80,7 @@ class illumination(spectrum_base):
         np.savetxt(fname, new_pc1d_ill, fmt="%.3f")
 
 
-class bp_filter(spectrum_base):
+class bp_filter(Spectrum):
     def __init__(self, edge_in_eV, f_type="high_pass", OD=2, energy_bound=(0.5, 6)):
 
         """
@@ -108,7 +108,7 @@ class bp_filter(spectrum_base):
         self.set_spectrum(wavelength, attenuation, 'eV')
 
 
-class material_filter(spectrum_base):
+class material_filter(Spectrum):
     def __init__(self, material_abs, thickness):
         assert isinstance(material_abs, Spectrum)
         attenuation = material_abs.core_spec * thickness
@@ -117,7 +117,7 @@ class material_filter(spectrum_base):
         self.set_spectrum(material_abs.core_wl, attenuation, 'm')
 
 
-class qe_filter_old(spectrum_base):
+class qe_filter_old(Spectrum):
     def __init__(self, wavelength_grid, qe_wl_in_ev, qe_in_ratio):
         assert isinstance(qe_wl_in_ev, np.ndarray)
         assert isinstance(qe_in_ratio, np.ndarray)
@@ -134,7 +134,7 @@ class qe_filter_old(spectrum_base):
         self.filter_attenuation = 1 - interped_qe_array
 
 
-class qe_filter(spectrum_base):
+class qe_filter(Spectrum):
     def __init__(self, qe_wavelength, qe_in_ratio, wavelength_unit):
         self.set_spectrum(qe_wavelength, 1 - qe_in_ratio, wavelength_unit=wavelength_unit)
 

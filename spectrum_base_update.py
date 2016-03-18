@@ -113,10 +113,11 @@ class Spectrum(object):
             spec = self._as_photon_flux(self.core_wl, spec)
 
         # Sort the spectrum by wavelength
-        sorted_idx = np.argsort(spec)
+        sorted_idx = np.argsort(wl)
+        wl = wl[sorted_idx]
         spec = spec[sorted_idx]
 
-        return wl, spec
+        return np.vstack((wl, spec))
 
     def get_spectrum(self, wavelength_unit, flux="energy"):
 
@@ -169,7 +170,7 @@ class Spectrum(object):
 
     def attenuation_single(self, filter):
 
-        assert isinstance(filter, spectrum_base)
+        assert isinstance(filter, Spectrum)
 
         atten_spec = filter.get_interp_spectrum(self.core_wl, 'm')
 
