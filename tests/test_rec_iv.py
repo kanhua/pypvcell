@@ -7,7 +7,7 @@ from photocurrent import gen_square_qe
 from ivsolver import calculate_j01_from_qe, calculate_j01, calculate_bed,gen_rec_iv
 import numpy as np
 import matplotlib.pyplot as plt
-
+import scipy.constants as sc
 
 class MyTestCase(unittest.TestCase):
     def test_gen_rec_iv_from_qe(self):
@@ -25,8 +25,17 @@ class MyTestCase(unittest.TestCase):
 
         b = calculate_j01(band_edge, 300, 1)
 
-        print(a)
-        print(b)
+        # print(a)
+        # print(b)
+
+        assert np.isclose(a, b)
+
+        test_v = 1.4
+
+        exp_term = np.exp(sc.e * test_v / (sc.k * 300))
+
+        # print(a*exp_term)
+        # print(b*exp_term)
 
         assert np.isclose(a, b)
 

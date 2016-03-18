@@ -4,7 +4,8 @@ import numpy as np
 from ivsolver import calculate_j01_from_qe, gen_rec_iv, calculate_j01, calculate_j02_from_rad_eff
 from detail_balanced_MJ import calc_mj_eta, rad_to_voc, extract_voc, rad_to_voc_fast
 from photocurrent import gen_qe_from_abs, gen_square_qe, calc_jsc
-from spectrum_base import spectrum_base
+# from spectrum_base import spectrum_base
+from spectrum_base_update import Spectrum
 import matplotlib.pyplot as plt
 from fom import voc
 from illumination import illumination, bp_filter
@@ -28,8 +29,7 @@ def calc_2j_si_eta(si_layer_t, si_rad_eta, top_cell_bg, top_cell_qe=1, top_cell_
 
     si_alpha = np.loadtxt(abs_file, delimiter=',')
 
-    si_alpha_sp = spectrum_base()
-    si_alpha_sp.set_spectrum(si_alpha[:, 0], si_alpha[:, 1], wavelength_unit='m')
+    si_alpha_sp = Spectrum(wavelength=si_alpha[:, 0], spectrum=si_alpha[:, 1], wavelength_unit='m')
 
     qe = gen_qe_from_abs(si_alpha_sp, si_layer)
 

@@ -43,6 +43,12 @@ class MyTestCase(unittest.TestCase):
         plt.savefig("./test.png")
 
     def test_calc_jsc(self):
+        """
+        Test if calc_jsc and calc_jsc_from_eg return close results
+        :return:
+        """
+
+
         ill = illumination(spectrum="AM1.5g")
         qe = gen_square_qe(1.42, 1)
 
@@ -50,10 +56,10 @@ class MyTestCase(unittest.TestCase):
 
         jsc2 = calc_jsc_from_eg(ill, 1.42)
 
-        print(jsc)
-        print(jsc2)
+        print("Jsc calculated by QE: %s" % jsc)
+        print("Jsc calculated setting Eg and integrate the spectrum: %s" % jsc2)
 
-
+        assert np.isclose(jsc, jsc2, rtol=5.e-3)
 
 
 if __name__ == '__main__':

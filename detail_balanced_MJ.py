@@ -12,7 +12,8 @@ from ivsolver import calculate_j01, calculate_j02_from_rad_eff, \
 from fom import max_power
 from photocurrent import gen_square_qe, calc_jsc,calc_jsc_from_eg
 import scipy.constants as sc
-from spectrum_base import spectrum_base
+# from spectrum_base import spectrum_base
+from spectrum_base_update import Spectrum
 
 
 def set_subcell_spectrum(input_ill, subcell_eg, subcell_filter):
@@ -38,7 +39,7 @@ def rad_to_voc(rad_eta, qe, max_voltage=1.9,spectrum="AM1.5g"):
     :return: the calculated Voc
     """
 
-    assert isinstance(qe, spectrum_base)
+    assert isinstance(qe, Spectrum)
     test_voltage = np.linspace(-0.5, max_voltage, num=300)
 
     j01_t = calculate_j01_from_qe(qe)

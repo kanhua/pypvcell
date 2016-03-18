@@ -195,7 +195,7 @@ def calculate_j01(eg_in_ev, temperature, n1, n_c=3.5,n_s=1):
 
     eg = eg_in_ev * sc.e
     Term1 = 2 * sc.pi * (n_c**2+n_s**2) * sc.e / (
-        4 * np.power(sc.pi,3) * np.power(sc.hbar,3) * np.power(sc.c,2))
+        np.power(sc.h, 3) * np.power(sc.c, 2))
     Term2 = sc.k * temperature * np.exp(-eg / (n1 * sc.k * temperature))
     Term3 = (eg * eg) + (2 * eg * sc.k * temperature) + (2 * np.power(sc.k,2) * np.power(temperature,2))
 
