@@ -62,7 +62,7 @@ def rad_to_voc_fast(rad_eta, qe, spectrum="AM1.5g", T=300):
     :return: the calculated Voc
     """
 
-    assert isinstance(qe, spectrum_base)
+    assert isinstance(qe, Spectrum)
 
     j01_t = calculate_j01_from_qe(qe, T=T)
 
