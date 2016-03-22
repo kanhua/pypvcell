@@ -142,7 +142,7 @@ def calc_1j_eta(eg,qe,r_eta,cell_temperature=300, n_c=3.5,n_s=1,
 
     if j01_method=="qe":
         j01 = calculate_j01_from_qe(qe_spec, n_c=n_c, n_s=n_s)
-        jsc=calc_jsc(ill,qe_spec)
+        jsc = calc_jsc(ill, qe_spec)
     elif j01_method=="eg":
         j01=calculate_j01(eg,temperature=cell_temperature,n1=1,n_c=n_c,n_s=n_s)
         jsc=calc_jsc_from_eg(ill,eg)

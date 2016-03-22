@@ -25,14 +25,14 @@ class MyTestCase(unittest.TestCase):
         self.si_alpha_sp.set_spectrum(self.si_alpha[:,0],self.si_alpha[:,1],wavelength_unit='m')
 
         self.direct_bg_qe=gen_square_qe(1.1,1)
-        self.direct_bg_jsc=calc_jsc(illumination(),self.direct_bg_qe)
+        self.direct_bg_jsc = calc_jsc(illumination(), self.direct_bg_qe)
 
         self.layer_set=np.logspace(-6,-3,num=20)
 
         self.jsc_arr=[]
         for i in self.layer_set:
             qe=gen_qe_from_abs(self.si_alpha_sp,i)
-            jsc=calc_jsc(illumination(),qe)
+            jsc = calc_jsc(illumination(), qe)
             self.jsc_arr.append(jsc)
 
         self.jsc_arr=np.array(self.jsc_arr)

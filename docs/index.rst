@@ -6,6 +6,8 @@ contain the root `toctree` directive.
 Welcome to pypvcell's documentation!
 ====================================
 
+Pypvcell is collection of python functions for simulating the I-V characteristics.
+
 Contents:
 
 .. toctree::

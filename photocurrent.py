@@ -40,17 +40,19 @@ def gen_qe_from_abs(absorption, layer_thickness):
     return qe
 
 
-def calc_jsc(input_illumination, qe):
+def calc_jsc(input_illumination, qe, check_type=True):
     """
     Calculate Jsc from given QE
 
+    :param check_type:
     :param input_illumination: illumination spectrum, an spectrum_base object
     :param qe: QE, an spectrum_base object
     :return: value of Jsc (A/m^2)
     """
 
-    assert isinstance(input_illumination, illumination)
-    assert isinstance(qe, Spectrum)
+    if check_type == True:
+        assert isinstance(input_illumination, illumination)
+        assert isinstance(qe, Spectrum)
 
     # initialise a QE interp object
 

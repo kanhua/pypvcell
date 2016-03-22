@@ -109,10 +109,11 @@ class bp_filter(Spectrum):
 
 
 class material_filter(Spectrum):
-    def __init__(self, material_abs, thickness):
-        assert isinstance(material_abs, Spectrum)
+    def __init__(self, material_abs, thickness, check_type=True):
+        if check_type == True:
+            assert isinstance(material_abs, Spectrum)
         attenuation = material_abs.core_spec * thickness
-        attenuation = np.power(10, -attenuation)
+        attenuation = np.exp(-attenuation)
 
         self.set_spectrum(material_abs.core_wl, attenuation, 'm')
 
