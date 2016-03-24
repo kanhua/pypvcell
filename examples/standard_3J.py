@@ -9,15 +9,15 @@ from iii_v_si import calc_2j_si_eta, calc_3j_si_eta
 
 
 def calc_std_3J():
-    algaas_bg_top=np.linspace(1.45,2.0,num=40)
-    algaas_bg_mid=np.linspace(1.0,1.8,num=40)
+    algaas_bg_top = np.linspace(1.45, 2.0, num=10)
+    algaas_bg_mid = np.linspace(1.0, 1.8, num=10)
 
     eta_array=np.zeros((algaas_bg_top.shape[0],algaas_bg_mid.shape[0]))
 
     for i,teg in enumerate(algaas_bg_top):
         for j,meg in enumerate(algaas_bg_mid):
-            eta,_,_,_= calc_3j_si_eta(1, 1, 240 / 0.9, top_band_gap=teg, top_cell_qe=1, mid_band_gap=meg, mid_cell_qe=1,
-                                      bot_cell_eta=1, bot_cell_qe=1, bot_band_gap=0.67)
+            eta = calc_3j_si_eta(1, 1, 240 / 0.9, top_band_gap=teg, top_cell_qe=1, mid_band_gap=meg, mid_cell_qe=1,
+                                 bot_cell_eta=1, bot_cell_qe=1, bot_band_gap=0.67)
             eta_array[i,j]=eta
 
 
@@ -26,8 +26,7 @@ def calc_std_3J():
 
 
 if __name__=="__main__":
-
-    #calc_std_3J()
+    calc_std_3J()
 
     data=np.load("standard_3J.npz")
     eta_array=data["eta"]
