@@ -82,7 +82,7 @@ def gen_rec_iv_with_rs_by_reverse(j01, j02, n1, n2, temperature, rshunt, rseries
     return (new_voltage, -current)
 
 
-def find_root_newton(f, fp, x_init):
+def find_root_newton(f, fp, x_init,verbose=True):
     max_iter = 10000
     tolerance = 1e-4
     step_lambda = 0.1
@@ -94,15 +94,18 @@ def find_root_newton(f, fp, x_init):
         convergence = abs(next_x - current_x) / current_x
         # if convergence<tolerance:
         if np.isclose(current_x, next_x, atol=0, rtol=tolerance):
-            print("reach tolerance: %s" % convergence)
+            if verbose:
+                print("reach tolerance: %s" % convergence)
             return next_x
         current_x = next_x
 
-    print("reach maximum iteration: %s" % convergence)
+    if verbose:
+        print("reach maximum iteration: %s" % convergence)
     return next_x
 
 
-def gen_rec_iv_with_rs_by_newton(j01, j02, n1, n2, temperature, rshunt, rseries, voltage, jsc=0):
+def gen_rec_iv_with_rs_by_newton(j01, j02, n1, n2, temperature, rshunt, rseries, voltage, jsc=0,verbose=True):
+
     voltage, cur = gen_rec_iv(j01, j02, n1, n2, temperature, rshunt, voltage, jsc)
 
     solved_current = list()
@@ -128,7 +131,7 @@ def gen_rec_iv_with_rs_by_newton(j01, j02, n1, n2, temperature, rshunt, rseries,
             init_x = solved_current[i - 1]
         else:
             init_x = cur[i]
-        solved_current.append(find_root_newton(f, fp, init_x))
+        solved_current.append(find_root_newton(f, fp, init_x,verbose=verbose))
 
     return voltage, np.array(solved_current)
 
@@ -171,6 +174,7 @@ def calculate_j01_from_qe(qe, n_c=3.5, n_s=1, threshold=1e-3, step_in_ev=1e-5, l
 
 
 def calculate_bed(qe, T=300):
+    
     assert isinstance(qe, Spectrum)
 
     qe_a = qe.get_spectrum(wavelength_unit='eV')

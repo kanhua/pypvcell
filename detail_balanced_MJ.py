@@ -99,11 +99,12 @@ def extract_voc(voltage, current, qe, spectrum="AM1.5g"):
     return voc(voltage, gen_current)
 
 
-def calc_ere(qe, voc, T=300, ill=illumination("AM1.5g", concentration=1)):
+def calc_ere(qe, voc, T=300, ill=illumination("AM1.5g", concentration=1),verbose=0):
     """
     Calculate external radiative efficiency based on Martin Green's paper
     [1]	M. A. Green, “Radiative efficiency of state-of-the-art photovoltaic cells,”
     Prog. Photovolt: Res. Appl., vol. 20, no. 4, pp. 472–476, Sep. 2011.
+
     :param qe: input EQE, a spectrum_base object
     :param voc: Voc of the test cell
     :param T: test tempearture of the cell, default is 300 K
@@ -113,9 +114,14 @@ def calc_ere(qe, voc, T=300, ill=illumination("AM1.5g", concentration=1)):
 
     jsc = calc_jsc(ill, qe)
 
+    if verbose>0:
+        print(jsc)
+
     jd = calculate_j01_from_qe(qe, lead_term=None)
 
-    ere = np.exp(sc.e * voc / (sc.k * T)) * jd / jsc / (3.5 ** 2 * 2)
+    #ere = np.exp(sc.e * voc / (sc.k * T)) * jd / jsc/(3.5**2*2)
+
+    ere = np.exp(sc.e * voc / (sc.k * T)) * jd / jsc
 
     return ere
 

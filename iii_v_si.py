@@ -92,7 +92,7 @@ def calc_2j_si_eta_direct(top_eg=1.87, top_rad_eta=1, top_qe=1, bot_eg=1.12, bot
 
 
 def calc_3j_si_eta(top_cell_eta, mid_cell_eta, concentration, top_band_gap=1.87, top_cell_qe=1, mid_band_gap=1.42,
-                   mid_cell_qe=1, bot_cell_eta=0.005, bot_cell_qe=1, bot_band_gap=1.12, spectrum="AM1.5g"):
+                   mid_cell_qe=1, bot_cell_eta=0.005, bot_cell_qe=1, bot_band_gap=1.12, spectrum="AM1.5g",mj="2T"):
     si_bg = bot_band_gap
     cell_temperature = 300
     subcell_eg = np.array([top_band_gap, mid_band_gap, si_bg])
@@ -104,7 +104,7 @@ def calc_3j_si_eta(top_cell_eta, mid_cell_eta, concentration, top_band_gap=1.87,
     #bot_voc = rad_to_voc(mid_cell_eta, gen_square_qe(si_bg, subcell_qe[2]), max_voltage=subcell_eg[2])
 
     return calc_mj_eta(subcell_eg, subcell_qe, subcell_rad_eff, cell_temperature, concentration=concentration,
-                       spectrum=spectrum)
+                       spectrum=spectrum,mj=mj)
 
 
 def calc_gaas(n_s=1):
