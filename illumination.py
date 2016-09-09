@@ -2,8 +2,7 @@ import numpy as np
 import os
 from scipy.interpolate import interp1d
 from units_system import UnitsSystem
-from spectrum_base import spectrum_base
-from spectrum_base_update import Spectrum
+from spectrum import Spectrum
 import pickle
 
 

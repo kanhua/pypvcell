@@ -8,8 +8,7 @@ from detail_balanced_MJ import calc_1j_eta
 import numpy as np
 import matplotlib.pyplot as plt
 
-
-etaopt_air_semi=np.loadtxt("./validation/eta_air_semi.txt",skiprows=1)
+etaopt_air_semi = np.loadtxt("../validation/eta_air_semi.txt", skiprows=1)
 
 eg_array = np.linspace(0.5, 2.0)
 

@@ -2,7 +2,7 @@ import numpy as np
 import scipy.interpolate
 import scipy.constants as sc
 from illumination import illumination
-from spectrum_base_update import Spectrum
+from spectrum import Spectrum
 
 
 def gen_square_qe_array(bandEdge_in_eV, qe_in_ratio, qe_below_edge=1e-3, wl_bound=(0.01, 5)):

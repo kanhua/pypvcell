@@ -2,8 +2,8 @@ import numpy as np
 from scipy.interpolate import interp1d
 from scipy.optimize import newton_krylov
 import scipy.constants as sc
-from spectrum_base import spectrum_base
-from spectrum_base_update import Spectrum
+# from spectrum_base import spectrum_base
+from spectrum import Spectrum
 from units_system import UnitsSystem
 import copy
 from fom import max_power
@@ -150,7 +150,7 @@ def calculate_j01_from_qe(qe, n_c=3.5, n_s=1, threshold=1e-3, step_in_ev=1e-5, l
     :param step_in_ev: meshgrid size when doing numerical integration trapz()
     :return: j01
     """
-    assert isinstance(qe, (Spectrum, spectrum_base))
+    assert isinstance(qe, Spectrum)
 
     # lead_term = np.power(sc.e,4) * 2 * (n_c ** 2) / (np.power(sc.h, 3) * np.power(sc.c, 2) * 2 * np.power(sc.pi,2))
 

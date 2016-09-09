@@ -5,7 +5,7 @@ from ivsolver import calculate_j01_from_qe, gen_rec_iv, calculate_j01, calculate
 from detail_balanced_MJ import calc_mj_eta, rad_to_voc, extract_voc, rad_to_voc_fast
 from photocurrent import gen_qe_from_abs, gen_square_qe, calc_jsc
 # from spectrum_base import spectrum_base
-from spectrum_base_update import Spectrum
+from spectrum import Spectrum
 import matplotlib.pyplot as plt
 from fom import voc
 from illumination import illumination, bp_filter
