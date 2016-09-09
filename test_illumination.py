@@ -76,7 +76,7 @@ def test_total_power():
     print(testIll.total_power())
 
 
-test_bpFilter()
+test_applyFilter()
 #test_total_power()
 #test_materialFilter()
 #test_applyFilter()

@@ -10,6 +10,8 @@ class Spectrum(object):
     def __init__(self, wavelength, spectrum, wavelength_unit, area_unit=None, is_photon_flux=False):
         self.core_wl = None
         self.core_spec = None
+        self.area_unit = area_unit
+        self.is_photon_flux = is_photon_flux
 
         if area_unit is None:
             self.set_spectrum(wavelength=wavelength, spectrum=spectrum, wavelength_unit=wavelength_unit,
@@ -31,8 +33,8 @@ class Spectrum(object):
         :param is_photon_flux: True/False, specify whether the input spectrum is photon flux or not
         """
 
-        isinstance(wavelength, np.ndarray)
-        isinstance(spectrum, np.ndarray)
+        assert isinstance(wavelength, np.ndarray)
+        assert isinstance(spectrum, np.ndarray)
 
         flux_unit_factor = ["photon_flux", "J"]
         length_wavelength_unit_factor = ('m', 'cm', 'nm')
@@ -40,7 +42,7 @@ class Spectrum(object):
 
         # Convert everything to photon energy : w/m^2-m
 
-        if wavelength_unit in length_wavelength_unit_factor:
+        if us.guess_dimension(wavelength_unit) == 'length':
 
             # Convert [flux]/[Area][Length] to [Flux]/[m^2][m]
             self.core_spec = us.convert(spectrum, area_unit + " " + wavelength_unit + "-1", "m-2 m-1")
@@ -124,24 +126,24 @@ class Spectrum(object):
         length_wavelength_unit_factor = ('m', 'cm', 'nm')
         energy_wavelength_unit_factor = {"J": 1, "eV": sc.e}
 
-        spectrum = np.zeros((2,self.core_wl.shape[0]))
+        spectrum = np.zeros((2, self.core_wl.shape[0]))
 
         if wavelength_unit in length_wavelength_unit_factor:
-            spectrum[0,:] = us.asUnit(self.core_wl, wavelength_unit)
+            spectrum[0, :] = us.asUnit(self.core_wl, wavelength_unit)
 
         elif wavelength_unit in energy_wavelength_unit_factor.keys():
-            spectrum[0,:] = sc.h * sc.c / self.core_wl
-            spectrum[0,:] = us.convert(spectrum[0,:], 'J', wavelength_unit)
+            spectrum[0, :] = sc.h * sc.c / self.core_wl
+            spectrum[0, :] = us.convert(spectrum[0, :], 'J', wavelength_unit)
 
-        spectrum[1,:] = self.core_spec
+        spectrum[1, :] = self.core_spec
 
         # convert the spectrum to photon flux if necessary
         if flux == "photon":
-            spectrum[1,:] = self._as_photon_flux(self.core_wl, spectrum[1,:])
+            spectrum[1, :] = self._as_photon_flux(self.core_wl, spectrum[1, :])
 
         # sort the spectrum by wavelength
-        sorted_idx = np.argsort(spectrum[0,:])
-        spectrum = spectrum[:,sorted_idx]
+        sorted_idx = np.argsort(spectrum[0, :])
+        spectrum = spectrum[:, sorted_idx]
 
         return spectrum
 
@@ -151,8 +153,8 @@ class Spectrum(object):
 
         output_spectrum = np.zeros((2, wavelength.shape[0]))
 
-        output_spectrum[0,:] = wavelength
-        output_spectrum[1,:] = np.interp(wavelength, orig_spectrum[0,:], orig_spectrum[1,:])
+        output_spectrum[0, :] = wavelength
+        output_spectrum[1, :] = np.interp(wavelength, orig_spectrum[0, :], orig_spectrum[1, :])
 
         return output_spectrum
 
@@ -162,24 +164,32 @@ class Spectrum(object):
 
         output_spectrum = np.zeros((2, wavelength.shape[0]))
 
-        output_spectrum[0,:] = wavelength
-        output_spectrum[1,:] = np.interp(wavelength,
-                                          orig_spectral_density[0,:], orig_spectral_density[1,:])
+        output_spectrum[0, :] = wavelength
+        output_spectrum[1, :] = np.interp(wavelength,
+                                          orig_spectral_density[0, :], orig_spectral_density[1, :])
 
         return output_spectrum
 
-    def attenuation_single(self, filter):
+    def __mul__(self, other):
 
+        return self.attenuation_single(other, inplace=False)
+
+    def attenuation_single(self, filter, inplace=True):
         assert isinstance(filter, Spectrum)
 
         atten_spec = filter.get_interp_spectrum(self.core_wl, 'm')
 
-        self.core_spec = self.core_spec * atten_spec[1,:]
+        new_core_spec = self.core_spec * atten_spec[1, :]
 
-        return copy.deepcopy(self)
+        if inplace:
+            self.core_spec = new_core_spec
+            return None
+        else:
+            newobj = copy.deepcopy(self)
+            newobj.core_spec = new_core_spec
+            return newobj
 
     def attenuation(self, filters):
-
         """
         Do attenuation of a list of filters
         :param filters: a list of filter instances
@@ -192,22 +202,28 @@ class Spectrum(object):
         return copy.deepcopy(self)
 
     def _as_photon_flux(self, wavelength, energy_flux):
-
         return energy_flux / (sc.h * sc.c) * wavelength
 
     def _as_energy(self, wavelength, photon_flux):
-
         return photon_flux * (sc.h * sc.c) / wavelength
 
     def _conv_wl_to_si(self, wavelength, unit):
+        """
+        Convert wavelength to meters.
+        :param wavelength:
+        :param unit:
+        :return:
+        """
 
         assert isinstance(unit, str)
 
-        energy_unit = {"J": 1, 'eV': sc.e}
+        if unit == 'J':
+            new_wl = us.mJ(wavelength)
 
-        if unit in energy_unit:
-            # self.wl_in_eV = sc.h * sc.c / (self.wl * sc.e)
-            new_wl = sc.h * sc.c / (wavelength * energy_unit[unit])
+        elif unit == 'eV':
+            new_wl = us.eVnm(wavelength)
+            new_wl = us.siUnits(new_wl, 'nm')
+
         else:
             new_wl = us.siUnits(wavelength, unit)
 
@@ -229,7 +245,7 @@ if __name__ == "__main__":
 
     nspectrum = test_spec.get_spectrum_density('m-2', 'm')
 
-    plt.plot(nspectrum[0,:], nspectrum[1,:], hold=True)
+    plt.plot(nspectrum[0, :], nspectrum[1, :], hold=True)
 
     plt.plot(ill.wl, ill.photon_flux_in_W)
     plt.show()

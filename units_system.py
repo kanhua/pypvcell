@@ -10,6 +10,8 @@ import os.path
 
 import scipy.constants as sc
 
+import json
+
 
 """Constants used commonly in solcore
 """
@@ -96,6 +98,7 @@ class UnitsSystem():
         pickle.dump(self.database, fp)
         fp.close()
 
+
     def safe_eval(self, string_expression):
         return eval(string_expression, {"__builtins__": {}}, {"constants": constants})
 
@@ -119,7 +122,7 @@ class UnitsSystem():
 
     def asUnit(self, value, unit, dimension=None):
         """ converts from si unit to other unit
-        >>> print asUnit(1, "mA") # print 1A in mA.
+        >>> asUnit(1, "mA") # print 1A in mA.
         1000.0
         """
         if unit is None or value is None:
@@ -142,13 +145,13 @@ class UnitsSystem():
     def siUnitFromString(self, string):
         """ converts a string of a number with units into si units of that quantity
 
-        >>> print si("5 mm s-1") # output in m/s
+        >>> print(si("5 mm s-1")) # output in m/s
         0.005
 
-        >>> print si("5e-0mm-2") # output in m2
+        >>> print(si("5e-0mm-2")) # output in m2
         5000000.0
     
-        >>> print si("5")
+        >>> print(si("5"))
         5.0
 
         """
@@ -193,7 +196,7 @@ class UnitsSystem():
         return factor / value
 
     def nmJ(self, value):
-        """ Bi-directional conversion between nm and eV.
+        """ Bi-directional conversion between nm and J.
     
         Arguments:
         value -- A number with units [nm] or [eV].
@@ -421,3 +424,9 @@ def independent_m_J(x, y):
 
 def reverse(x):
     return x[::-1]
+
+
+if __name__ == "__main__":
+    import doctest
+
+    doctest.testmod()

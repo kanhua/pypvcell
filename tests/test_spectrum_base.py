@@ -5,6 +5,9 @@ import numpy as np
 from spectrum_base import spectrum_base
 import scipy.constants as sc
 from units_system import UnitsSystem
+from photocurrent import gen_square_qe
+from illumination import illumination
+import matplotlib.pyplot as plt
 
 us = UnitsSystem()
 
@@ -109,8 +112,6 @@ class spectrum_base_test_case(unittest.TestCase):
         expect_spec = init_spec / (sc.h * sc.c / us.siUnits(init_wl, 'nm'))
 
         assert np.all(np.isclose(spectrum[:,1],expect_spec))
-
-
 
 
 if __name__ == '__main__':

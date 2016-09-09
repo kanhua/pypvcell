@@ -5,6 +5,9 @@ import numpy as np
 from spectrum_base_update import Spectrum
 import scipy.constants as sc
 from units_system import UnitsSystem
+from photocurrent import gen_square_qe
+from illumination import illumination
+import matplotlib.pyplot as plt
 
 us = UnitsSystem()
 
@@ -89,6 +92,33 @@ class spectrum_base_test_case(unittest.TestCase):
         expect_spec = init_spec / (sc.h * sc.c / us.siUnits(init_wl, 'nm'))
 
         assert np.all(np.isclose(spectrum[1,:], expect_spec))
+
+    def test_9(self):
+        """
+        This test sets up a spectrum, and filter it with GaAs substrate.
+        Unfiltered part of the spectrum has 10% loss.
+        This essentially cut the spectrum at 1.42 eV
+        :return:
+        """
+
+        sq_qe = gen_square_qe(1.42, 0.9)
+        test_ill = illumination()
+        # test_qef = qe_filter(sq_qe)
+
+        filtered_ill = test_ill * sq_qe
+
+        assert isinstance(filtered_ill, illumination)
+
+        plt.plot(filtered_ill.get_spectrum('eV')[0, :], filtered_ill.get_spectrum('eV')[1, :], label="filtered")
+        plt.plot(test_ill.get_spectrum('eV')[0, :], test_ill.get_spectrum('eV')[1, :], label="original")
+
+        plt.xlabel('wavelength (eV)')
+        plt.ylabel('spectrum (W/eV/m^2)')
+
+        plt.legend()
+
+        plt.show()
+
 
 
 if __name__ == '__main__':

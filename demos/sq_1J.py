@@ -1,3 +1,9 @@
+"""
+Calculate the SQ-limit of 1-J cell
+This calculation compares the file with the graph in etaOpt paper
+"""
+
+
 from detail_balanced_MJ import calc_1j_eta
 import numpy as np
 import matplotlib.pyplot as plt
@@ -30,6 +36,8 @@ plt.plot(eg_array, eta_array_air_air,label="nc=1,ns=1",hold=True)
 plt.plot(eg_array,eta_array_air_semi,label="nc=1,ns=3.6")
 plt.plot(eg_array,eta_array_semi_semi,label="nc=3.6,ns=3.6")
 plt.plot(etaopt_air_semi[:,0],etaopt_air_semi[:,1]/100,'o',label="etaopt_air_semi")
+plt.xlabel("band gap (eV)")
+plt.ylabel("efficiency")
 plt.legend()
 plt.grid()
 

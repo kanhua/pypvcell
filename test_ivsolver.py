@@ -2,6 +2,7 @@ import matplotlib.pyplot as plt
 from ivsolver import gen_rec_iv, get_v_from_j
 from ivsolver import solve_mj_iv
 import numpy as np
+import fom
 
 I01_array = (1e-20, 1e-18, 1e-17)
 I02_array = (1e-13, 1e-15, 1e-15)

@@ -28,7 +28,9 @@ class illumination(Spectrum):
         wl=spec_data["wl"]
         flux=spec_data[spectrum]
 
-        self.set_spectrum_density(wl, flux, "m-2", "nm")
+        Spectrum.__init__(self, wl, flux, 'nm', area_unit='m-2', is_photon_flux=False)
+
+        # self.set_spectrum_density(wl, flux, "m-2", "nm")
         self.core_spec = self.core_spec * concentration
 
     def read_from_csv(self, spectrum):
