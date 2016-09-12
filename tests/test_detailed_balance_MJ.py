@@ -3,7 +3,7 @@ from photocurrent import gen_square_qe
 from detail_balanced_MJ import rad_to_voc_fast,rad_to_voc
 import numpy as np
 
-class MyTestCase(unittest.TestCase):
+class DBMJTestCase(unittest.TestCase):
     def test_rad_to_voc(self):
         """
         Calculate the Voc from radiative efficiencies.

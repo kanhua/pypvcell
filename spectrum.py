@@ -172,7 +172,16 @@ class Spectrum(object):
 
     def __mul__(self, other):
 
-        return self.attenuation_single(other, inplace=False)
+        if type(other)==int or type(other)==float:
+            newobj=copy.deepcopy(self)
+            newobj.core_spec=self.core_spec*other
+            return newobj
+        elif isinstance(other,Spectrum):
+            return self.attenuation_single(other, inplace=False)
+        else:
+            raise ValueError("The multipler should either be a scalar or a Spectrum calss object.")
+
+
 
     def attenuation_single(self, filter, inplace=True):
         assert isinstance(filter, Spectrum)
