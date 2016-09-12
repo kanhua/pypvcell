@@ -7,6 +7,9 @@ us = UnitsSystem()
 
 
 class Spectrum(object):
+    """
+    This class handles the spectrum.
+    """
     def __init__(self, wavelength, spectrum, wavelength_unit, area_unit=None, is_photon_flux=False):
         self.core_wl = None
         self.core_spec = None
@@ -26,6 +29,7 @@ class Spectrum(object):
         Convert the input spectrum density to standard units defined in this class:
         spectrum density: W/m^2-m
         wavelength: m
+
         :param wavelength: an ndarray that stores the wavelength
         :param spectrum: an ndarray that stores the spectral density
         :param area_unit: the unit of the area, ex. m-2, cm-2
