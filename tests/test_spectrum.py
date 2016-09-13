@@ -22,7 +22,7 @@ class SpectrumTestCases(unittest.TestCase):
         # set up cases
         self.init_wl2 = np.linspace(1, 5, num=1000)
         self.init_spec2 = np.linspace(1, 5, num=1000)
-        self.spec_base2 = Spectrum(self.init_wl2, self.init_spec2, area_unit="m-2", wavelength_unit="eV")
+        self.spec_base2 = Spectrum(self.init_wl2, self.init_spec2, x_unit="eV", y_area_unit="m-2")
 
     def test_1(self):
         spectrum = self.spec_base.get_spectrum_density("m-2", "nm")
@@ -55,7 +55,7 @@ class SpectrumTestCases(unittest.TestCase):
         init_wl = np.linspace(1, 5, num=10)
         init_spec = np.ones(init_wl.shape)
 
-        test_spec_base = Spectrum(wavelength=init_wl, spectrum=init_spec, wavelength_unit='eV')
+        test_spec_base = Spectrum(x_data=init_wl, y_data=init_spec, x_unit='eV')
         spectrum = test_spec_base.get_spectrum('nm')
 
         assert np.all(np.isclose(spectrum[0, :], np.sort(us.eVnm(init_wl))))
@@ -68,7 +68,7 @@ class SpectrumTestCases(unittest.TestCase):
         init_wl = np.linspace(300, 500, num=10)
         init_spec = np.ones(init_wl.shape)
 
-        test_spec_base = Spectrum(init_wl, init_spec, wavelength_unit='nm', is_photon_flux=True)
+        test_spec_base = Spectrum(init_wl, init_spec, x_unit='nm', is_photon_flux=True)
         spectrum = test_spec_base.get_spectrum('nm')
 
         # Prepare an expected spectrum for comparsion
@@ -138,7 +138,7 @@ class SpectrumTestCases(unittest.TestCase):
         mulp_spec=np.ones(init_wl.shape)*0.5
 
         test_spec_base = Spectrum(init_wl, init_spec, 'nm', is_photon_flux=False)
-        mulp_spec_base=Spectrum(mulp_wl,mulp_spec,'nm',is_photon_flux=False)
+        mulp_spec_base = Spectrum(mulp_wl, mulp_spec, 'nm', is_photon_flux=False)
         test_spec_base=test_spec_base*mulp_spec_base
 
         spec_arr=test_spec_base.get_spectrum('nm')

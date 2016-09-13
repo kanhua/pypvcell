@@ -48,8 +48,7 @@ class MyTestCase(unittest.TestCase):
         :return:
         """
 
-
-        ill = illumination(spectrum="AM1.5g")
+        ill = illumination(x_data="AM1.5g", y_data=null, wavelength_unit=)
         qe = gen_square_qe(1.42, 1)
 
         jsc = calc_jsc(ill, qe)

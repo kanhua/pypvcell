@@ -63,7 +63,7 @@ class MyTestCase(unittest.TestCase):
             qe=gen_qe_from_abs(self.si_alpha_sp,t)
             j01= calculate_j01_from_qe(qe)
             v,i=gen_rec_iv(j01,0,1,2,300,1e10,test_v,jsc=self.jsc_arr[i])
-            self.eta_arr.append(fom.max_power(v,i)/illumination().total_power())
+            self.eta_arr.append(fom.max_power(v, i) / illumination().total_power())
             self.voc_arr.append(fom.voc(v,i))
 
         plt.semilogx(self.layer_set*1e6,self.voc_arr)
@@ -82,7 +82,7 @@ class MyTestCase(unittest.TestCase):
             qe=gen_qe_from_abs(self.si_alpha_sp,t)
             j01= calculate_j01_from_qe(qe)
             v,i=gen_rec_iv(j01,0,1,2,300,1e10,test_v,jsc=self.jsc_arr[i])
-            self.eta_arr.append(fom.max_power(v,i)/illumination().total_power())
+            self.eta_arr.append(fom.max_power(v, i) / illumination().total_power())
 
         plt.semilogx(self.layer_set*1e6,self.eta_arr)
         plt.xlabel("layer thickness (um)")

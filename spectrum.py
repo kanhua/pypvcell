@@ -8,20 +8,39 @@ us = UnitsSystem()
 
 class Spectrum(object):
     """
-    This class handles the spectrum.
+    This class handles the operation of the spectrum y(x), including unit conversion and multiplication.
+
+
+    It can handle unit conversions of different types of spectrum, including:
+
+    1. Standard spectrum. The unit of y is independent of x, e.g. quantum efficiency, absorption spectrum, etc.
+    2. Sepctral density. The unit of y is per [x-unit].
+    For example, the Black-body radiation spectrum is often in the unit of energy/nm/m^2
+    3. Photon flux: y is number of photons. When converting y into energy (J), it has to be multiplied by its photon energy.
+
     """
-    def __init__(self, wavelength, spectrum, wavelength_unit, area_unit=None, is_photon_flux=False):
+
+    def __init__(self, x_data, y_data, x_unit, y_area_unit=None, is_photon_flux=False):
+        """
+        Constructor of the spectrum y(x)
+
+        :param x_data: x data of the spectrum (1d numpy array)
+        :param y_data: y data of the spectrum (1d numpy array)
+        :param x_unit: the unit of x (string), e.g. 'nm', 'eV'
+        :param y_area_unit: (string) If y is per area, put area unit here, e.g. 'm^2' or 'cm^2'.
+        :param is_photon_flux: (boolean). True if y is number of photons.
+        """
         self.core_wl = None
         self.core_spec = None
-        self.area_unit = area_unit
+        self.area_unit = y_area_unit
         self.is_photon_flux = is_photon_flux
 
-        if area_unit is None:
-            self.set_spectrum(wavelength=wavelength, spectrum=spectrum, wavelength_unit=wavelength_unit,
+        if y_area_unit is None:
+            self.set_spectrum(wavelength=x_data, spectrum=y_data, wavelength_unit=x_unit,
                               is_photon_flux=is_photon_flux)
         else:
-            self.set_spectrum_density(wavelength=wavelength, spectrum=spectrum, area_unit=area_unit,
-                                      wavelength_unit=wavelength_unit, is_photon_flux=is_photon_flux)
+            self.set_spectrum_density(wavelength=x_data, spectrum=y_data, area_unit=y_area_unit,
+                                      wavelength_unit=x_unit, is_photon_flux=is_photon_flux)
 
     def set_spectrum_density(self, wavelength, spectrum, area_unit, wavelength_unit, is_photon_flux=False):
 
@@ -41,7 +60,6 @@ class Spectrum(object):
         assert isinstance(spectrum, np.ndarray)
 
         flux_unit_factor = ["photon_flux", "J"]
-        length_wavelength_unit_factor = ('m', 'cm', 'nm')
         energy_wavelength_unit_factor = {"J": 1, "eV": sc.e}
 
         # Convert everything to photon energy : w/m^2-m
@@ -70,7 +88,6 @@ class Spectrum(object):
     def set_spectrum(self, wavelength, spectrum, wavelength_unit, is_photon_flux=False):
 
         """
-        " Load the input spectrum into the class.
         The spectrum can be anything that is a function of wavelength, ex. absorption coefficient, qe, etc.
         This method only converts the wavelength. For coverting spectral density, use read_speactrum_density()
         :param wavelength: an ndarray that stores the wavelength
@@ -176,16 +193,14 @@ class Spectrum(object):
 
     def __mul__(self, other):
 
-        if type(other)==int or type(other)==float:
-            newobj=copy.deepcopy(self)
-            newobj.core_spec=self.core_spec*other
+        if type(other) == int or type(other) == float:
+            newobj = copy.deepcopy(self)
+            newobj.core_spec = self.core_spec * other
             return newobj
-        elif isinstance(other,Spectrum):
+        elif isinstance(other, Spectrum):
             return self.attenuation_single(other, inplace=False)
         else:
             raise ValueError("The multipler should either be a scalar or a Spectrum calss object.")
-
-
 
     def attenuation_single(self, filter, inplace=True):
         assert isinstance(filter, Spectrum)

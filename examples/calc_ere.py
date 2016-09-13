@@ -27,7 +27,7 @@ def try_si_unsw():
 
     test_qe.set_spectrum(eqe[:, 0], eqe[:, 1], "nm")
 
-    jsc = calc_jsc(illumination("AM1.5g", concentration=1), test_qe)
+    jsc = calc_jsc(illumination("AM1.5g", y_data=1, wavelength_unit=null), test_qe)
 
     print("jsc %s:" % jsc)
 

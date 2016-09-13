@@ -35,7 +35,7 @@ def gen_square_qe(bandEdge_in_eV, qe_in_ratio, qe_below_edge=1e-6, wl_bound=(0.0
     qe_array = gen_square_qe_array(bandEdge_in_eV, qe_in_ratio,
                                    qe_below_edge=qe_below_edge, wl_bound=wl_bound)
 
-    output_spec = Spectrum(wavelength=qe_array[:, 0], spectrum=qe_array[:, 1], wavelength_unit="eV")
+    output_spec = Spectrum(x_data=qe_array[:, 0], y_data=qe_array[:, 1], x_unit="eV")
 
     return output_spec
 
@@ -55,7 +55,7 @@ def gen_qe_from_abs(absorption, layer_thickness):
 
     abty = 1 - np.exp(-alpha * layer_thickness)
 
-    qe = Spectrum(wavelength=wl, spectrum=abty, wavelength_unit='m')
+    qe = Spectrum(x_data=wl, y_data=abty, x_unit='m')
 
     return qe
 

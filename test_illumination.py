@@ -31,8 +31,8 @@ def test_materialFilter():
 def test_qe_filter():
 
     qe_array=gen_sqaure_QE(1.42, 0.9)
-    test_ill=illumination()
-    test_qef=qe_filter(test_ill.wl_in_eV,qe_array[:,0],qe_array[:,1])
+    test_ill = illumination()
+    test_qef = qe_filter(test_ill.wl_in_eV, qe_array[:, 0], qe_array[:, 1])
 
     filtered_ill=applyFilter(test_ill,[test_qef])
 

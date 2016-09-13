@@ -12,7 +12,7 @@ us = UnitsSystem()
 
 class FiltersTestCase(unittest.TestCase):
     def test_bpFilter(self):
-        bf = bp_filter(edge_in_eV=1.42, OD=2)
+        bf = bp_filter(x_data=1.42, y_data=2, wavelength_unit=null)
         abs_spec = bf.get_spectrum(wavelength_unit='nm')
 
         # Test whether the absorption in the range between 0.1 to 1 eV equals to 0.01
@@ -61,7 +61,7 @@ class FiltersTestCase(unittest.TestCase):
         ill = illumination()
         orig_spec = ill.get_spectrum_density('m-2', 'nm')
 
-        ill.attenuation_single(bp_filter(edge_in_eV=edge, OD=2))
+        ill.attenuation_single(bp_filter(x_data=edge, spectrum=2, wavelength_unit=null))
 
         filtered_spec = ill.get_spectrum_density('m-2', 'nm')
 
