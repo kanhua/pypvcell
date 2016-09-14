@@ -138,7 +138,7 @@ class qe_filter_old(Spectrum):
 
 class qe_filter(Spectrum):
     def __init__(self, qe_wavelength, qe_in_ratio, wavelength_unit):
-        self.set_spectrum(qe_wavelength, 1 - qe_in_ratio, wavelength_unit=wavelength_unit)
+        self.set_spectrum(qe_wavelength, 1 - qe_in_ratio, x_unit=wavelength_unit)
 
 if __name__=="__main__":
 

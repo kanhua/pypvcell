@@ -78,7 +78,7 @@ def plot_calculate_bed():
         qe_qe = np.array([1, 1])
 
         unity_eqe = spectrum_base()
-        unity_eqe.set_spectrum(qe_wl, qe_qe, wavelength_unit='eV')
+        unity_eqe.set_spectrum(qe_wl, qe_qe, x_unit='eV')
 
         qe = gen_square_qe(1.1, 1, qe_below_edge=0)
 

@@ -160,7 +160,7 @@ def calculate_j01_from_qe(qe, n_c=3.5, n_s=1, threshold=1e-3, step_in_ev=1e-5, l
         #lead_term = np.power(sc.e, 4) * 2 * sc.pi * (n_c ** 2+n_s**2) / (np.power(sc.c, 2) * np.power(sc.h, 3))
         lead_term=j01_lead_term*(n_c ** 2+n_s**2)
 
-    qe_a = qe.get_spectrum(wavelength_unit='eV')
+    qe_a = qe.get_spectrum(x_unit='eV')
 
     qe_a = qe.get_interp_spectrum(np.arange(np.min(qe_a[0, :]), np.max(qe_a[0, :]), step=step_in_ev), 'eV')
 
@@ -177,7 +177,7 @@ def calculate_bed(qe, T=300):
     
     assert isinstance(qe, Spectrum)
 
-    qe_a = qe.get_spectrum(wavelength_unit='eV')
+    qe_a = qe.get_spectrum(x_unit='eV')
 
     qe_a = qe.get_interp_spectrum(np.arange(np.min(qe_a[0, :]), np.max(qe_a[0, :]), step=1e-6), 'eV')
 

@@ -13,7 +13,7 @@ si_alpha=np.loadtxt(abs_file,delimiter=',')
 
 
 si_alpha_sp=spectrum_base()
-si_alpha_sp.set_spectrum(si_alpha[:,0],si_alpha[:,1],wavelength_unit='m')
+si_alpha_sp.set_spectrum(si_alpha[:, 0], si_alpha[:, 1], x_unit='m')
 
 
 si_layer=[1,2,100,1000]  #in um

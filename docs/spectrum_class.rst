@@ -9,3 +9,4 @@ In pypvcell, spectrum is a data structure that handles a set of wavelengths/freq
 
 .. automodule:: spectrum
 .. autoclass:: spectrum.Spectrum
+:members:

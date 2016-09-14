@@ -22,7 +22,7 @@ class MyTestCase(unittest.TestCase):
         abs_file="si_alpha.csv"
         self.si_alpha=np.loadtxt(abs_file,delimiter=',')
         self.si_alpha_sp=spectrum_base()
-        self.si_alpha_sp.set_spectrum(self.si_alpha[:,0],self.si_alpha[:,1],wavelength_unit='m')
+        self.si_alpha_sp.set_spectrum(self.si_alpha[:, 0], self.si_alpha[:, 1], x_unit='m')
 
         self.direct_bg_qe=gen_square_qe(1.1,1)
         self.direct_bg_jsc = calc_jsc(illumination(), self.direct_bg_qe)
