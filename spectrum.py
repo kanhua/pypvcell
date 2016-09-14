@@ -20,10 +20,11 @@ class Spectrum(object):
 
     """
 
-    def __init__(self, x_data, y_data, x_unit, y_area_unit=None, is_photon_flux=False):
+    def __init__(self, x_data, y_data, x_unit, y_area_unit=None, is_spec_density=False, is_photon_flux=False):
         """
         Constructor of the spectrum y(x)
 
+        :param is_spec_density:
         :param x_data: x data of the spectrum (1d numpy array)
         :param y_data: y data of the spectrum (1d numpy array)
         :param x_unit: the unit of x (string), e.g. 'nm', 'eV'
@@ -33,7 +34,7 @@ class Spectrum(object):
         self.core_wl = None
         self.core_spec = None
         self.area_unit = y_area_unit
-        self.is_photon_flux = is_photon_flux
+        self.is_spec_density = is_spec_density
 
         if y_area_unit is None:
             self.set_spectrum(x_data=x_data, y_data=y_data, x_unit=x_unit, is_photon_flux=is_photon_flux)
@@ -63,26 +64,96 @@ class Spectrum(object):
 
         # Convert everything to photon energy : w/m^2-m
 
+        if self.is_spec_density:
+            dx_unit = x_unit + "-1"
+            if us.guess_dimension(x_unit) == "length":
+                default_dx_unit = "m-1"
+            elif us.guess_dimension(x_unit) == 'energy':
+                default_dx_unit = "J-1"
+        else:
+            dx_unit = ""
+            default_dx_unit = ""
+
         if us.guess_dimension(x_unit) == 'length':
 
-            # Convert [flux]/[Area][Length] to [Flux]/[m^2][m]
-            self.core_spec = us.convert(y_data, y_area_unit + " " + x_unit + "-1", "m-2 m-1")
+            # Convert [flux]/[Area][Length] to [Flux]/[m^2][m], in one go
+            self.core_spec = us.convert(y_data, y_area_unit + " " + dx_unit, "m-2" + " " + default_dx_unit)
 
             # Convert wavelength unit to [m]
             self.core_wl = self._conv_wl_to_si(x_data, x_unit)
 
-        elif x_unit in energy_wavelength_unit_factor.keys():
+        elif us.guess_dimension(x_unit) == 'energy':
             self.core_wl = self._conv_wl_to_si(x_data, x_unit)
 
             # Convert [flux]/[Area][Energy] to [flux]/[Area][J] first, and then convert [flux]/[Area][J] to []/[Area][m]
-            self.core_spec = us.convert(y_data, x_unit + '-1', 'J-1') * sc.h * sc.c / np.power(self.core_wl,
-                                                                                               2)
+            self.core_spec = us.convert(y_data, dx_unit, default_dx_unit)
+
+            if dx_unit != None:
+                self.core_spec *= sc.h * sc.c / np.power(self.core_wl, 2)
 
             # Convert [flux]/[Area][Energy] to [flux]/[m^2][J]
             self.core_spec = us.convert(self.core_spec, y_area_unit, "m-2")
 
+        # Convert photon flux to energy (J) representation
         if is_photon_flux:
             self.core_spec = self._as_energy(self.core_wl, self.core_spec)
+
+    def convert_spectrum_unit(self, x_data, y_data, from_x_unit, to_x_unit,
+                              from_y_area_unit, to_y_area_unit,
+                              is_spec_density=False):
+
+        assert isinstance(x_data, np.ndarray)
+        assert isinstance(y_data, np.ndarray)
+
+        if is_spec_density:
+            dx_unit = from_x_unit + "-1"
+        else:
+            dx_unit = ""
+
+        if to_y_area_unit == None:
+            to_y_area_unit = ""
+
+        if from_y_area_unit == None:
+            from_y_area_unit = ""
+
+        orig_y_div_unit = from_y_area_unit + " " + dx_unit
+        new_orig_y_div_unit = to_y_area_unit + " " + dx_unit
+
+        # Simple case
+        if us.guess_dimension(from_x_unit) == us.guess_dimension(to_x_unit):
+
+            new_x_data = us.convert(x_data, from_x_unit, to_x_unit)
+
+            new_y_data = us.convert(y_data, orig_y_div_unit,
+                                    new_orig_y_div_unit)
+
+
+        elif us.guess_dimension(from_x_unit) == 'length' and us.guess_dimension(to_x_unit) == 'energy':
+
+            new_x_data = us.convert(x_data, from_x_unit, 'nm')
+            new_x_data = us.eVnm(new_x_data)
+            new_x_data = us.convert(new_x_data, 'eV', to_x_unit)
+
+            new_y_data = us.convert(y_data, from_y_area_unit, to_y_area_unit)
+
+            if is_spec_density:
+                conversion_constant = us.asUnit(sc.h, to_x_unit + " s") * us.asUnit(sc.c, from_x_unit + " s-1")
+                new_y_data = new_y_data * conversion_constant / new_x_data ** 2
+
+
+        elif us.guess_dimension(from_x_unit) == 'energy' and us.guess_dimension(to_x_unit) == 'length':
+
+            new_x_data = us.convert(x_data, from_x_unit, 'eV')
+            new_x_data = us.eVnm(new_x_data)
+            new_x_data = us.convert(new_x_data, 'nm', to_x_unit)
+
+            new_y_data = us.convert(y_data, from_y_area_unit, to_y_area_unit)
+
+            if is_spec_density:
+                conversion_constant = us.asUnit(sc.h, from_x_unit + " s") * us.asUnit(sc.c, to_x_unit + " s-1")
+                new_y_data = new_y_data * conversion_constant / new_x_data ** 2
+
+        return new_x_data, new_y_data
 
     def set_spectrum(self, x_data, y_data, x_unit, is_photon_flux=False):
 
@@ -264,13 +335,35 @@ class Spectrum(object):
 
         return new_wl
 
+    def _conv_x_to_unit(self, x_data, from_x_unit, to_x_unit):
+
+        if us.guess_dimension(from_x_unit) == us.guess_dimension(to_x_unit):
+            return us.convert(x_data, from_unit=from_x_unit, to_unit=to_x_unit)
+
+        elif (us.guess_dimension(from_x_unit) == 'energy' and us.guess_dimension(to_x_unit) == 'length'):
+
+            new_x_data = us.convert(x_data, from_x_unit, 'J')
+            new_x_data = us.mJ(new_x_data)
+
+            return us.convert(new_x_data, 'm', to_x_unit)
+
+        elif (us.guess_dimension(from_x_unit) == 'length' and us.guess_dimension(to_x_unit) == 'energy'):
+
+            new_x_data = us.convert(x_data, from_x_unit, 'm')
+            new_x_data = us.mJ(new_x_data)
+
+            return us.convert(new_x_data, 'J', to_x_unit)
+
+        else:
+            raise ValueError("The input units (from_x_unit and to_x_unit) do not match")
+
 
 if __name__ == "__main__":
     from illumination import illumination
 
     ill = illumination()
 
-    test_spec = Spectrum(us.asUnit(ill.wl, 'nm'), ill.photon_flux_in_W / 1e9, "nm", area_unit="m-2")
+    test_spec = Spectrum(us.asUnit(ill.wl, 'nm'), ill.photon_flux_in_W / 1e9, "nm")
 
     # test_spec.set_spectrum_density(ill.wl_in_eV, ill.photon_flux_in_W_perEV, "m-2", "eV")
 

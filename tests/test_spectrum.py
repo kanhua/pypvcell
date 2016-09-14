@@ -17,12 +17,85 @@ class SpectrumTestCases(unittest.TestCase):
         # set up cases for length wavelength conversions
         self.init_wl = np.linspace(300, 1000, num=5)
         self.init_spec = np.ones((self.init_wl.shape[0],))
-        self.spec_base = Spectrum(self.init_wl, self.init_spec, "nm", "m-2")
+        self.spec_base = Spectrum(self.init_wl, self.init_spec, x_unit="nm", y_area_unit="m-2")
 
         # set up cases
         self.init_wl2 = np.linspace(1, 5, num=1000)
         self.init_spec2 = np.linspace(1, 5, num=1000)
         self.spec_base2 = Spectrum(self.init_wl2, self.init_spec2, x_unit="eV", y_area_unit="m-2")
+
+    def test_convert_spectrum_unit(self):
+        x_data = np.linspace(300, 1000, num=3)
+        y_data = np.ones(x_data.shape)
+
+        # test without area units
+
+        spec = Spectrum(x_data=x_data, y_data=y_data, x_unit='nm',
+                        y_area_unit=None, is_spec_density=False, is_photon_flux=False)
+
+        new_x_data, new_y_data = spec.convert_spectrum_unit(x_data, y_data, from_x_unit='nm', to_x_unit='nm',
+                                                            from_y_area_unit=None, to_y_area_unit=None,
+                                                            is_spec_density=False)
+
+        self.assertTrue(np.all(np.isclose(x_data, new_x_data)))
+        assert np.all(np.isclose(y_data, new_y_data))
+
+        # test with area units
+
+        new_x_data, new_y_data = spec.convert_spectrum_unit(x_data, y_data, from_x_unit='nm', to_x_unit='nm',
+                                                            from_y_area_unit='m-2', to_y_area_unit='cm-2',
+                                                            is_spec_density=False)
+
+        self.assertTrue(np.all(np.isclose(x_data, new_x_data)))
+        self.assertTrue(np.all(np.isclose(y_data, new_y_data * 10000)))
+
+        new_x_data, new_y_data = spec.convert_spectrum_unit(x_data, y_data, from_x_unit='nm', to_x_unit='eV',
+                                                            from_y_area_unit=None, to_y_area_unit=None,
+                                                            is_spec_density=False)
+
+        self.assertTrue(np.all(np.isclose(y_data, new_y_data)))
+        self.assertTrue(np.all(np.isclose(x_data, us.eVnm(new_x_data))))
+
+        x_data = np.linspace(300, 1000, num=1000)  # use trapz to check the result, therefore num has to be large
+        y_data = np.ones(x_data.shape)
+
+        print("Test converting nm to eV")
+        new_x_data, new_y_data = spec.convert_spectrum_unit(x_data, y_data, from_x_unit='nm', to_x_unit='eV',
+                                                            from_y_area_unit=None, to_y_area_unit=None,
+                                                            is_spec_density=True)
+
+        self.assertTrue(np.all(np.isclose(x_data, us.eVnm(new_x_data))))
+        area_before_conv = np.trapz(new_y_data[::-1], new_x_data[::-1])
+        area_after_conv = np.trapz(y_data, x_data)
+        self.assertTrue(np.isclose(area_before_conv, area_after_conv, rtol=1e-3))
+
+        print("Test converting eV to nm")
+        x_data = np.linspace(0.2, 5, num=1000)  # use trapz to check the result, therefore num has to be large
+        y_data = np.ones(x_data.shape)
+
+        new_x_data, new_y_data = spec.convert_spectrum_unit(x_data, y_data, from_x_unit='eV', to_x_unit='nm',
+                                                            from_y_area_unit=None, to_y_area_unit=None,
+                                                            is_spec_density=True)
+
+        self.assertTrue(np.all(np.isclose(x_data, us.eVnm(new_x_data))))
+        area_after_conv = np.trapz(new_y_data[::-1], new_x_data[::-1])
+        area_before_conv = np.trapz(y_data, x_data)
+        self.assertTrue(np.isclose(area_before_conv, area_after_conv, rtol=1e-3))
+
+        x_data = np.linspace(0.2, 5, num=1000)  # use trapz to check the result, therefore num has to be large
+        y_data = np.ones(x_data.shape)
+
+        print("Test converting eV to nm, per area:")
+        new_x_data, new_y_data = spec.convert_spectrum_unit(x_data, y_data, from_x_unit='eV', to_x_unit='nm',
+                                                            from_y_area_unit='m-2', to_y_area_unit='cm-2',
+                                                            is_spec_density=True)
+
+        self.assertTrue(np.all(np.isclose(x_data, us.eVnm(new_x_data))))
+        area_after_conv = np.trapz(new_y_data[::-1], new_x_data[::-1])
+        area_before_conv = np.trapz(y_data, x_data)
+        self.assertTrue(np.isclose(area_before_conv, area_after_conv * 10000, rtol=1e-2))
+
+
 
     def test_1(self):
         spectrum = self.spec_base.get_spectrum_density("m-2", "nm")

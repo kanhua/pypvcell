@@ -12,7 +12,6 @@ import scipy.constants as sc
 
 import json
 
-
 """Constants used commonly in solcore
 """
 
@@ -61,7 +60,6 @@ class UnitsSystem():
         self.dimensions = defaultdict(dict)
         self.read(name="defaultunits")
 
-
     def read(self, name=None):
         self.read_database()
         self.si_conversions = {}
@@ -97,7 +95,6 @@ class UnitsSystem():
         fp = open("databasedump.pkl", "wb")
         pickle.dump(self.database, fp)
         fp.close()
-
 
     def safe_eval(self, string_expression):
         return eval(string_expression, {"__builtins__": {}}, {"constants": constants})
@@ -176,7 +173,11 @@ class UnitsSystem():
         >>> print convert(1, "cm s-1", "km h-1")
         0.036
         """
-        return self.asUnit(self.siUnits(value, from_unit), to_unit)
+
+        if from_unit == to_unit:
+            return value
+        else:
+            return self.asUnit(self.siUnits(value, from_unit), to_unit)
 
     def eVnm(self, value):
         """ Bi-directional conversion between nm and eV.
@@ -213,7 +214,7 @@ class UnitsSystem():
         return factor / self.siUnits(value, "nm")
 
     def mJ(self, value):
-        """ Bi-directional conversion between nm and eV.
+        """ Bi-directional conversion between m and J.
     
         Arguments:
         value -- A number with units [nm] or [eV].
@@ -365,7 +366,7 @@ class UnitsSystem():
         assert len(possibilities) != 0, "Guessing dimension of '%s': No candidates found" % unit
         assert len(
             possibilities) == 1, "Guessing dimension of '%s': Multiple candidates found, please convert manually. (%s)" % (
-        unit, ", ".join(possibilities))
+            unit, ", ".join(possibilities))
 
         return possibilities[0]
 
