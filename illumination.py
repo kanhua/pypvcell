@@ -24,13 +24,11 @@ def load_default_spectrum(fname):
     print("spectrum loaded!")
     return cache_spectrum
 
+
+# Read default spectrum
 this_dir = os.path.split(__file__)[0]
 spec_data = load_default_spectrum(os.path.join(this_dir, "astmg173.csv"))
 
-
-# Read cache
-# with open(os.path.join(this_dir,'spec_data.pickle'), 'rb') as f:
-#    spec_data=pickle.load(f)
 
 
 class illumination(Spectrum):
@@ -48,8 +46,7 @@ class illumination(Spectrum):
         Spectrum.__init__(self, wl, flux * concentration, 'nm',
                           y_area_unit='m-2', is_photon_flux=False, is_spec_density=True)
 
-
-    def read_from_csv(self, spectrum):
+    def _x_read_from_csv(self, spectrum):
         if spectrum in ["AM1.5g", "AM1.5d", "AM0"]:
             this_dir = os.path.split(__file__)[0]
             spectrumfile = np.loadtxt(os.path.join(this_dir, "astmg173.csv"),
@@ -68,10 +65,9 @@ class illumination(Spectrum):
     def total_power(self):
 
         # Calculate power using different methods
-        return np.trapz(self.core_spec, self.core_x)
+        return np.trapz(self.core_y, self.core_x)
 
-
-    def write_pc1d_abs(self, fname):
+    def _x_write_pc1d_abs(self, fname):
 
         current_dir = os.path.dirname(os.path.abspath(__file__))
 
@@ -123,55 +119,26 @@ class bp_filter(Spectrum):
 
         attenuation = np.power(10, -attenuation)
 
-        self.set_spectrum(wavelength, attenuation, 'eV')
+        Spectrum.__init__(self, wavelength, attenuation, 'eV')
 
 
 class material_filter(Spectrum):
-    def __init__(self, material_abs, thickness, check_type=True):
-        if check_type == True:
-            assert isinstance(material_abs, Spectrum)
-        attenuation = material_abs.core_y * thickness
+    def __init__(self, material_abs, thickness):
+        assert isinstance(material_abs, Spectrum)
+
+        abs_spec = material_abs.get_spectrum(x_unit='m')
+
+        attenuation = abs_spec[1, :] * thickness
         attenuation = np.exp(-attenuation)
 
-        self.set_spectrum(material_abs.core_x, attenuation, 'm')
+        Spectrum.__init__(self, abs_spec[0, :], attenuation, 'm')
 
 
-class qe_filter_old(Spectrum):
-    def __init__(self, wavelength_grid, qe_wl_in_ev, qe_in_ratio):
-        assert isinstance(qe_wl_in_ev, np.ndarray)
-        assert isinstance(qe_in_ratio, np.ndarray)
-        assert qe_wl_in_ev.shape == qe_in_ratio.shape
-
-        print("Warning: this QE filter can only deal with photon flux, "
-              "it will ends up with wrong results if you convert the photon flux back to energy")
-
-        QEinterp_func = interp1d(x=qe_wl_in_ev, y=qe_in_ratio)
-
-        interped_qe_array = QEinterp_func(wavelength_grid)
-
-        self.wavelength = wavelength_grid
-        self.filter_attenuation = 1 - interped_qe_array
 
 
 class qe_filter(Spectrum):
-    def __init__(self, qe_wavelength, qe_in_ratio, wavelength_unit):
-        self.set_spectrum(qe_wavelength, 1 - qe_in_ratio, x_unit=wavelength_unit)
+    def __init__(self, qe_wavelength, qe_in_ratio, x_unit):
+        Spectrum.__init__(self, qe_wavelength, 1 - qe_in_ratio, x_unit=x_unit)
 
 if __name__=="__main__":
-
-    cache_spectrum={}
-    spectrumfile = np.loadtxt(os.path.join(this_dir, "astmg173.csv"),
-                              dtype=float, delimiter=',', skiprows=2)
-
-    wl = spectrumfile[:, 0]
-
-    cache_spectrum["wl"]=spectrumfile[:,0]
-    cache_spectrum["AM1.5g"]=spectrumfile[:,2]
-    cache_spectrum["AM1.5d"]=spectrumfile[:,3]
-    cache_spectrum["AM0"]=spectrumfile[:,1]
-
-
-    with open(os.path.join(this_dir,'spec_data.pickle'), 'wb') as f:
-    # Pickle the 'data' dictionary using the highest protocol available.
-        pickle.dump(cache_spectrum, f)
-
+    pass
