@@ -136,7 +136,7 @@ class SpectrumTestCases(unittest.TestCase):
 
         spec_base2 = Spectrum(init_wl2, init_spec2, x_unit="eV", y_area_unit="", is_spec_density=True)
 
-        spectrum = spec_base2.get_spectrum(x_unit='nm', y_area_unit='')
+        spectrum = spec_base2.get_spectrum(to_x_unit='nm', to_y_area_unit='')
 
         self.assertTrue(np.all(np.isclose(spectrum[0, :], np.sort(us.eVnm(init_wl2)))))
 
@@ -147,7 +147,7 @@ class SpectrumTestCases(unittest.TestCase):
                         msg="area_before: %s, area_after: %s" % (area_before, area_after))
 
     def test_5(self):
-        spectrum = self.spec_base2.get_spectrum(y_area_unit="m-2", x_unit='J')
+        spectrum = self.spec_base2.get_spectrum(to_x_unit='J', to_y_area_unit="m-2")
 
         assert np.all(np.isclose(spectrum[0, :], np.sort(self.init_wl2) * sc.e))
         assert np.isclose(np.trapz(spectrum[1, :], spectrum[0, :]), np.trapz(self.init_spec2, self.init_wl2))
@@ -157,11 +157,11 @@ class SpectrumTestCases(unittest.TestCase):
         init_spec = np.ones(init_wl.shape)
 
         test_spec_base = Spectrum(x_data=init_wl, y_data=init_spec, x_unit='eV', y_area_unit="")
-        spectrum = test_spec_base.get_spectrum(x_unit='nm', y_area_unit="")
+        spectrum = test_spec_base.get_spectrum(to_x_unit='nm', to_y_area_unit="")
 
         assert np.all(np.isclose(spectrum[0, :], np.sort(us.eVnm(init_wl))))
 
-    def test_7(self):
+    def test_energy_flux_conversion(self):
         """
         This test converts photon flux to energy flux
 
@@ -170,7 +170,7 @@ class SpectrumTestCases(unittest.TestCase):
         init_spec = np.ones(init_wl.shape)
 
         test_spec_base = Spectrum(init_wl, init_spec, x_unit='nm', is_photon_flux=True)
-        spectrum = test_spec_base.get_spectrum(x_unit='nm')
+        spectrum = test_spec_base.get_spectrum(to_x_unit='nm')
 
         # Prepare an expected spectrum for comparsion
         expect_spec = init_spec * sc.h * sc.c / us.siUnits(init_wl, 'nm')
@@ -179,7 +179,7 @@ class SpectrumTestCases(unittest.TestCase):
         # ( both are in the order of ~1e-19) Need renormalise them for proper comparison.
         assert np.all(np.isclose(spectrum[1, :] * 1e19, expect_spec * 1e19))
 
-    def test_8(self):
+    def test_photon_flux_conversion(self):
         """
         This test converts energy flux to photons
 
@@ -188,7 +188,7 @@ class SpectrumTestCases(unittest.TestCase):
         init_spec = np.ones(init_wl.shape)
 
         test_spec_base = Spectrum(init_wl, init_spec, 'nm', is_photon_flux=False)
-        spectrum = test_spec_base.get_spectrum('nm', flux="photon")
+        spectrum = test_spec_base.get_spectrum('nm', to_photon_flux=True)
 
         expect_spec = init_spec / (sc.h * sc.c / us.siUnits(init_wl, 'nm'))
 

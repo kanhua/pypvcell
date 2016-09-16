@@ -17,8 +17,7 @@ init_spec = np.ones(init_wl.shape)
 test_spec_base = Spectrum(init_wl, init_spec, 'nm', is_photon_flux=False)
 
 for i in range(30000):
-
-    wl, spec = test_spec_base.get_spectrum('nm', flux="photon")
+    wl, spec = test_spec_base.get_spectrum('nm', flux="photon", flux="photon")
 
     expect_spec = init_spec / (sc.h * sc.c / us.siUnits(init_wl, 'nm'))
 
@@ -36,8 +35,7 @@ init_spec = np.ones(init_wl.shape)
 test_spec_base.set_spectrum(init_wl, init_spec, 'nm', is_photon_flux=False)
 
 for i in range(30000):
-
-    spectrum=test_spec_base.get_spectrum('nm',flux="photon")
+    spectrum = test_spec_base.get_spectrum('nm', flux="photon", flux="photon")
 
     expect_spec=init_spec/(sc.h*sc.c/us.siUnits(init_wl,'nm'))
 

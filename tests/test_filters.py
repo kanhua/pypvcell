@@ -13,7 +13,7 @@ us = UnitsSystem()
 class FiltersTestCase(unittest.TestCase):
     def test_bpFilter(self):
         bf = bp_filter(x_data=1.42, y_data=2, x_unit=null)
-        abs_spec = bf.get_spectrum(x_unit='nm')
+        abs_spec = bf.get_spectrum(to_x_unit='nm')
 
         # Test whether the absorption in the range between 0.1 to 1 eV equals to 0.01
         test_wl = np.linspace(0.1, 1, num=10)

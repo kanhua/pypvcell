@@ -29,6 +29,7 @@ class Spectrum(object):
         :param y_data: y data of the spectrum (1d numpy array)
         :param x_unit: the unit of x (string), e.g. 'nm', 'eV'
         :param y_area_unit: (string) If y is per area, put area unit here, e.g. 'm-2' or 'cm-2'.
+        Put null string '' if y does not have area unit
         :param is_photon_flux: (boolean). True if y is number of photons.
         """
 
@@ -38,10 +39,6 @@ class Spectrum(object):
                           is_spec_density=is_spec_density)
 
     def set_spectrum(self, x_data, y_data, x_unit, y_area_unit, is_photon_flux, is_spec_density):
-        """
-
-
-        """
 
 
         assert isinstance(x_data, np.ndarray)
@@ -49,6 +46,7 @@ class Spectrum(object):
         assert isinstance(x_unit, str)
         assert isinstance(y_area_unit, str)
         assert isinstance(is_photon_flux, bool)
+        assert isinstance(is_spec_density, bool)
 
         # Convert everything to photon energy : w/m^2-m
 
@@ -75,6 +73,11 @@ class Spectrum(object):
 
         assert isinstance(x_data, np.ndarray)
         assert isinstance(y_data, np.ndarray)
+        assert isinstance(from_x_unit, str)
+        assert isinstance(to_x_unit, str)
+        assert isinstance(from_y_area_unit, str)
+        assert isinstance(to_y_area_unit, str)
+        assert isinstance(is_spec_density, bool)
 
         if x_data.size != y_data.size:
             raise ValueError("The array size of x_data and y_data do not match.")
@@ -157,18 +160,18 @@ class Spectrum(object):
 
         self.core_y = y_data
 
-    def get_spectrum(self, x_unit, y_area_unit="default", flux="energy"):
+    def get_spectrum(self, to_x_unit, to_y_area_unit="default", to_photon_flux=False):
 
-        if y_area_unit == "default":
-            y_area_unit = self.y_area_unit
+        if to_y_area_unit == "default":
+            to_y_area_unit = self.y_area_unit
 
         x_data, y_data = self.convert_spectrum_unit(self.core_x, self.core_y,
-                                                    from_x_unit='m', to_x_unit=x_unit,
-                                                    from_y_area_unit=self.y_area_unit, to_y_area_unit=y_area_unit,
+                                                    from_x_unit='m', to_x_unit=to_x_unit,
+                                                    from_y_area_unit=self.y_area_unit, to_y_area_unit=to_y_area_unit,
                                                     is_spec_density=self.is_spec_density)
 
         # convert the spectrum to photon flux if necessary
-        if flux == "photon":
+        if to_photon_flux:
             y_data = self._as_photon_flux(self.core_x, y_data)
 
         # Sort the spectrum by wavelength
@@ -244,17 +247,28 @@ class Spectrum(object):
 
         return spectrum
 
-    def get_interp_spectrum(self, x_data, x_unit, y_area_unit="default", flux="energy"):
+    def get_interp_spectrum(self, to_x_data, to_x_unit, to_y_area_unit="default", to_photon_flux=False,
+                            interp_left=None, interp_right=None):
 
-        # TODO add code to check if the bound of x_data and self._core_wl overlaps
-        # TODO merge get_interp_spectrum and get_interp_spectrum_density
+        """
+        Get interpolated spectrum.
 
-        orig_spectrum = self.get_spectrum(x_unit, y_area_unit, flux)
+        :param to_x_data: (ndarray) x values to be interpolated
+        :param to_x_unit: (string) unit of x of the output value
+        :param to_y_area_unit: (string) unit of area of y of the output value.
+        :param to_photon_flux: (bool) True if converting the value to photon flux as the output
+        :param interp_left: value to return for x < core_x[0], return core_x[0] if set to be None
+        :param interp_right: value to return for x> core_x[-1], return core_y[-1] if set to be None
+        :return: a 2xL array
+        """
 
-        output_spectrum = np.zeros((2, x_data.shape[0]))
+        orig_spectrum = self.get_spectrum(to_x_unit, to_y_area_unit, to_photon_flux=to_photon_flux)
 
-        output_spectrum[0, :] = x_data
-        output_spectrum[1, :] = np.interp(x_data, orig_spectrum[0, :], orig_spectrum[1, :])
+        output_spectrum = np.zeros((2, to_x_data.shape[0]))
+
+        output_spectrum[0, :] = to_x_data
+        output_spectrum[1, :] = np.interp(to_x_data, orig_spectrum[0, :],
+                                          orig_spectrum[1, :], left=interp_left, right=interp_right)
 
         return output_spectrum
 

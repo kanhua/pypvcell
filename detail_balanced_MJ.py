@@ -12,7 +12,6 @@ from ivsolver import calculate_j01, calculate_j02_from_rad_eff, \
 from fom import max_power
 from photocurrent import gen_square_qe, calc_jsc,calc_jsc_from_eg
 import scipy.constants as sc
-# from spectrum_base import spectrum_base
 from spectrum import Spectrum
 
 

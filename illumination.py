@@ -126,7 +126,7 @@ class material_filter(Spectrum):
     def __init__(self, material_abs, thickness):
         assert isinstance(material_abs, Spectrum)
 
-        abs_spec = material_abs.get_spectrum(x_unit='m')
+        abs_spec = material_abs.get_spectrum(to_x_unit='m')
 
         attenuation = abs_spec[1, :] * thickness
         attenuation = np.exp(-attenuation)

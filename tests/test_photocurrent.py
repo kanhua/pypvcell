@@ -19,7 +19,7 @@ class MyTestCase(unittest.TestCase):
 
         qe=gen_qe_from_abs(abs,layer_thickness)
 
-        qe_a = qe.get_spectrum(x_unit='nm')
+        qe_a = qe.get_spectrum(to_x_unit='nm')
 
         assert np.isclose(qe_a[1, 0], 1 - np.exp(-layer_thickness * abs_array[0, 1]))
 
@@ -34,9 +34,9 @@ class MyTestCase(unittest.TestCase):
 
         qe_2=gen_qe_from_abs(abs,5e-6)
 
-        qe_1_a = qe_1.get_spectrum(x_unit='nm')
+        qe_1_a = qe_1.get_spectrum(to_x_unit='nm')
 
-        qe_2_b = qe_2.get_spectrum(x_unit='nm')
+        qe_2_b = qe_2.get_spectrum(to_x_unit='nm')
 
         plt.plot(qe_1_a[0, :], qe_1_a[1, :], hold=True)
         plt.plot(qe_2_b[0, :], qe_2_b[1, :])
