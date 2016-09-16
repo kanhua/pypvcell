@@ -8,10 +8,29 @@ import pickle
 
 us = UnitsSystem()
 
-this_dir = os.path.split(__file__)[0]
 
-with open(os.path.join(this_dir,'spec_data.pickle'), 'rb') as f:
-    spec_data=pickle.load(f)
+def load_default_spectrum(fname):
+    cache_spectrum = {}
+    spectrumfile = np.loadtxt(os.path.join(this_dir, "astmg173.csv"),
+                              dtype=float, delimiter=',', skiprows=2)
+
+    wl = spectrumfile[:, 0]
+
+    cache_spectrum["wl"] = spectrumfile[:, 0]
+    cache_spectrum["AM1.5g"] = spectrumfile[:, 2]
+    cache_spectrum["AM1.5d"] = spectrumfile[:, 3]
+    cache_spectrum["AM0"] = spectrumfile[:, 1]
+
+    print("spectrum loaded!")
+    return cache_spectrum
+
+this_dir = os.path.split(__file__)[0]
+spec_data = load_default_spectrum(os.path.join(this_dir, "astmg173.csv"))
+
+
+# Read cache
+# with open(os.path.join(this_dir,'spec_data.pickle'), 'rb') as f:
+#    spec_data=pickle.load(f)
 
 
 class illumination(Spectrum):
@@ -21,16 +40,14 @@ class illumination(Spectrum):
         Initialise a standard spectrum.
         """
 
-
         #flux, wl = self.read_from_csv(spectrum)
 
         wl=spec_data["wl"]
         flux=spec_data[spectrum]
 
-        Spectrum.__init__(self, wl, flux, 'nm', y_area_unit='m-2', is_photon_flux=False)
+        Spectrum.__init__(self, wl, flux * concentration, 'nm',
+                          y_area_unit='m-2', is_photon_flux=False, is_spec_density=True)
 
-        # self.set_spectrum_density(wl, flux, "m-2", "nm")
-        self.core_spec = self.core_spec * concentration
 
     def read_from_csv(self, spectrum):
         if spectrum in ["AM1.5g", "AM1.5d", "AM0"]:
@@ -51,7 +68,7 @@ class illumination(Spectrum):
     def total_power(self):
 
         # Calculate power using different methods
-        return np.trapz(self.core_spec, self.core_wl)
+        return np.trapz(self.core_spec, self.core_x)
 
 
     def write_pc1d_abs(self, fname):
@@ -113,10 +130,10 @@ class material_filter(Spectrum):
     def __init__(self, material_abs, thickness, check_type=True):
         if check_type == True:
             assert isinstance(material_abs, Spectrum)
-        attenuation = material_abs.core_spec * thickness
+        attenuation = material_abs.core_y * thickness
         attenuation = np.exp(-attenuation)
 
-        self.set_spectrum(material_abs.core_wl, attenuation, 'm')
+        self.set_spectrum(material_abs.core_x, attenuation, 'm')
 
 
 class qe_filter_old(Spectrum):

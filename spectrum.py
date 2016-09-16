@@ -20,7 +20,7 @@ class Spectrum(object):
 
     """
 
-    def __init__(self, x_data, y_data, x_unit, y_area_unit=None, is_spec_density=False, is_photon_flux=False):
+    def __init__(self, x_data, y_data, x_unit, y_area_unit="", is_spec_density=False, is_photon_flux=False):
         """
         Constructor of the spectrum y(x)
 
@@ -31,93 +31,69 @@ class Spectrum(object):
         :param y_area_unit: (string) If y is per area, put area unit here, e.g. 'm-2' or 'cm-2'.
         :param is_photon_flux: (boolean). True if y is number of photons.
         """
-        self.core_wl = None
-        self.core_spec = None
-        self.area_unit = y_area_unit
-        self.is_spec_density = is_spec_density
 
-        if y_area_unit is None:
-            self.set_spectrum(x_data=x_data, y_data=y_data, x_unit=x_unit, is_photon_flux=is_photon_flux)
-        else:
-            self.set_spectrum_density(x_data=x_data, y_data=y_data, y_area_unit=y_area_unit, x_unit=x_unit,
-                                      is_photon_flux=is_photon_flux)
+        self.set_spectrum(x_data=x_data, y_data=y_data, x_unit=x_unit,
+                          y_area_unit=y_area_unit,
+                          is_photon_flux=is_photon_flux,
+                          is_spec_density=is_spec_density)
 
-    def set_spectrum_density(self, x_data, y_data, y_area_unit, x_unit, is_photon_flux=False):
+    def set_spectrum(self, x_data, y_data, x_unit, y_area_unit, is_photon_flux, is_spec_density):
+        """
+
 
         """
-        Convert the input spectrum density to standard units defined in this class:
-        spectrum density: W/m^2-m
-        wavelength: m
 
-        :param x_data: an ndarray that stores the wavelength
-        :param y_data: an ndarray that stores the spectral density
-        :param y_area_unit: the unit of the area, ex. m-2, cm-2
-        :param x_unit: the unit of wavelength, ex: nm, m, eV, J
-        :param is_photon_flux: True/False, specify whether the input spectrum is photon flux or not
-        """
 
         assert isinstance(x_data, np.ndarray)
         assert isinstance(y_data, np.ndarray)
-
-        flux_unit_factor = ["photon_flux", "J"]
-        energy_wavelength_unit_factor = {"J": 1, "eV": sc.e}
+        assert isinstance(x_unit, str)
+        assert isinstance(y_area_unit, str)
+        assert isinstance(is_photon_flux, bool)
 
         # Convert everything to photon energy : w/m^2-m
 
-        if self.is_spec_density:
-            dx_unit = x_unit + "-1"
-            if us.guess_dimension(x_unit) == "length":
-                default_dx_unit = "m-1"
-            elif us.guess_dimension(x_unit) == 'energy':
-                default_dx_unit = "J-1"
+        self.is_spec_density = is_spec_density
+
+        if y_area_unit != '':
+            self.core_x, self.core_y = self.convert_spectrum_unit(x_data, y_data, from_x_unit=x_unit, to_x_unit='m',
+                                                                  from_y_area_unit=y_area_unit, to_y_area_unit='m-2',
+                                                                  is_spec_density=self.is_spec_density)
+            self.y_area_unit = 'm-2'
         else:
-            dx_unit = ""
-            default_dx_unit = ""
-
-        if us.guess_dimension(x_unit) == 'length':
-
-            # Convert [flux]/[Area][Length] to [Flux]/[m^2][m], in one go
-            self.core_spec = us.convert(y_data, y_area_unit + " " + dx_unit, "m-2" + " " + default_dx_unit)
-
-            # Convert wavelength unit to [m]
-            self.core_wl = self._conv_wl_to_si(x_data, x_unit)
-
-        elif us.guess_dimension(x_unit) == 'energy':
-            self.core_wl = self._conv_wl_to_si(x_data, x_unit)
-
-            # Convert [flux]/[Area][Energy] to [flux]/[Area][J] first, and then convert [flux]/[Area][J] to []/[Area][m]
-            self.core_spec = us.convert(y_data, dx_unit, default_dx_unit)
-
-            if dx_unit != None:
-                self.core_spec *= sc.h * sc.c / np.power(self.core_wl, 2)
-
-            # Convert [flux]/[Area][Energy] to [flux]/[m^2][J]
-            self.core_spec = us.convert(self.core_spec, y_area_unit, "m-2")
+            self.core_x, self.core_y = self.convert_spectrum_unit(x_data, y_data, from_x_unit=x_unit, to_x_unit='m',
+                                                                  from_y_area_unit='', to_y_area_unit='',
+                                                                  is_spec_density=self.is_spec_density)
+            self.y_area_unit = ''
 
         # Convert photon flux to energy (J) representation
         if is_photon_flux:
-            self.core_spec = self._as_energy(self.core_wl, self.core_spec)
+            self.core_y = self._as_energy(self.core_x, self.core_y)
 
     def convert_spectrum_unit(self, x_data, y_data, from_x_unit, to_x_unit,
                               from_y_area_unit, to_y_area_unit,
-                              is_spec_density=False):
+                              is_spec_density):
 
         assert isinstance(x_data, np.ndarray)
         assert isinstance(y_data, np.ndarray)
 
+        if x_data.size != y_data.size:
+            raise ValueError("The array size of x_data and y_data do not match.")
+
+        if us.compare_wavelength_dimension(from_x_unit, to_x_unit) == False:
+            raise ValueError("The dimension of from_x_unit and to_x_unit do not match.")
+
+        if us.compare_dimension(from_y_area_unit, to_y_area_unit) == False:
+            raise ValueError("The dimension of from y_area_unit and to_y_area_unit do not match.")
+
         if is_spec_density:
-            dx_unit = from_x_unit + "-1"
+            from_dx_unit = from_x_unit + "-1"
+            to_dx_unit = to_x_unit + "-1"
         else:
-            dx_unit = ""
+            from_dx_unit = ""
+            to_dx_unit = ""
 
-        if to_y_area_unit == None:
-            to_y_area_unit = ""
-
-        if from_y_area_unit == None:
-            from_y_area_unit = ""
-
-        orig_y_div_unit = from_y_area_unit + " " + dx_unit
-        new_orig_y_div_unit = to_y_area_unit + " " + dx_unit
+        orig_y_div_unit = from_y_area_unit + " " + from_dx_unit
+        new_orig_y_div_unit = to_y_area_unit + " " + to_dx_unit
 
         # Simple case
         if us.guess_dimension(from_x_unit) == us.guess_dimension(to_x_unit):
@@ -155,9 +131,10 @@ class Spectrum(object):
 
         return new_x_data, new_y_data
 
-    def set_spectrum(self, x_data, y_data, x_unit, is_photon_flux=False):
+    def _x_set_spectrum(self, x_data, y_data, x_unit, is_photon_flux=False):
 
         """
+        TO BE deprecated...........
         The spectrum can be anything that is a function of wavelength, ex. absorption coefficient, qe, etc.
         This method only converts the wavelength. For coverting spectral density, use read_speactrum_density()
         :param x_data: an ndarray that stores the wavelength
@@ -170,17 +147,38 @@ class Spectrum(object):
         # Convert everything to photon energy : w/m^2-m
 
         if x_unit in length_wavelength_unit_factor:
-            self.core_wl = self._conv_wl_to_si(x_data, x_unit)
+            self.core_x = self._conv_wl_to_si(x_data, x_unit)
 
         elif x_unit in energy_wavelength_unit_factor.keys():
-            self.core_wl = self._conv_wl_to_si(x_data, x_unit)
+            self.core_x = self._conv_wl_to_si(x_data, x_unit)
 
         if is_photon_flux:
-            y_data = self._as_energy(self.core_wl, y_data)
+            y_data = self._as_energy(self.core_x, y_data)
 
-        self.core_spec = y_data
+        self.core_y = y_data
 
-    def get_spectrum_density(self, area_unit, wavelength_unit, flux="energy"):
+    def get_spectrum(self, x_unit, y_area_unit="default", flux="energy"):
+
+        if y_area_unit == "default":
+            y_area_unit = self.y_area_unit
+
+        x_data, y_data = self.convert_spectrum_unit(self.core_x, self.core_y,
+                                                    from_x_unit='m', to_x_unit=x_unit,
+                                                    from_y_area_unit=self.y_area_unit, to_y_area_unit=y_area_unit,
+                                                    is_spec_density=self.is_spec_density)
+
+        # convert the spectrum to photon flux if necessary
+        if flux == "photon":
+            y_data = self._as_photon_flux(self.core_x, y_data)
+
+        # Sort the spectrum by wavelength
+        sorted_idx = np.argsort(x_data)
+        x_data = x_data[sorted_idx]
+        y_data = y_data[sorted_idx]
+
+        return np.vstack((x_data, y_data))
+
+    def old_get_spectrum_density(self, area_unit, wavelength_unit, flux="energy"):
 
         """
 
@@ -197,21 +195,21 @@ class Spectrum(object):
         spec = None
 
         if wavelength_unit in length_wavelength_unit_factor:
-            wl = us.asUnit(self.core_wl, wavelength_unit)
-            spec = us.convert(self.core_spec, 'm-2', area_unit)
+            wl = us.asUnit(self.core_x, wavelength_unit)
+            spec = us.convert(self.core_y, 'm-2', area_unit)
             spec = us.convert(spec, 'm-1', wavelength_unit + '-1')
 
         elif wavelength_unit in energy_wavelength_unit_factor.keys():
-            wl = sc.h * sc.c / self.core_wl
+            wl = sc.h * sc.c / self.core_x
             wl = us.convert(wl, 'J', wavelength_unit)
 
-            spec = us.convert(self.core_spec, 'm-2', area_unit)
-            spec = spec * np.power(self.core_wl, 2) / (sc.h * sc.c)
+            spec = us.convert(self.core_y, 'm-2', area_unit)
+            spec = spec * np.power(self.core_x, 2) / (sc.h * sc.c)
             spec = us.convert(spec, 'J-1', wavelength_unit + '-1')
 
         # convert the spectrum to photon flux if necessary
         if flux == "photon":
-            spec = self._as_photon_flux(self.core_wl, spec)
+            spec = self._as_photon_flux(self.core_x, spec)
 
         # Sort the spectrum by wavelength
         sorted_idx = np.argsort(wl)
@@ -220,25 +218,25 @@ class Spectrum(object):
 
         return np.vstack((wl, spec))
 
-    def get_spectrum(self, x_unit, flux="energy"):
+    def old_get_spectrum(self, x_unit, flux="energy"):
 
         length_wavelength_unit_factor = ('m', 'cm', 'nm')
         energy_wavelength_unit_factor = {"J": 1, "eV": sc.e}
 
-        spectrum = np.zeros((2, self.core_wl.shape[0]))
+        spectrum = np.zeros((2, self.core_x.shape[0]))
 
         if x_unit in length_wavelength_unit_factor:
-            spectrum[0, :] = us.asUnit(self.core_wl, x_unit)
+            spectrum[0, :] = us.asUnit(self.core_x, x_unit)
 
         elif x_unit in energy_wavelength_unit_factor.keys():
-            spectrum[0, :] = sc.h * sc.c / self.core_wl
+            spectrum[0, :] = sc.h * sc.c / self.core_x
             spectrum[0, :] = us.convert(spectrum[0, :], 'J', x_unit)
 
-        spectrum[1, :] = self.core_spec
+        spectrum[1, :] = self.core_y
 
         # convert the spectrum to photon flux if necessary
         if flux == "photon":
-            spectrum[1, :] = self._as_photon_flux(self.core_wl, spectrum[1, :])
+            spectrum[1, :] = self._as_photon_flux(self.core_x, spectrum[1, :])
 
         # sort the spectrum by wavelength
         sorted_idx = np.argsort(spectrum[0, :])
@@ -246,9 +244,12 @@ class Spectrum(object):
 
         return spectrum
 
-    def get_interp_spectrum(self, x_data, x_unit, flux="energy"):
+    def get_interp_spectrum(self, x_data, x_unit, y_area_unit="default", flux="energy"):
 
-        orig_spectrum = self.get_spectrum(x_unit, flux)
+        # TODO add code to check if the bound of x_data and self._core_wl overlaps
+        # TODO merge get_interp_spectrum and get_interp_spectrum_density
+
+        orig_spectrum = self.get_spectrum(x_unit, y_area_unit, flux)
 
         output_spectrum = np.zeros((2, x_data.shape[0]))
 
@@ -257,7 +258,7 @@ class Spectrum(object):
 
         return output_spectrum
 
-    def get_interp_spectrum_density(self, x_data, y_area_unit, x_unit, flux="energy"):
+    def old_get_interp_spectrum_density(self, x_data, y_area_unit, x_unit, flux="energy"):
 
         orig_spectral_density = self.get_spectrum_density(y_area_unit, x_unit, flux=flux)
 
@@ -273,7 +274,7 @@ class Spectrum(object):
 
         if type(other) == int or type(other) == float:
             newobj = copy.deepcopy(self)
-            newobj.core_spec = self.core_spec * other
+            newobj.core_y = self.core_y * other
             return newobj
         elif isinstance(other, Spectrum):
             return self.attenuation_single(other, inplace=False)
@@ -283,16 +284,16 @@ class Spectrum(object):
     def attenuation_single(self, filter, inplace=True):
         assert isinstance(filter, Spectrum)
 
-        atten_spec = filter.get_interp_spectrum(self.core_wl, 'm')
+        atten_spec = filter.get_interp_spectrum(self.core_x, 'm')
 
-        new_core_spec = self.core_spec * atten_spec[1, :]
+        new_core_spec = self.core_y * atten_spec[1, :]
 
         if inplace:
-            self.core_spec = new_core_spec
+            self.core_y = new_core_spec
             return None
         else:
             newobj = copy.deepcopy(self)
-            newobj.core_spec = new_core_spec
+            newobj.core_y = new_core_spec
             return newobj
 
     def attenuation(self, filters):
@@ -357,6 +358,19 @@ class Spectrum(object):
         else:
             raise ValueError("The input units (from_x_unit and to_x_unit) do not match")
 
+    def _check_x_unit(self, from_x_unit, to_x_unit):
+
+        d1 = us.guess_dimension(from_x_unit)
+        d2 = us.guess_dimension(to_x_unit)
+
+        if d1 == d2 and (d1 in ['length', 'energy']):
+            return True
+        elif set([d1, d2]) == set(['length', 'energy']):
+            return True
+        else:
+            return False
+
+
 
 if __name__ == "__main__":
     from illumination import illumination
@@ -369,7 +383,7 @@ if __name__ == "__main__":
 
     import matplotlib.pyplot as plt
 
-    # plt.plot(asUnit(test_spec.core_wl,'nm'),test_spec.core_spec/1e9,hold=True)
+    # plt.plot(asUnit(test_spec.core_x,'nm'),test_spec.core_y/1e9,hold=True)
 
     nspectrum = test_spec.get_spectrum_density('m-2', 'm')
 

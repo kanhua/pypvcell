@@ -370,6 +370,55 @@ class UnitsSystem():
 
         return possibilities[0]
 
+    def compare_dimension(self, unit_1, unit_2):
+
+        # trivial case
+        if unit_1 == unit_2:
+            return True
+
+        units_list_1 = self.split_units_RE.findall(unit_1)
+        units_list_2 = self.split_units_RE.findall(unit_2)
+
+        if len(units_list_1) != 1 or len(units_list_2) != 1:
+            raise ValueError(
+                "The input units can only contain one unit, such as m2 or s, unit such as m2 s is not allowed!")
+
+        u1, p1 = units_list_1[0]
+        u2, p2 = units_list_2[0]
+
+        if (self.guess_dimension(u1) == self.guess_dimension(u2)) and \
+                (p1 == p2):
+            return True
+        else:
+            return False
+
+    def compare_wavelength_dimension(self, unit_1, unit_2):
+
+        # trivial case
+        if unit_1 == unit_2:
+            return True
+
+        units_list_1 = self.split_units_RE.findall(unit_1)
+        units_list_2 = self.split_units_RE.findall(unit_2)
+
+        if len(units_list_1) != 1 or len(units_list_2) != 1:
+            raise ValueError(
+                "The input units can only contain one unit, such as m2 or s, unit such as m2 s is not allowed!")
+
+        u1, p1 = units_list_1[0]
+        u2, p2 = units_list_2[0]
+
+        gd1 = self.guess_dimension(u1)
+        gd2 = self.guess_dimension(u2)
+
+        if (self.guess_dimension(u1) == self.guess_dimension(u2)) and \
+                (p1 == p2):
+            return True
+        elif set([gd1, gd2]) == set(["energy", "length"]) and (p1 == p2):
+            return True
+        else:
+            return False
+
     def list_dimensions(self):
         for dim in self.dimensions.keys():
             print(

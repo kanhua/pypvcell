@@ -29,7 +29,7 @@ def calc_2j_si_eta(si_layer_t, si_rad_eta, top_cell_bg, top_cell_qe=1, top_cell_
 
     si_alpha = np.loadtxt(abs_file, delimiter=',')
 
-    si_alpha_sp = Spectrum(x_data=si_alpha[:, 0], y_data=si_alpha[:, 1], wavelength_unit='m')
+    si_alpha_sp = Spectrum(x_data=si_alpha[:, 0], y_data=si_alpha[:, 1], x_unit='m')
 
     qe = gen_qe_from_abs(si_alpha_sp, si_layer)
 

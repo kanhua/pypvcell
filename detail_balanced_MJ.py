@@ -72,7 +72,7 @@ def rad_to_voc_fast(rad_eta, qe, spectrum="AM1.5g", T=300):
     # j02_t = calculate_j02_from_rad_eff(j01_t, rad_eta, test_voltage, 300, n2=2)
 
 
-    jsc = calc_jsc(input_illumination=illumination(spectrum, ), qe=qe)
+    jsc = calc_jsc(input_illumination=illumination(spectrum), qe=qe)
 
     voc = np.log(rad_eta * jsc / j01_t) * (sc.k * T / sc.e)
 
@@ -91,7 +91,7 @@ def extract_voc(voltage, current, qe, spectrum="AM1.5g"):
     :return: the calculated Voc
     """
 
-    input_ill = illumination(x_data=1, y_data=1, wavelength_unit=null)
+    input_ill = illumination(x_data=1, y_data=1, x_unit=null)
     jsc = calc_jsc(input_ill, qe=qe)
 
     gen_current = current - jsc
@@ -99,7 +99,7 @@ def extract_voc(voltage, current, qe, spectrum="AM1.5g"):
     return voc(voltage, gen_current)
 
 
-def calc_ere(qe, voc, T=300, ill=illumination("AM1.5g", y_data=1, wavelength_unit=null), verbose=0):
+def calc_ere(qe, voc, T=300, ill=illumination("AM1.5g", y_data=1, x_unit=null), verbose=0):
     """
     Calculate external radiative efficiency based on Martin Green's paper
     [1]	M. A. Green, “Radiative efficiency of state-of-the-art photovoltaic cells,”
@@ -144,7 +144,7 @@ def calc_1j_eta(eg,qe,r_eta,cell_temperature=300, n_c=3.5,n_s=1,
     volt = np.linspace(-0.5, eg, num=300)
     qe_spec=gen_square_qe(eg,qe)
 
-    ill = illumination(y_data=concentration, y_data=spectrum, wavelength_unit=null)
+    ill = illumination(x_data=concentration, y_data=concentration, x_unit=null)
 
     if j01_method=="qe":
         j01 = calculate_j01_from_qe(qe_spec, n_c=n_c, n_s=n_s)
@@ -206,7 +206,7 @@ def calc_mj_eta(subcell_eg, subcell_qe, subcell_rad_eff, cell_temperature, conce
         subcell_qe[replace_qe[0]] = replace_qe[1]
 
     # calculate photocurrent for each subcell
-    input_ill = illumination(x_data=concentration, y_data=concentration, wavelength_unit=null)
+    input_ill = illumination(x_data=concentration, y_data=concentration, x_unit=null)
     subcell_filter = [qe_filter(qe.core_wl, qe.core_spec, 'm') for qe in subcell_qe]
 
     # initialise illumination spectrum for each subcell

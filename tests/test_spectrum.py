@@ -22,7 +22,7 @@ class SpectrumTestCases(unittest.TestCase):
         # set up cases
         self.init_wl2 = np.linspace(1, 5, num=1000)
         self.init_spec2 = np.linspace(1, 5, num=1000)
-        self.spec_base2 = Spectrum(self.init_wl2, self.init_spec2, x_unit="eV", y_area_unit="m-2")
+        self.spec_base2 = Spectrum(self.init_wl2, self.init_spec2, x_unit="eV", y_area_unit="m-2", is_spec_density=True)
 
     def test_convert_spectrum_unit(self):
         x_data = np.linspace(300, 1000, num=3)
@@ -31,10 +31,10 @@ class SpectrumTestCases(unittest.TestCase):
         # test without area units
 
         spec = Spectrum(x_data=x_data, y_data=y_data, x_unit='nm',
-                        y_area_unit=None, is_spec_density=False, is_photon_flux=False)
+                        y_area_unit='', is_spec_density=False, is_photon_flux=False)
 
         new_x_data, new_y_data = spec.convert_spectrum_unit(x_data, y_data, from_x_unit='nm', to_x_unit='nm',
-                                                            from_y_area_unit=None, to_y_area_unit=None,
+                                                            from_y_area_unit='', to_y_area_unit='',
                                                             is_spec_density=False)
 
         self.assertTrue(np.all(np.isclose(x_data, new_x_data)))
@@ -50,7 +50,7 @@ class SpectrumTestCases(unittest.TestCase):
         self.assertTrue(np.all(np.isclose(y_data, new_y_data * 10000)))
 
         new_x_data, new_y_data = spec.convert_spectrum_unit(x_data, y_data, from_x_unit='nm', to_x_unit='eV',
-                                                            from_y_area_unit=None, to_y_area_unit=None,
+                                                            from_y_area_unit='', to_y_area_unit='',
                                                             is_spec_density=False)
 
         self.assertTrue(np.all(np.isclose(y_data, new_y_data)))
@@ -61,12 +61,31 @@ class SpectrumTestCases(unittest.TestCase):
 
         print("Test converting nm to eV")
         new_x_data, new_y_data = spec.convert_spectrum_unit(x_data, y_data, from_x_unit='nm', to_x_unit='eV',
-                                                            from_y_area_unit=None, to_y_area_unit=None,
+                                                            from_y_area_unit='', to_y_area_unit='',
                                                             is_spec_density=True)
 
         self.assertTrue(np.all(np.isclose(x_data, us.eVnm(new_x_data))))
-        area_before_conv = np.trapz(new_y_data[::-1], new_x_data[::-1])
-        area_after_conv = np.trapz(y_data, x_data)
+        area_after_conv = np.trapz(new_y_data[::-1], new_x_data[::-1])
+        area_before_conv = np.trapz(y_data, x_data)
+        self.assertTrue(np.isclose(area_before_conv, area_after_conv, rtol=1e-3))
+
+        print("Test converting nm to eV with area:")
+        new_x_data, new_y_data = spec.convert_spectrum_unit(x_data, y_data, from_x_unit='nm', to_x_unit='eV',
+                                                            from_y_area_unit='m-2', to_y_area_unit='cm-2',
+                                                            is_spec_density=True)
+
+        self.assertTrue(np.all(np.isclose(x_data, us.eVnm(new_x_data))))
+        area_after_conv = np.trapz(new_y_data[::-1], new_x_data[::-1])
+        area_before_conv = np.trapz(y_data, x_data)
+        self.assertTrue(np.isclose(area_before_conv, area_after_conv * 10000, rtol=1e-3))
+
+        new_x_data, new_y_data = spec.convert_spectrum_unit(x_data, y_data, from_x_unit='nm', to_x_unit='eV',
+                                                            from_y_area_unit='m-2', to_y_area_unit='m-2',
+                                                            is_spec_density=True)
+
+        self.assertTrue(np.all(np.isclose(x_data, us.eVnm(new_x_data))))
+        area_after_conv = np.trapz(new_y_data[::-1], new_x_data[::-1])
+        area_before_conv = np.trapz(y_data, x_data)
         self.assertTrue(np.isclose(area_before_conv, area_after_conv, rtol=1e-3))
 
         print("Test converting eV to nm")
@@ -74,7 +93,7 @@ class SpectrumTestCases(unittest.TestCase):
         y_data = np.ones(x_data.shape)
 
         new_x_data, new_y_data = spec.convert_spectrum_unit(x_data, y_data, from_x_unit='eV', to_x_unit='nm',
-                                                            from_y_area_unit=None, to_y_area_unit=None,
+                                                            from_y_area_unit='', to_y_area_unit='',
                                                             is_spec_density=True)
 
         self.assertTrue(np.all(np.isclose(x_data, us.eVnm(new_x_data))))
@@ -90,36 +109,45 @@ class SpectrumTestCases(unittest.TestCase):
                                                             from_y_area_unit='m-2', to_y_area_unit='cm-2',
                                                             is_spec_density=True)
 
-        self.assertTrue(np.all(np.isclose(x_data, us.eVnm(new_x_data))))
         area_after_conv = np.trapz(new_y_data[::-1], new_x_data[::-1])
         area_before_conv = np.trapz(y_data, x_data)
+
+        self.assertTrue(np.all(np.isclose(x_data, us.eVnm(new_x_data))))
+
         self.assertTrue(np.isclose(area_before_conv, area_after_conv * 10000, rtol=1e-2))
 
-
-
     def test_1(self):
-        spectrum = self.spec_base.get_spectrum_density("m-2", "nm")
+        spectrum = self.spec_base.get_spectrum("nm", 'm-2')
         assert np.all(np.isclose(spectrum[0, :], self.init_wl))
         assert np.all(np.isclose(spectrum[1, :], self.init_spec))
 
-    def test_2(self):
-        spectrum = self.spec_base.get_spectrum_density("cm-2", 'nm')
+        spectrum = self.spec_base.get_spectrum('nm', 'cm-2')
         assert np.all(np.isclose(spectrum[0, :], self.init_wl))
         assert np.all(np.isclose(spectrum[1, :], self.init_spec / 1e4))
 
-    def test_3(self):
-        spectrum = self.spec_base.get_spectrum_density("cm-2", 'm')
+        # This is not spectral density, therefore we don't have to convert nm->m in sefl.init_spec
+        spectrum = self.spec_base.get_spectrum('m', 'cm-2')
         assert np.all(np.isclose(spectrum[0, :], self.init_wl / 1e9))
-        assert np.all(np.isclose(spectrum[1, :], self.init_spec / 1e4 * 1e9))
+        assert np.all(np.isclose(spectrum[1, :], self.init_spec / 1e4))
 
     def test_4(self):
-        spectrum = self.spec_base2.get_spectrum_density("m-2", 'nm')
+        init_wl2 = np.linspace(1, 5, num=1000)
+        init_spec2 = np.linspace(1, 5, num=1000)
 
-        assert np.all(np.isclose(spectrum[0, :], np.sort(us.eVnm(self.init_wl2))))
-        assert np.isclose(np.trapz(spectrum[1, :], spectrum[0, :]), np.trapz(self.init_spec2, self.init_wl2))
+        spec_base2 = Spectrum(init_wl2, init_spec2, x_unit="eV", y_area_unit="", is_spec_density=True)
+
+        spectrum = spec_base2.get_spectrum(x_unit='nm', y_area_unit='')
+
+        self.assertTrue(np.all(np.isclose(spectrum[0, :], np.sort(us.eVnm(init_wl2)))))
+
+        area_before = np.trapz(init_spec2, init_wl2)
+        area_after = np.trapz(spectrum[1, :], spectrum[0, :])
+
+        self.assertTrue(np.isclose(area_before, area_after),
+                        msg="area_before: %s, area_after: %s" % (area_before, area_after))
 
     def test_5(self):
-        spectrum = self.spec_base2.get_spectrum_density("m-2", 'J')
+        spectrum = self.spec_base2.get_spectrum(y_area_unit="m-2", x_unit='J')
 
         assert np.all(np.isclose(spectrum[0, :], np.sort(self.init_wl2) * sc.e))
         assert np.isclose(np.trapz(spectrum[1, :], spectrum[0, :]), np.trapz(self.init_spec2, self.init_wl2))
@@ -128,8 +156,8 @@ class SpectrumTestCases(unittest.TestCase):
         init_wl = np.linspace(1, 5, num=10)
         init_spec = np.ones(init_wl.shape)
 
-        test_spec_base = Spectrum(x_data=init_wl, y_data=init_spec, x_unit='eV')
-        spectrum = test_spec_base.get_spectrum('nm')
+        test_spec_base = Spectrum(x_data=init_wl, y_data=init_spec, x_unit='eV', y_area_unit="")
+        spectrum = test_spec_base.get_spectrum(x_unit='nm', y_area_unit="")
 
         assert np.all(np.isclose(spectrum[0, :], np.sort(us.eVnm(init_wl))))
 
@@ -142,7 +170,7 @@ class SpectrumTestCases(unittest.TestCase):
         init_spec = np.ones(init_wl.shape)
 
         test_spec_base = Spectrum(init_wl, init_spec, x_unit='nm', is_photon_flux=True)
-        spectrum = test_spec_base.get_spectrum('nm')
+        spectrum = test_spec_base.get_spectrum(x_unit='nm')
 
         # Prepare an expected spectrum for comparsion
         expect_spec = init_spec * sc.h * sc.c / us.siUnits(init_wl, 'nm')
@@ -197,31 +225,26 @@ class SpectrumTestCases(unittest.TestCase):
         init_spec = np.ones(init_wl.shape)
 
         test_spec_base = Spectrum(init_wl, init_spec, 'nm', is_photon_flux=False)
-        test_spec_base=test_spec_base*0.5
+        test_spec_base = test_spec_base * 0.5
 
         spectrum = test_spec_base.get_spectrum('nm')
 
-        self.assertEqual(spectrum[1,5],0.5)
+        self.assertEqual(spectrum[1, 5], 0.5)
 
     def test_mul_spectrum(self):
         init_wl = np.linspace(300, 500, num=10)
         init_spec = np.ones(init_wl.shape)
 
-        mulp_wl=np.linspace(200,600,num=10)
-        mulp_spec=np.ones(init_wl.shape)*0.5
+        mulp_wl = np.linspace(200, 600, num=10)
+        mulp_spec = np.ones(init_wl.shape) * 0.5
 
         test_spec_base = Spectrum(init_wl, init_spec, 'nm', is_photon_flux=False)
         mulp_spec_base = Spectrum(mulp_wl, mulp_spec, 'nm', is_photon_flux=False)
-        test_spec_base=test_spec_base*mulp_spec_base
+        test_spec_base = test_spec_base * mulp_spec_base
 
-        spec_arr=test_spec_base.get_spectrum('nm')
+        spec_arr = test_spec_base.get_spectrum('nm')
 
-        self.assertEqual(spec_arr[1,5],0.5)
-
-
-
-
-
+        self.assertEqual(spec_arr[1, 5], 0.5)
 
 
 if __name__ == '__main__':
