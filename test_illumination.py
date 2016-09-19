@@ -1,4 +1,4 @@
-from illumination import illumination,applyFilter,material_filter,bp_filter,qe_filter
+from illumination import illumination, applyFilter, material_filter, BpFilter, qe_filter
 import matplotlib.pyplot as plt
 import numpy as np
 from solcore3 import material, siUnits

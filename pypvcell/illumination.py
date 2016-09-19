@@ -1,8 +1,8 @@
 import numpy as np
 import os
 from scipy.interpolate import interp1d
-from units_system import UnitsSystem
-from spectrum import Spectrum
+from pypvcell.units_system import UnitsSystem
+from pypvcell.spectrum import Spectrum
 import pickle
 
 
@@ -94,7 +94,7 @@ class illumination(Spectrum):
         np.savetxt(fname, new_pc1d_ill, fmt="%.3f")
 
 
-class bp_filter(Spectrum):
+class BpFilter(Spectrum):
     def __init__(self, edge_in_eV, f_type="high_pass", OD=2, energy_bound=(0.5, 6)):
 
         """

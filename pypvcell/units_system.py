@@ -1,7 +1,7 @@
 from collections import defaultdict
 import re
 
-import constants
+import pypvcell.constants as constants
 import pickle
 
 import numpy
@@ -10,7 +10,6 @@ import os.path
 
 import scipy.constants as sc
 
-import json
 
 """Constants used commonly in solcore
 """
@@ -477,6 +476,8 @@ def reverse(x):
 
 
 if __name__ == "__main__":
-    import doctest
+    # import doctest
 
-    doctest.testmod()
+    # doctest.testmod()
+    us = UnitsSystem()
+    us.list_dimensions()

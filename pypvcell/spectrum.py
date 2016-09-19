@@ -1,6 +1,6 @@
 import numpy as np
 import scipy.constants as sc
-from units_system import UnitsSystem
+from pypvcell.units_system import UnitsSystem
 import copy
 
 us = UnitsSystem()
@@ -43,12 +43,13 @@ class Spectrum(object):
         This is essentially a constructor method that sets up the attributes of the object.
         It converts everything to standard MKS unit. x_data: 'm', y_data: '[]/m^2-m'
 
-        :param x_data:
-        :param y_data:
-        :param x_unit:
-        :param y_area_unit:
-        :param is_photon_flux:
-        :param is_spec_density:
+        :param x_data: x data of the spectrum (1d numpy array)
+        :param y_data: y data of the spectrum (1d numpy array)
+        :param x_unit: the unit of x (string), e.g. 'nm', 'eV'
+        :param y_area_unit:(string) If y is per area, put area unit here, e.g. 'm-2' or 'cm-2'.
+                Put null string '' if y does not have area unit
+        :param is_photon_flux: True if y is number of photons.
+        :param is_spec_density: True if y is spectral density.
         :return: None
         """
 
@@ -283,14 +284,14 @@ class Spectrum(object):
         if us.guess_dimension(from_x_unit) == us.guess_dimension(to_x_unit):
             return us.convert(x_data, from_unit=from_x_unit, to_unit=to_x_unit)
 
-        elif (us.guess_dimension(from_x_unit) == 'energy' and us.guess_dimension(to_x_unit) == 'length'):
+        elif us.guess_dimension(from_x_unit) == 'energy' and us.guess_dimension(to_x_unit) == 'length':
 
             new_x_data = us.convert(x_data, from_x_unit, 'J')
             new_x_data = us.mJ(new_x_data)
 
             return us.convert(new_x_data, 'm', to_x_unit)
 
-        elif (us.guess_dimension(from_x_unit) == 'length' and us.guess_dimension(to_x_unit) == 'energy'):
+        elif us.guess_dimension(from_x_unit) == 'length' and us.guess_dimension(to_x_unit) == 'energy':
 
             new_x_data = us.convert(x_data, from_x_unit, 'm')
             new_x_data = us.mJ(new_x_data)
@@ -314,21 +315,4 @@ class Spectrum(object):
 
 
 if __name__ == "__main__":
-    from illumination import illumination
-
-    ill = illumination()
-
-    test_spec = Spectrum(us.asUnit(ill.wl, 'nm'), ill.photon_flux_in_W / 1e9, "nm")
-
-    # test_spec.set_spectrum_density(ill.wl_in_eV, ill.photon_flux_in_W_perEV, "m-2", "eV")
-
-    import matplotlib.pyplot as plt
-
-    # plt.plot(asUnit(test_spec.core_x,'nm'),test_spec.core_y/1e9,hold=True)
-
-    nspectrum = test_spec.get_spectrum_density('m-2', 'm')
-
-    plt.plot(nspectrum[0, :], nspectrum[1, :], hold=True)
-
-    plt.plot(ill.wl, ill.photon_flux_in_W)
-    plt.show()
+    pass

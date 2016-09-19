@@ -1,7 +1,7 @@
 __author__ = 'kanhua'
 
 import unittest
-from illumination import bp_filter, qe_filter, illumination
+from illumination import BpFilter, qe_filter, illumination
 import numpy as np
 from photocurrent import gen_square_qe_array
 import matplotlib.pyplot as plt
@@ -12,7 +12,7 @@ us = UnitsSystem()
 
 class FiltersTestCase(unittest.TestCase):
     def test_bpFilter(self):
-        bf = bp_filter(x_data=1.42, y_data=2, x_unit=null)
+        bf = BpFilter(x_data=1.42, y_data=2, x_unit=null)
         abs_spec = bf.get_spectrum(to_x_unit='nm')
 
         # Test whether the absorption in the range between 0.1 to 1 eV equals to 0.01
@@ -61,7 +61,7 @@ class FiltersTestCase(unittest.TestCase):
         ill = illumination()
         orig_spec = ill.get_spectrum_density('m-2', 'nm')
 
-        ill.attenuation_single(bp_filter(x_data=edge, y_data=2, x_unit=null))
+        ill.attenuation_single(BpFilter(x_data=edge, y_data=2, x_unit=null))
 
         filtered_spec = ill.get_spectrum_density('m-2', 'nm')
 

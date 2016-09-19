@@ -8,7 +8,7 @@ from photocurrent import gen_qe_from_abs, gen_square_qe, calc_jsc
 from spectrum_base import spectrum_base
 import matplotlib.pyplot as plt
 from fom import voc
-from illumination import illumination, bp_filter
+from illumination import illumination, BpFilter
 from scipy.interpolate import interp2d
 
 

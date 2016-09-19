@@ -2,11 +2,11 @@ __author__ = 'kanhua'
 
 import unittest
 import numpy as np
-from spectrum import Spectrum
+from pypvcell.spectrum import Spectrum
 import scipy.constants as sc
-from units_system import UnitsSystem
-from photocurrent import gen_square_qe
-from illumination import illumination
+from pypvcell.units_system import UnitsSystem
+from pypvcell.photocurrent import gen_square_qe
+from pypvcell.illumination import illumination
 import matplotlib.pyplot as plt
 
 us = UnitsSystem()

@@ -3,10 +3,10 @@ from scipy.interpolate import interp1d
 from scipy.optimize import newton_krylov
 import scipy.constants as sc
 # from spectrum_base import spectrum_base
-from spectrum import Spectrum
-from units_system import UnitsSystem
+from pypvcell.spectrum import Spectrum
+from pypvcell.units_system import UnitsSystem
 import copy
-from fom import max_power
+from pypvcell.fom import max_power
 
 us = UnitsSystem()
 
