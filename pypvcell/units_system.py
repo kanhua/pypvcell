@@ -10,6 +10,8 @@ import os.path
 
 import scipy.constants as sc
 
+from configparser import ConfigParser
+
 
 """Constants used commonly in solcore
 """
@@ -60,7 +62,7 @@ class UnitsSystem():
         self.read(name="defaultunits")
 
     def read(self, name=None):
-        self.read_database()
+        self.try_read()
         self.si_conversions = {}
         for dimension in self.database.sections():
             units = self.database.options(dimension)
@@ -84,16 +86,13 @@ class UnitsSystem():
                 self.siConversions[unit] = self.safe_eval(string_expression)
                 self.dimensions[dimension][unit] = self.siConversions[unit]
 
-    def read_database(self):
-        work_dir = os.path.dirname(os.path.realpath(__file__))
-        fp = open(work_dir + "/databasedump.pkl", "rb")
-        self.database = pickle.load(fp)
-        fp.close()
+    def try_read(self):
+        self.database = ConfigParser()
+        self.database.optionxform = str
 
-    def write_database(self):
-        fp = open("databasedump.pkl", "wb")
-        pickle.dump(self.database, fp)
-        fp.close()
+        work_dir = os.path.dirname(os.path.realpath(__file__))
+        self.database.read(os.path.join(work_dir, "defaultunits.txt"))
+
 
     def safe_eval(self, string_expression):
         return eval(string_expression, {"__builtins__": {}}, {"constants": constants})
@@ -481,3 +480,5 @@ if __name__ == "__main__":
     # doctest.testmod()
     us = UnitsSystem()
     us.list_dimensions()
+
+    print(us.eVnm(1.0))

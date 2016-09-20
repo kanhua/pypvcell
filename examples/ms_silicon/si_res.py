@@ -2,7 +2,7 @@
 Calculate the criteria of series resistance of silicon solar cell
 """
 
-from units_system import UnitsSystem
+from pypvcell.units_system import UnitsSystem
 import numpy as np
 
 us = UnitsSystem()
