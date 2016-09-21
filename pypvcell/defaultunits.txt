@@ -8,7 +8,7 @@ META_GenerateConversions: m centi deci
 
 [mass]
 META_GenerateConversions: g 0.001 altbase
-emu: constants.electron_mass
+emu: sc.electron_mass
 amu: 1.66053878283e-27
 
 [time]
@@ -20,8 +20,8 @@ day:86400
 
 [angle]
 radians: 1
-degrees: constants.pi/180.
-°: constants.pi/180.
+degrees: sc.pi/180.
+°: sc.pi/180.
 
 [pressure] 
 hPa: 100.
@@ -46,7 +46,7 @@ META_GenerateConversions: W
 
 [energy]
 META_GenerateConversions: J
-META_GenerateConversions2: eV constants.q altbase
+META_GenerateConversions2: eV sc.e altbase
 
 [luminous intensity]
 META_GenerateConversions: cd

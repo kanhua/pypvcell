@@ -1,9 +1,6 @@
 from collections import defaultdict
 import re
 
-import pypvcell.constants as constants
-import pickle
-
 import numpy
 
 import os.path
@@ -95,7 +92,8 @@ class UnitsSystem():
 
 
     def safe_eval(self, string_expression):
-        return eval(string_expression, {"__builtins__": {}}, {"constants": constants})
+        # return eval(string_expression, {"__builtins__": {}}, {"constants": constants})
+        return eval(string_expression)
 
     def siUnits(self, value, unit):
         """convert value from unit to equivalent si-unit
