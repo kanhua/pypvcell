@@ -94,10 +94,12 @@ def calc_jsc_from_eg(input_illumination, eg):
 
     assert isinstance(input_illumination, illumination)
 
-    ill_array = input_illumination.get_spectrum_density('m-2', 'eV', flux="photon")
+    ill_array = input_illumination.get_spectrum(to_x_unit='eV', to_y_area_unit='m-2', to_photon_flux=True)
 
-    ill_array = input_illumination.get_interp_spectrum_density(np.linspace(eg, ill_array[0, :].max(), num=100), "m-2",
-                                                               "eV", flux="photon")
+    ill_array = input_illumination.get_interp_spectrum(np.linspace(eg, ill_array[0, :].max(), num=100),
+                                                       to_x_unit='eV',
+                                                       to_y_area_unit='m-2',
+                                                       to_photon_flux=True)
 
     jsc = sc.e * np.trapz(ill_array[1, :], ill_array[0, :])
 

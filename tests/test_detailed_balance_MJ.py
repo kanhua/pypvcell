@@ -1,6 +1,6 @@
 import unittest
-from photocurrent import gen_square_qe
-from detail_balanced_MJ import rad_to_voc_fast,rad_to_voc
+from pypvcell.photocurrent import gen_square_qe
+from pypvcell.detail_balanced_MJ import rad_to_voc_fast, rad_to_voc
 import numpy as np
 
 class DBMJTestCase(unittest.TestCase):

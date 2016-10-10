@@ -4,15 +4,15 @@ detalied balance calculation of many junction devices
 
 import numpy as np
 import copy
-from illumination import qe_filter, illumination
-from fom import voc
-from ivsolver import calculate_j01, calculate_j02_from_rad_eff, \
+from pypvcell.illumination import qe_filter, illumination
+from pypvcell.fom import voc
+from pypvcell.ivsolver import calculate_j01, calculate_j02_from_rad_eff, \
     gen_rec_iv, gen_rec_iv_with_rs_by_newton, solve_mj_iv, \
     calculate_j01_from_qe, gen_rec_iv_by_rad_eta,solve_ms_mj_iv
-from fom import max_power
-from photocurrent import gen_square_qe, calc_jsc,calc_jsc_from_eg
+from pypvcell.fom import max_power
+from pypvcell.photocurrent import gen_square_qe, calc_jsc, calc_jsc_from_eg
 import scipy.constants as sc
-from spectrum import Spectrum
+from pypvcell.spectrum import Spectrum
 
 
 def set_subcell_spectrum(input_ill, subcell_eg, subcell_filter):
@@ -98,7 +98,7 @@ def extract_voc(voltage, current, qe, spectrum="AM1.5g"):
     return voc(voltage, gen_current)
 
 
-def calc_ere(qe, voc, T=300, ill=illumination("AM1.5g", y_data=1, x_unit=null), verbose=0):
+def calc_ere(qe, voc, T=300, ill=illumination("AM1.5g"), verbose=0):
     """
     Calculate external radiative efficiency based on Martin Green's paper
     [1]	M. A. Green, “Radiative efficiency of state-of-the-art photovoltaic cells,”
@@ -143,7 +143,7 @@ def calc_1j_eta(eg,qe,r_eta,cell_temperature=300, n_c=3.5,n_s=1,
     volt = np.linspace(-0.5, eg, num=300)
     qe_spec=gen_square_qe(eg,qe)
 
-    ill = illumination(x_data=concentration, y_data=concentration, x_unit=null)
+    ill = illumination("AM1.5g", concentration=concentration)
 
     if j01_method=="qe":
         j01 = calculate_j01_from_qe(qe_spec, n_c=n_c, n_s=n_s)
@@ -205,7 +205,7 @@ def calc_mj_eta(subcell_eg, subcell_qe, subcell_rad_eff, cell_temperature, conce
         subcell_qe[replace_qe[0]] = replace_qe[1]
 
     # calculate photocurrent for each subcell
-    input_ill = illumination(x_data=concentration, y_data=concentration, x_unit=null)
+    input_ill = illumination(spectrum, concentration=concentration)
     subcell_filter = [qe_filter(qe.core_wl, qe.core_spec, 'm') for qe in subcell_qe]
 
     # initialise illumination spectrum for each subcell
