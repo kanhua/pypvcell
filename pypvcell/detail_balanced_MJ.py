@@ -143,7 +143,7 @@ def calc_1j_eta(eg,qe,r_eta,cell_temperature=300, n_c=3.5,n_s=1,
     volt = np.linspace(-0.5, eg, num=300)
     qe_spec=gen_square_qe(eg,qe)
 
-    ill = illumination("AM1.5g", concentration=concentration)
+    ill = illumination(spectrum=spectrum, concentration=concentration)
 
     if j01_method=="qe":
         j01 = calculate_j01_from_qe(qe_spec, n_c=n_c, n_s=n_s)
