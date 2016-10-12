@@ -7,7 +7,7 @@ from pypvcell.detail_balanced_MJ import calc_1j_eta
 import numpy as np
 import matplotlib.pyplot as plt
 from pypvcell.solarcell import SQCell
-from pypvcell.illumination import illumination
+from pypvcell.illumination import Illumination
 
 etaopt_air_semi = np.loadtxt("../validation/eta_air_semi.txt", skiprows=1)
 
@@ -22,7 +22,7 @@ calc_method = "eg"
 conc = 1500 * 1000 / 918
 # conc=1
 
-input_ill = illumination("AM1.5d", concentration=conc)
+input_ill = Illumination("AM1.5d", concentration=conc)
 
 eta_array_air_semi_class = []
 for eg in eg_array:

@@ -1,7 +1,7 @@
 import numpy as np
 import scipy.interpolate
 import scipy.constants as sc
-from pypvcell.illumination import illumination
+from pypvcell.illumination import Illumination
 from pypvcell.spectrum import Spectrum
 
 
@@ -71,7 +71,7 @@ def calc_jsc(input_illumination, qe, check_type=True):
     """
 
     if check_type == True:
-        assert isinstance(input_illumination, illumination)
+        assert isinstance(input_illumination, Illumination)
         assert isinstance(qe, Spectrum)
 
     # initialise a QE interp object
@@ -92,7 +92,7 @@ def calc_jsc_from_eg(input_illumination, eg):
     :return: value of Jsc (A/m^2)
     """
 
-    assert isinstance(input_illumination, illumination)
+    assert isinstance(input_illumination, Illumination)
 
     ill_array = input_illumination.get_spectrum(to_x_unit='eV', to_y_area_unit='m-2', to_photon_flux=True)
 

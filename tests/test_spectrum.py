@@ -6,7 +6,7 @@ from pypvcell.spectrum import Spectrum
 import scipy.constants as sc
 from pypvcell.units_system import UnitsSystem
 from pypvcell.photocurrent import gen_square_qe
-from pypvcell.illumination import illumination
+from pypvcell.illumination import Illumination
 import matplotlib.pyplot as plt
 
 us = UnitsSystem()
@@ -203,12 +203,12 @@ class SpectrumTestCases(unittest.TestCase):
         """
 
         sq_qe = gen_square_qe(1.42, 0.9)
-        test_ill = illumination()
+        test_ill = Illumination()
         # test_qef = qe_filter(sq_qe)
 
         filtered_ill = test_ill * sq_qe
 
-        assert isinstance(filtered_ill, illumination)
+        assert isinstance(filtered_ill, Illumination)
 
         plt.plot(filtered_ill.get_spectrum('eV')[0, :], filtered_ill.get_spectrum('eV')[1, :], label="filtered")
         plt.plot(test_ill.get_spectrum('eV')[0, :], test_ill.get_spectrum('eV')[1, :], label="original")

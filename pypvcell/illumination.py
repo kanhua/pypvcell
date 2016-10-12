@@ -30,8 +30,7 @@ this_dir = os.path.split(__file__)[0]
 spec_data = load_default_spectrum(os.path.join(this_dir, "astmg173.csv"))
 
 
-
-class illumination(Spectrum):
+class Illumination(Spectrum):
     def __init__(self, spectrum="AM1.5g", concentration=1):
 
         """
@@ -134,9 +133,11 @@ class material_filter(Spectrum):
         Spectrum.__init__(self, abs_spec[0, :], attenuation, 'm')
 
 
-
-
-class qe_filter(Spectrum):
+class QeFilter(Spectrum):
+    """
+    QeFilter is essentially a Spectrum of QE.
+    It calculates the transmission of QE. i.e., this spectrum gives 1-EQE(E)
+    """
     def __init__(self, qe_wavelength, qe_in_ratio, x_unit):
         Spectrum.__init__(self, qe_wavelength, 1 - qe_in_ratio, x_unit=x_unit)
 
