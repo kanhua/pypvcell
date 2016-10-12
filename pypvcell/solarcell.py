@@ -21,7 +21,20 @@ class SolarCell(object):
 
 
 class SQCell(SolarCell):
+    """
+    A SolarCell at Shockley-Queisser limit
+
+    """
     def __init__(self, eg, cell_T, n_c=3.5, n_s=1):
+        """
+        Initialize a SQ solar cell.
+        It loads the class and sets up J01 of the cell
+
+        :param eg: Band gap (eV)
+        :param cell_T: temperature (K)
+        :param n_c: refractive index of cell
+        :param n_s: refractive index of ambient
+        """
         self.eg = eg
         self.cell_T = cell_T
         self.n_c = n_c
