@@ -29,37 +29,43 @@ def calc_tp(input_ill: Illumination,
 
     if a_c >= a_3:
         # power of silicon underneath III-V
-        p_3s = filtered_ill.total_power() * total_area * a_3 * eta_s(filtered_ill * float(f_c / a_c))
+        p_3s = filtered_ill.total_power() * f_c * (a_3 / a_c) * eta_s(filtered_ill * float(f_c / a_c))
 
         # power of silicon in the concentrated area
-        p_s_1 = input_ill.total_power() * total_area * (a_c - a_3) * eta_s(input_ill * float(f_c / a_c))
+        p_s_1 = input_ill.total_power() * f_c * (a_c - a_3) / a_c * eta_s(input_ill * float(f_c / a_c))
 
         # power of silicon in the diluted area
-        p_s_2 = input_ill.total_power() * total_area * (1 - a_c) * eta_s(input_ill * float((1 - f_c) / (1 - a_c)))
+        p_s_2 = input_ill.total_power() * (1 - f_c) * eta_s(input_ill * float((1 - f_c) / (1 - a_c)))
 
         # power of III-V
-        p_3 = input_ill.total_power() * total_area * a_3 * eta_3(input_ill * float(f_c / a_c))
+        p_3 = input_ill.total_power() * f_c * a_3 / a_c * eta_3(input_ill * float(f_c / a_c))
         tp = p_3s + p_s_1 + p_s_2 + p_3
 
     else:
 
         # power of III-V in diluted area
-        p_3_1 = input_ill.total_power() * total_area * (a_3 - a_c) * eta_3(input_ill * float((1 - f_c) / (1 - a_c)))
+        p_3_1 = input_ill.total_power() * (1 - f_c) * (a_3 - a_c) / (1 - a_c) * eta_3(
+            input_ill * float((1 - f_c) / (1 - a_c)))
+
+        assert p_3_1 >= 0
 
         # power of III-V in concentrated area
-        p_3_2 = input_ill.total_power() * total_area * a_3 * eta_3(input_ill * float(f_c / a_c))
+        p_3_2 = input_ill.total_power() * f_c * eta_3(input_ill * float(f_c / a_c))
+
+        assert p_3_2 >= 0
 
         # power of silicon underneath III-V
-        p_3s_1 = filtered_ill.total_power() * total_area * a_3 * eta_s(filtered_ill * float(f_c / a_c))
-        p_3s_2 = filtered_ill.total_power() * total_area * (a_3 - a_c) * eta_s(
+        p_3s_1 = filtered_ill.total_power() * f_c * eta_s(filtered_ill * float(f_c / a_c))
+        p_3s_2 = filtered_ill.total_power() * (1 - f_c) * (a_3 - a_c) / (1 - a_c) * eta_s(
             filtered_ill * float((1 - f_c) / (1 - a_c)))
 
         # power of silicon in diluted area
-        p_s_1 = input_ill.total_power() * total_area * (1 - a_3) * eta_s(input_ill * float((1 - f_c) / (1 - a_c)))
+        p_s_1 = input_ill.total_power() * (1 - f_c) * (1 - a_3) / (1 - a_c) * eta_s(
+            input_ill * float((1 - f_c) / (1 - a_c)))
 
         tp = p_3_1 + p_3_2 + p_3s_1 + p_3s_2 + p_s_1
 
-    return tp
+    return tp * total_area
 
 
 def eta_s(ill):
@@ -85,18 +91,3 @@ def eta_3(ill):
     return sqcell.get_eta()
 
 
-std_ill = Illumination("AM1.5g", concentration=1)
-
-a_3 = 0.1
-a_c = 0.2
-f_c_arr = np.linspace(0.1, 0.9, num=20)
-
-tp_arr = []
-for f in f_c_arr:
-    tp = calc_tp(std_ill, 1, a_3=a_3, a_c=a_c, f_c=f, eta_s=eta_s, eta_3=eta_3)
-    tp_arr.append(tp)
-
-tp_arr = np.array(tp_arr)
-
-plt.plot(f_c_arr, tp_arr)
-plt.show()
