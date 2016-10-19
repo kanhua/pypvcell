@@ -1,4 +1,3 @@
-from typing import List
 from pypvcell.illumination import Illumination
 from pypvcell.photocurrent import gen_square_qe, calc_jsc_from_eg
 from pypvcell.ivsolver import calculate_j01, gen_rec_iv_by_rad_eta, solve_mj_iv
@@ -14,10 +13,22 @@ class SolarCell(object):
     def get_iv(self):
         raise NotImplementedError()
 
-    def set_input_spectrum(self, input_spectrum: Illumination):
+    def set_input_spectrum(self, input_spectrum):
+        """
+        Set the illlumination spectrum of the solar cell
+
+        :param input_spectrum: the illumination spectrum.
+        :type input_spectrum: Illumination
+        """
         raise NotImplementedError()
 
     def get_transmit_spectrum(self):
+        """
+
+        :return: The transmitted spectrum of this solar cell
+        :rtype: Illumination
+        """
+
         raise NotImplementedError()
 
 
@@ -47,11 +58,12 @@ class SQCell(SolarCell):
         self.j01 = calculate_j01(self.eg, temperature=self.cell_T,
                                  n1=1, n_c=self.n_c, n_s=self.n_s)
 
-    def set_input_spectrum(self, input_spectrum: Illumination):
+    def set_input_spectrum(self, input_spectrum):
         self.ill = input_spectrum
         self.jsc = calc_jsc_from_eg(input_spectrum, self.eg)
 
-    def get_transmit_spectrum(self) -> Illumination:
+    def get_transmit_spectrum(self):
+
         sp = self.ill.get_spectrum(to_x_unit='eV')
 
         filter_y = sp[0, :] < self.eg
@@ -78,7 +90,12 @@ class SQCell(SolarCell):
 
 
 class MJCell(SolarCell):
-    def __init__(self, subcell: List[SolarCell]):
+    def __init__(self, subcell):
+        """
+
+        :param subcell: A list of SolarCell instances of multijunction cell from top to bottom , e.g. [top_cell mid_cell bot_cell]
+        :type subcell: List[SolarCell]
+        """
 
         self.subcell = subcell
 

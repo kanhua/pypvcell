@@ -5,7 +5,6 @@ import copy
 
 us = UnitsSystem()
 
-
 class Spectrum(object):
     """
     This class handles the operation of the spectrum y(x), including unit conversion and multiplication.
@@ -215,14 +214,23 @@ class Spectrum(object):
 
     def __mul__(self, other):
 
-        if type(other) == int or type(other) == float:
-            newobj = copy.deepcopy(self)
-            newobj.core_y = self.core_y * other
-            return newobj
-        elif isinstance(other, Spectrum):
+        if isinstance(other, Spectrum):
             return self.attenuation_single(other, inplace=False)
         else:
-            raise ValueError("The multipler should either be a scalar or a Spectrum calss object.")
+            try:
+                newobj = copy.deepcopy(self)
+                newobj.core_y = self.core_y * other
+
+                if newobj.core_x.shape != newobj.core_y.shape:
+                    raise Exception("The multipler should either be a scalar or a Spectrum calss object"
+                                    ", or an ndarray that matches the length of the spectrum")
+
+                return newobj
+
+            except (TypeError, AttributeError) as err:
+                print(
+                    "Runtime Error: The multipler should either be a scalar or a Spectrum class object when doing Spectrum multiplication")
+
 
     def attenuation_single(self, filter, inplace=True):
         assert isinstance(filter, Spectrum)

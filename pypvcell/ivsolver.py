@@ -1,3 +1,4 @@
+from typing import List, Tuple
 import numpy as np
 from scipy.interpolate import interp1d
 from scipy.optimize import newton_krylov
@@ -257,12 +258,11 @@ def solve_ms_mj_iv(v_i,ill_power):
     return np.sum(max_p_list)/ill_power
 
 
-
-
-def solve_mj_iv(voltage_current_tuple, i_max=None):
+def solve_mj_iv(v_i, i_max=None):
     """
 
-    :param voltage_current_tuple: a list of (voltage,current) tuple
+    :param v_i: a list of (voltage,current) tuple
+    :type v_i: List[Tuple[np.ndarray,np.ndarray]]
     """
 
     # Select the minimum of range maximums
@@ -273,7 +273,7 @@ def solve_mj_iv(voltage_current_tuple, i_max=None):
     # check the input
     i_range_max = 0
     i_range_min = 0
-    for idx, iv_tup in enumerate(voltage_current_tuple):
+    for idx, iv_tup in enumerate(v_i):
 
         assert isinstance(iv_tup, tuple)
 
@@ -303,7 +303,7 @@ def solve_mj_iv(voltage_current_tuple, i_max=None):
             current_range = np.linspace(i_range_min, i_max, num=10000)
 
     voltage_sum = 0
-    for iv_tup in voltage_current_tuple:
+    for iv_tup in v_i:
         voltage, current = iv_tup
 
         voltage_sum = voltage_sum + get_v_from_j(voltage, current, current_range)

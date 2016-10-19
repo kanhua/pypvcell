@@ -34,7 +34,8 @@ def rad_to_voc(rad_eta, qe, max_voltage=1.9,spectrum="AM1.5g"):
     Calculate Voc from given radiative efficiency numerically
 
     :param rad_eta: radiative efficiency (in ratio)
-    :param qe: quantum efficiency, a spectrum_base instance
+    :param qe: quantum efficiency
+    :type qe: Spectrum
     :param max_voltage: the maximum voltage of the dark-IV, the default value is 1.9. A safe way is set it to the value of the band gap
     :return: the calculated Voc
     """
@@ -58,7 +59,8 @@ def rad_to_voc_fast(rad_eta, qe, spectrum="AM1.5g", T=300):
     Calculate Voc from given radiative efficiency analytically
 
     :param rad_eta: radiative efficiency (in ratio)
-    :param qe: quantum efficiency, a spectrum_base instance
+    :param qe: quantum efficiency
+    :type qe: Spectrum
     :param max_voltage: the maximum voltage of the dark-IV, the default value is 1.9.
     A safe way is set it to the value of the band gap
     :return: the calculated Voc

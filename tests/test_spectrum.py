@@ -246,6 +246,16 @@ class SpectrumTestCases(unittest.TestCase):
 
         self.assertEqual(spec_arr[1, 5], 0.5)
 
+    def test_mul_wrong_spectrum(self):
+        init_wl = np.linspace(300, 500, num=10)
+        init_spec = np.ones(init_wl.shape)
+        test_spec_base = Spectrum(init_wl, init_spec, 'nm', is_photon_flux=False)
+
+        self.assertRaises(TypeError, test_spec_base * 'r')
+        self.assertRaises(TypeError, test_spec_base * 1)
+
+        # test_spec_base*[1,2]
+
 
 if __name__ == '__main__':
     unittest.main()
