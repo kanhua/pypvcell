@@ -196,6 +196,15 @@ def get_v_from_j(voltage, current, target_current):
 
 
 def calculate_j01(eg_in_ev, temperature, n1, n_c=3.5,n_s=1):
+    """
+    Calculate J01 for analytical expression
+    :param eg_in_ev:
+    :param temperature:
+    :param n1: ideality factor
+    :param n_c: refractive index of the cell
+    :param n_s: refractive index of the surroundings
+    :return:
+    """
 
     eg = eg_in_ev * sc.e
     Term1 = 2 * sc.pi * (n_c**2+n_s**2) * sc.e / (

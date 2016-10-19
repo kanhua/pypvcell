@@ -1,6 +1,8 @@
+from typing import List
+
 from pypvcell.illumination import Illumination
 from pypvcell.photocurrent import gen_square_qe, calc_jsc_from_eg
-from pypvcell.ivsolver import calculate_j01, gen_rec_iv_by_rad_eta
+from pypvcell.ivsolver import calculate_j01, gen_rec_iv_by_rad_eta, solve_mj_iv
 from pypvcell.fom import max_power
 from pypvcell.spectrum import Spectrum
 import numpy as np
@@ -13,7 +15,7 @@ class SolarCell(object):
     def get_iv(self):
         raise NotImplementedError()
 
-    def set_input_spectrum(self, input_spectrum):
+    def set_input_spectrum(self, input_spectrum: Illumination):
         raise NotImplementedError()
 
     def get_transmit_spectrum(self):
@@ -74,3 +76,38 @@ class SQCell(SolarCell):
         volt, current = gen_rec_iv_by_rad_eta(self.j01, 1, 1, self.cell_T, 1e15, voltage=volt, jsc=self.jsc)
 
         return volt, current
+
+
+class MJCell(SolarCell):
+    def __init__(self, subcell: List[SolarCell]):
+
+        self.subcell = subcell
+
+    def set_input_spectrum(self, input_spectrum):
+
+        self.ill = input_spectrum
+        filtered_spectrum = None
+
+        # Set spectrum for each subcell
+        for i, sc in enumerate(self.subcell):
+            if i == 0:
+                sc.set_input_spectrum(input_spectrum)
+                filtered_spectrum = sc.get_transmit_spectrum()
+            else:
+                sc.set_input_spectrum(filtered_spectrum)
+
+    def get_iv(self, volt=None):
+
+        all_iv = [(sc.get_iv()) for sc in self.subcell]
+
+        v, i = solve_mj_iv(all_iv, i_max=20)
+
+        return v, i
+
+    def get_eta(self):
+
+        v, i = self.get_iv()
+
+        eta = max_power(v, i)
+
+        return eta / self.ill.total_power()
