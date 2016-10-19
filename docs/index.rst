@@ -39,10 +39,12 @@ Pypvcell support both Python 2.x and 3. However, we recommend using Python 3.
 
 
 Liscence:
+--------------------------
 MIT
 
 
-Acknowledgement:
+Acknowledgement
+--------------------------
 
 The development of this software is partly suppored by Japan New Energy and Industrial Technology Development Organization (NEDO).
 Pypvcell is inspired by Solcore by Markus Furher et al.

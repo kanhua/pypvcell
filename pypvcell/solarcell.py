@@ -1,5 +1,4 @@
 from typing import List
-
 from pypvcell.illumination import Illumination
 from pypvcell.photocurrent import gen_square_qe, calc_jsc_from_eg
 from pypvcell.ivsolver import calculate_j01, gen_rec_iv_by_rad_eta, solve_mj_iv
