@@ -16,7 +16,9 @@ Examples
 -----------
 
 In Pypvcell, a type of solar cell is defined as class. For example, here's a way to define a solar cell class.
-The following code demonstrates how to set up a solar cell at Shockley-Queisser limit: ::
+The following code demonstrates how to set up a solar cell at Shockley-Queisser limit:
+
+.. code-block:: python
 
     from pypvcell.illumination import Illumination
     from pypvcell.solarcell import SQCell
@@ -32,10 +34,12 @@ The following code demonstrates how to set up a solar cell at Shockley-Queisser 
     print(sq_cell.get_eta())
 
 
-Support of python version
+Prerequisites
 --------------------------
 
-Pypvcell support both Python 2.x and 3. However, we recommend using Python 3.
+- Pypvcell support both Python 2.x and 3. However, we recommend using Python 3.
+- Numpy, Scipy, Matplotlib
+
 
 
 Liscence:
@@ -50,10 +54,15 @@ The development of this software is partly suppored by Japan New Energy and Indu
 Pypvcell is inspired by Solcore by Markus Furher et al.
 
 
-Contents:
+Modules
+-----------------
 
 .. toctree::
-:maxdepth: 2
+:maxdepth: 1
+
+        spectrum_class
+        photocurrent_m
+
 
 
 

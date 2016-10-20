@@ -1,5 +1,5 @@
 import unittest
-from pypvcell.photocurrent import gen_square_qe
+from pypvcell.photocurrent import gen_step_qe
 from pypvcell.detail_balanced_MJ import rad_to_voc_fast, rad_to_voc
 import numpy as np
 
@@ -12,7 +12,7 @@ class DBMJTestCase(unittest.TestCase):
         :return:
         """
 
-        test_qe = gen_square_qe(1.12, 0.8)
+        test_qe = gen_step_qe(1.12, 0.8)
 
         r1 = rad_to_voc(0.001, test_qe)
 

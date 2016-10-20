@@ -10,7 +10,7 @@ from pypvcell.ivsolver import calculate_j01, calculate_j02_from_rad_eff, \
     gen_rec_iv, gen_rec_iv_with_rs_by_newton, solve_mj_iv, \
     calculate_j01_from_qe, gen_rec_iv_by_rad_eta,solve_ms_mj_iv
 from pypvcell.fom import max_power
-from pypvcell.photocurrent import gen_square_qe, calc_jsc, calc_jsc_from_eg
+from pypvcell.photocurrent import gen_step_qe, calc_jsc, calc_jsc_from_eg
 import scipy.constants as sc
 from pypvcell.spectrum import Spectrum
 
@@ -143,7 +143,7 @@ def calc_1j_eta(eg,qe,r_eta,cell_temperature=300, n_c=3.5,n_s=1,
     :return: the calculated efficiency
     """
     volt = np.linspace(-0.5, eg, num=300)
-    qe_spec=gen_square_qe(eg,qe)
+    qe_spec = gen_step_qe(eg, qe)
 
     ill = Illumination(spectrum=spectrum, concentration=concentration)
 
@@ -186,7 +186,7 @@ def calc_mj_eta(subcell_eg, subcell_qe, subcell_rad_eff, cell_temperature, conce
 
     # calculate j01 and j02 for each subcell
 
-    subcell_qe = [gen_square_qe(subcell_eg[i], subcell_qe[i]) for i, _ in enumerate(subcell_eg)]
+    subcell_qe = [gen_step_qe(subcell_eg[i], subcell_qe[i]) for i, _ in enumerate(subcell_eg)]
 
 
     #subcell_j01 = [calculate_j01_from_qe(qe) for i,qe in enumerate(subcell_qe)]
@@ -261,17 +261,3 @@ def calc_mj_eta(subcell_eg, subcell_qe, subcell_rad_eff, cell_temperature, conce
     return conv_efficiency
 
 
-if __name__ == "__main__":
-    import yaml
-
-    input_file = "db_layers.yaml"
-
-    file_inst = open(input_file, 'r')
-
-    file_content = file_inst.read()
-
-    d = yaml.load(file_content)
-
-    eta = calc_mj_eta(**d)
-
-    print(eta)

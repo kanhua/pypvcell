@@ -5,7 +5,7 @@ import numpy as np
 from pypvcell.spectrum import Spectrum
 import scipy.constants as sc
 from pypvcell.units_system import UnitsSystem
-from pypvcell.photocurrent import gen_square_qe
+from pypvcell.photocurrent import gen_step_qe
 from pypvcell.illumination import Illumination
 import matplotlib.pyplot as plt
 
@@ -202,7 +202,7 @@ class SpectrumTestCases(unittest.TestCase):
         :return:
         """
 
-        sq_qe = gen_square_qe(1.42, 0.9)
+        sq_qe = gen_step_qe(1.42, 0.9)
         test_ill = Illumination()
         # test_qef = qe_filter(sq_qe)
 
