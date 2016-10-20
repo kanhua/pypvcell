@@ -1,3 +1,34 @@
+"""
+Introduction
+-------------
+
+Spectrum class is designed to simplify the unit conversions, interpolation and arithmetic operations of spectrum data in the form of ``y(x)`` or ``y(x)dx``.
+When modeling solar cells, we often have to deal with spectrum with different units. For example, the ``x`` of your EQE is in photon energy (eV), but the ``x`` of the illumination spectrum is in wavelength (nm), and you want to multiply them to get Jsc. You then have to convert the ``x`` of EQE into wavelength, reverse the sequence of both ``x`` and ``y``, interpolate either the EQE or the illumination spectrum, convert ``y`` of the illumination spectrum into photon flux, multiply the data and finally run numerical integration to get Jsc. These processes can cause some headache and very error prone. ``Spectrum`` class aims to make these calculations robust and easy.
+
+Spectrum class bundles the data of ``x``, ``y`` and their associated units together into an object. This design may look clumsy at first sight, but this helps reduce many potential errors that could happen when handling the unit conversions of the data. The reason is that the value of ``y`` is often coupled with the unit of ``x``. For example, converting the ``y`` data from energy flux into photon flux requires the values of ``x``.
+
+Design of ``Spectrum`` class
+-----------------------------
+
+An instance of ``Spectrum`` class bundles the following key properties of a spectrum y(x):
+
+- x_data: the values of x
+- y_data: the values of y
+- x_unit: the unit of x (strings), e.g. 'eV', 'nm', 'J' and so on.
+- y_area_unit (optional): use this if the spectrum is something per area, such as sun irradiance (W/m^2), e.g., 'm 2')
+- is_spec_density: a boolean value to specify whether the spectrum is y(x)dx. In other words, this should be set to ``True`` if the integration of y(x)dx is a physical quantity. For example, this should be set to ``True`` when dealing with the sun irradiance spectrum because the integration of the sun irradiance spectrum gives the total illumination power. On the other hand, this should be set to ```False``` for spectrum like quantum efficiency or absorption spectrum.
+- is_photon_flux: This boolean values specifies whether the spectrum is photon flux.
+
+Access the values in ``Spectrum``
+---------------------------------
+
+
+
+Arithmetic operation
+---------------------
+
+
+"""
 import numpy as np
 import scipy.constants as sc
 from pypvcell.units_system import UnitsSystem

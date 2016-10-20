@@ -45,52 +45,12 @@ class Illumination(Spectrum):
         Spectrum.__init__(self, wl, flux * concentration, 'nm',
                           y_area_unit='m-2', is_photon_flux=False, is_spec_density=True)
 
-    def _x_read_from_csv(self, spectrum):
-        if spectrum in ["AM1.5g", "AM1.5d", "AM0"]:
-            this_dir = os.path.split(__file__)[0]
-            spectrumfile = np.loadtxt(os.path.join(this_dir, "astmg173.csv"),
-                                      dtype=float, delimiter=',', skiprows=2)
-
-            wl = spectrumfile[:, 0]
-
-            if spectrum == "AM1.5g":
-                flux = spectrumfile[:, 2]
-            elif spectrum == "AM0":
-                flux = spectrumfile[:, 1]
-            elif spectrum == "AM1.5d":
-                flux = spectrumfile[:, 3]
-        return flux, wl
-
     def total_power(self):
 
         # Calculate power using different methods
         return np.trapz(self.core_y, self.core_x)
 
-    def _x_write_pc1d_abs(self, fname):
 
-        current_dir = os.path.dirname(os.path.abspath(__file__))
-
-        pc1d_ill = np.loadtxt(os.path.join(current_dir, "AM15D_trim.SPC"))
-
-        pc1d_ill_per_nm = self.get_interp_spectrum_density(pc1d_ill[:, 0], "m-2", "nm")[:, 1]
-
-        # fill delta wl
-
-        delta_wl = np.zeros((pc1d_ill.shape[0],))
-
-        delta_wl[0] = pc1d_ill[1, 0] - pc1d_ill[0, 0]
-        delta_wl[-1] = pc1d_ill[-1, 0] - pc1d_ill[-2, 0]
-        for idx in range(1, pc1d_ill.shape[0] - 1):
-            delta_wl[idx] = ((pc1d_ill[idx + 1, 0] - pc1d_ill[idx, 0]) + (pc1d_ill[idx, 0] - pc1d_ill[idx - 1, 0])) / 2
-
-        pc1d_ill_intensity = pc1d_ill_per_nm * delta_wl
-
-        new_pc1d_ill = np.zeros(pc1d_ill.shape)
-
-        new_pc1d_ill[:, 0] = pc1d_ill[:, 0]
-        new_pc1d_ill[:, 1] = pc1d_ill_intensity
-
-        np.savetxt(fname, new_pc1d_ill, fmt="%.3f")
 
 
 class BpFilter(Spectrum):

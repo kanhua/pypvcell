@@ -1,18 +1,19 @@
-"""This module calculates figures of merit of solar cell IVs"""
-__author__ = 'kanhua'
-
 import numpy as np
 from scipy.interpolate import interp1d
 
-import matplotlib.pyplot as plt
-
-
 def voc(voltage, current):
+    """
+    Calculate the open-circuit voltage of an I-V curve.
+
+    :param voltage: the array of voltage
+    :type voltage: np.ndarray
+    :param current: the array of current
+    :type current: np.ndarray
+    :return: the value of Voc
+    """
+
     assert isinstance(voltage, np.ndarray)
     assert isinstance(current, np.ndarray)
-
-    #plt.plot(voltage,current)
-    #plt.show()
 
     interp = interp1d(x=current, y=voltage)
 
@@ -25,6 +26,16 @@ def voc(voltage, current):
 
 
 def isc(voltage, current):
+    """
+    Calculate the short-circuit current of an I-V curve
+
+    :param voltage: voltage array
+    :type voltage: np.ndarray
+    :param current: current array
+    :type current: np.ndarray
+    :return: The value of isc
+    """
+
     assert isinstance(voltage, np.ndarray)
     assert isinstance(current, np.ndarray)
 
@@ -39,6 +50,15 @@ def isc(voltage, current):
 
 
 def ff(voltage, current):
+    """
+    Calculate the fill factor from an I-V curve
+
+    :param voltage: voltage array
+    :type voltage: np.ndarray
+    :param current: current array
+    :type current: np.ndarray
+    :return: fill factor (in numerics)
+    """
     assert isinstance(voltage, np.ndarray)
     assert isinstance(current, np.ndarray)
 
@@ -56,6 +76,16 @@ def ff(voltage, current):
 
 
 def max_power(voltage,current):
+    """
+    Calculate the maximum power of an I-V curve.
+    Note that this function uses the convention of negative Isc.
+
+    :param voltage: voltage array
+    :type voltage: np.ndarray
+    :param current: current array
+    :type current: np.ndarray
+    :return: the value of maximum power
+    """
 
     assert isinstance(voltage, np.ndarray)
     assert isinstance(current, np.ndarray)
