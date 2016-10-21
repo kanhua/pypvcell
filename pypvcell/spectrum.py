@@ -243,24 +243,21 @@ class Spectrum(object):
 
         return output_spectrum
 
-    def __mul__(self, other):
+    def __add__(self, s2):
 
-        if isinstance(other, Spectrum):
-            return self.attenuation_single(other, inplace=False)
-        else:
-            try:
-                newobj = copy.deepcopy(self)
-                newobj.core_y = self.core_y * other
+        return self._arith_op(s2, np.add)
 
-                if newobj.core_x.shape != newobj.core_y.shape:
-                    raise Exception("The multipler should either be a scalar or a Spectrum calss object"
-                                    ", or an ndarray that matches the length of the spectrum")
+    def __sub__(self, s2):
 
-                return newobj
+        return self._arith_op(s2, np.substract)
 
-            except (TypeError, AttributeError) as err:
-                print(
-                    "Runtime Error: The multipler should either be a scalar or a Spectrum class object when doing Spectrum multiplication")
+    def __truediv__(self, s2):
+
+        return self._arith_op(s2, np.divide)
+
+    def __mul__(self, s2):
+
+        return self._arith_op(s2, np.multiply)
 
 
     def attenuation_single(self, filter, inplace=True):
@@ -277,6 +274,60 @@ class Spectrum(object):
             newobj = copy.deepcopy(self)
             newobj.core_y = new_core_spec
             return newobj
+
+    def _arith_op(self, s2, op):
+        """
+        Do the arithmetic operations
+
+        :param s2: an instance of Spectrum
+        :type s2: Spectrum,float
+        :param op: numpy ufunc, such as np.add, np.substract, np.multiply, np.divide
+        :return: the new Spectrum instance.
+        """
+
+        if isinstance(s2, Spectrum):
+            return self._spec_arith_op(s2, op, inplace=False)
+
+        else:
+
+            newobj = copy.deepcopy(self)
+            newobj.core_y = op(newobj.core_y, s2)
+
+            if newobj.core_x.shape != newobj.core_y.shape:
+                raise Exception("The multipler should either be a scalar or a Spectrum calss object"
+                                ", or an ndarray that matches the length of the spectrum")
+
+            return newobj
+            # except (TypeError, AttributeError) as err:
+            #   print(
+            #      "Runtime Error: The multipler should either be a scalar or a Spectrum class object when doing Spectrum multiplication")
+
+    def _spec_arith_op(self, s2, op, inplace=True):
+        """
+        Do the arithmetic operations of two Spectrum instances
+
+        :param s2: an instance of Spectrum
+        :type s2: Spectrum
+        :param op: numpy ufunc, such as np.add, np.substract, np.multiply, np.divide
+        :param inplace: True if the results overwrites the instance itself.
+        :type inplace: bool
+        :return: the new spectrum opject. Return None if inplace is set True
+        """
+
+        assert isinstance(s2, Spectrum)
+
+        new_spec = s2.get_interp_spectrum(self.core_x, 'm')
+
+        new_core_spec = op(self.core_y, new_spec[1, :])
+
+        if inplace:
+            self.core_y = new_core_spec
+            return None
+        else:
+            newobj = copy.deepcopy(self)
+            newobj.core_y = new_core_spec
+            return newobj
+
 
     def attenuation(self, filters):
         """
