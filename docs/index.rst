@@ -58,11 +58,11 @@ Modules
 -----------------
 
 .. toctree::
-:maxdepth: 2
+    :maxdepth: 2
 
-        spectrum_class
-        photocurrent_m
-        fom_m
+    spectrum_class
+    photocurrent_m
+    fom_m
 
 
 
