@@ -260,21 +260,6 @@ class Spectrum(object):
         return self._arith_op(s2, np.multiply)
 
 
-    def attenuation_single(self, filter, inplace=True):
-        assert isinstance(filter, Spectrum)
-
-        atten_spec = filter.get_interp_spectrum(self.core_x, 'm')
-
-        new_core_spec = self.core_y * atten_spec[1, :]
-
-        if inplace:
-            self.core_y = new_core_spec
-            return None
-        else:
-            newobj = copy.deepcopy(self)
-            newobj.core_y = new_core_spec
-            return newobj
-
     def _arith_op(self, s2, op):
         """
         Do the arithmetic operations
@@ -327,19 +312,6 @@ class Spectrum(object):
             newobj = copy.deepcopy(self)
             newobj.core_y = new_core_spec
             return newobj
-
-
-    def attenuation(self, filters):
-        """
-        Do attenuation of a list of filters
-        :param filters: a list of filter instances
-        """
-        assert isinstance(filters, list)
-
-        for f in filters:
-            self.attenuation_single(f)
-
-        return copy.deepcopy(self)
 
     def _as_photon_flux(self, wavelength, energy_flux):
         return energy_flux / (sc.h * sc.c) * wavelength
