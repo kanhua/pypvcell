@@ -300,18 +300,17 @@ class Spectrum(object):
             return self._spec_arith_op(s2, op, inplace=False)
 
         else:
+            try:
+                newobj = copy.deepcopy(self)
+                newobj.core_y = op(newobj.core_y, s2)
 
-            newobj = copy.deepcopy(self)
-            newobj.core_y = op(newobj.core_y, s2)
+                if newobj.core_x.shape != newobj.core_y.shape:
+                    raise Exception("The multipler should either be a scalar or a Spectrum calss object"
+                                    ", or an ndarray that matches the length of the spectrum")
 
-            if newobj.core_x.shape != newobj.core_y.shape:
-                raise Exception("The multipler should either be a scalar or a Spectrum calss object"
-                                ", or an ndarray that matches the length of the spectrum")
-
-            return newobj
-            # except (TypeError, AttributeError) as err:
-            #   print(
-            #      "Runtime Error: The multipler should either be a scalar or a Spectrum class object when doing Spectrum multiplication")
+                return newobj
+            except (TypeError, AttributeError) as err:
+                raise err("Runtime Error: The multipler should either be a scalar or a Spectrum class object when doing Spectrum multiplication")
 
     def _spec_arith_op(self, s2, op, inplace=True):
         """
