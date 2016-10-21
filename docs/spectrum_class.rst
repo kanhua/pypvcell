@@ -12,4 +12,6 @@ Spectrum class API
 
 
 .. autoclass:: pypvcell.spectrum.Spectrum
-:members:
+    :members:
+    :special-members: __init__
+

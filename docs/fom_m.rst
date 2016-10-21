@@ -8,4 +8,4 @@ Methods in this module
 -----------------------
 
 .. automodule:: pypvcell.fom
-:members:
+    :members:

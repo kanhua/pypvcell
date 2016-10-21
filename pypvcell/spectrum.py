@@ -12,20 +12,43 @@ Design of ``Spectrum`` class
 
 An instance of ``Spectrum`` class bundles the following key properties of a spectrum y(x):
 
-- x_data: the values of x
-- y_data: the values of y
-- x_unit: the unit of x (strings), e.g. 'eV', 'nm', 'J' and so on.
-- y_area_unit (optional): use this if the spectrum is something per area, such as sun irradiance (W/m^2), e.g., 'm 2')
-- is_spec_density: a boolean value to specify whether the spectrum is y(x)dx. In other words, this should be set to ``True`` if the integration of y(x)dx is a physical quantity. For example, this should be set to ``True`` when dealing with the sun irradiance spectrum because the integration of the sun irradiance spectrum gives the total illumination power. On the other hand, this should be set to ```False``` for spectrum like quantum efficiency or absorption spectrum.
-- is_photon_flux: This boolean values specifies whether the spectrum is photon flux.
+- ``x_data``: the values of x
+- ``y_data``: the values of y
+- ``x_unit``: the unit of x (strings), e.g. 'eV', 'nm', 'J' and so on.
+- ``y_area_unit`` (optional): use this if the spectrum is something per area, such as sun irradiance (W/m^2), e.g., 'm 2')
+- ``is_spec_density``: a boolean value to specify whether the spectrum is y(x)dx. In other words, this should be set to ``True`` if the integration of y(x)dx is a physical quantity. For example, this should be set to ``True`` when dealing with the sun irradiance spectrum because the integration of the sun irradiance spectrum gives the total illumination power. On the other hand, this should be set to ``False`` for spectrum like quantum efficiency or absorption spectrum.
+- ``is_photon_flux``: This boolean values specifies whether the spectrum is photon flux.
+
 
 Access the values in ``Spectrum``
----------------------------------
+-----------------------------------
+
+One can use ``get_spectrum()`` or ``get_interp_spectrum()`` to accessing the values of x and y in a spectrum. When retrieving the values of spectrum data, the user has to specify the unit for x. Both of these functions will handle the unit conversion and rearrange the order of x and y (say, when converting nm to eV).
+
+``get_spectrum()`` returns the 2xL numpy array of the x and y data.
+
+``get_interp_spectrum()`` returns the 2xL numpy array of interpolated x and y data from given x.
 
 
+Arithmetic operations
+-----------------------
 
-Arithmetic operation
----------------------
+Spectrum class supports arithmetic operations between different spectrum, for example: ::
+
+    # Multiplication of two spectrum
+    s3=s1*s2
+
+If s1 and s2 have different x, the function will interpolate s2 based on the values of x in s1.
+After that, it does the multiplication of y in s1 and s2.
+
+Spectrum calss also supports arithmetic operations with single float number, for example: ::
+
+    # Multiply a spectrum by a single number
+    s2=s1*0.5
+
+This operation multiply all the y values in s1 by 0.5 and return the result to s2.
+
+
 
 
 """
@@ -43,10 +66,9 @@ class Spectrum(object):
 
     It can handle unit conversions of different types of spectrum, including:
 
-    1. Standard spectrum. The unit of y is independent of x, e.g. quantum efficiency, absorption spectrum, etc.
-    2. Sepctral density. The unit of y is per [x-unit].
-    For example, the Black-body radiation spectrum is often in the unit of energy/nm/m^2
-    3. Photon flux: y is number of photons. When converting y into energy (J), it has to be multiplied by its photon energy.
+    - Standard spectrum. The unit of y is independent of x, e.g. quantum efficiency, absorption spectrum, etc.
+    - Sepctral density. The unit of y is per [x-unit]. For example, the Black-body radiation spectrum is often in the unit of energy/nm/m^2
+    - Photon flux: y is number of photons. When converting y into energy (J), it has to be multiplied by its photon energy.
 
     """
 
@@ -76,10 +98,13 @@ class Spectrum(object):
         :param x_data: x data of the spectrum (1d numpy array)
         :param y_data: y data of the spectrum (1d numpy array)
         :param x_unit: the unit of x (string), e.g. 'nm', 'eV'
-        :param y_area_unit:(string) If y is per area, put area unit here, e.g. 'm-2' or 'cm-2'.
-                Put null string '' if y does not have area unit
+        :type x_unit: str
+        :param y_area_unit: If y is per area, put area unit here, e.g. 'm-2' or 'cm-2'. Put null string '' if y does not have area unit
+        :type y_area_unit: str
         :param is_photon_flux: True if y is number of photons.
+        :type is_photon_flux: bool
         :param is_spec_density: True if y is spectral density.
+        :type is_spec_density: bool
         :return: None
         """
 
@@ -108,6 +133,7 @@ class Spectrum(object):
         # Convert photon flux to energy (J) representation
         if is_photon_flux:
             self.core_y = self._as_energy(self.core_x, self.core_y)
+
 
     def convert_spectrum_unit(self, x_data, y_data, from_x_unit, to_x_unit,
                               from_y_area_unit, to_y_area_unit,

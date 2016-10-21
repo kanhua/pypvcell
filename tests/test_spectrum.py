@@ -251,10 +251,9 @@ class SpectrumTestCases(unittest.TestCase):
         init_spec = np.ones(init_wl.shape)
         test_spec_base = Spectrum(init_wl, init_spec, 'nm', is_photon_flux=False)
 
-        # self.assertRaises(TypeError, test_spec_base * 'r')
-        # self.assertRaises(TypeError, test_spec_base * 1)
+        with self.assertRaises(TypeError):
+            test_spec_base*'r'
 
-        test_spec_base *10
 
 
 if __name__ == '__main__':

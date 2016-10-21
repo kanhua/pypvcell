@@ -5,7 +5,7 @@ This module provide some useful functions for perfoming calculation related to p
 
 
 Methods in this module
----------------
+------------------------
 
 .. automodule:: pypvcell.photocurrent
-:members:
+    :members:
