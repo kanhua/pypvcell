@@ -275,7 +275,7 @@ class Spectrum(object):
 
     def __sub__(self, s2):
 
-        return self._arith_op(s2, np.substract)
+        return self._arith_op(s2, np.subtract)
 
     def __truediv__(self, s2):
 
@@ -284,6 +284,35 @@ class Spectrum(object):
     def __mul__(self, s2):
 
         return self._arith_op(s2, np.multiply)
+
+    def __radd__(self,s2):
+
+        return self._arith_op(s2, np.add)
+
+    def __rsub__(self,s2):
+
+        return self._arith_op(s2,np.subtract)*(-1)
+
+    def __rmul__(self,s2):
+
+        return self._arith_op(s2,np.multiply)
+
+    def __rtruediv__(self,s2):
+
+        return self._inverse()._arith_op(s2,np.multiply)
+
+
+    def _inverse(self):
+
+        if self.y_area_unit !='':
+            print("Warning: y data is not dimensionless!")
+
+        newobj=copy.deepcopy(self)
+        newobj.core_y=1/newobj.core_y
+
+        return newobj
+
+
 
 
     def _arith_op(self, s2, op):
