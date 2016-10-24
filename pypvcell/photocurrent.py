@@ -86,7 +86,7 @@ def calc_jsc(input_illumination, qe):
     :return: value of Jsc (A/m^2)
     """
 
-    if not issubclass(input_illumination, Spectrum):
+    if not isinstance(input_illumination, Spectrum):
         raise TypeError("input_illumination should be a subclass of Spectrum")
 
     if not isinstance(qe, Spectrum):
@@ -111,7 +111,7 @@ def calc_jsc_from_eg(input_illumination, eg):
     :return: value of Jsc (A/m^2)
     """
 
-    if not issubclass(input_illumination, Spectrum):
+    if not isinstance(input_illumination, Spectrum):
         raise TypeError("input_illumination should be a subclass of Spectrum, preferably Illumination class")
 
     ill_array = input_illumination.get_spectrum(to_x_unit='eV', to_y_area_unit='m-2', to_photon_flux=True)

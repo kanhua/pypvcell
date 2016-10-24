@@ -252,32 +252,26 @@ class SpectrumTestCases(unittest.TestCase):
         test_spec_base = Spectrum(init_wl, init_spec, 'nm', is_photon_flux=False)
 
         with self.assertRaises(TypeError):
-            test_spec_base*'r'
-
+            test_spec_base * 'r'
 
     def test_inv_op(self):
-
         init_wl = np.linspace(300, 500, num=10)
         init_spec = np.ones(init_wl.shape)
 
         s1 = Spectrum(init_wl, init_spec, 'nm', is_photon_flux=False)
 
-        s3=1-s1*0.2
-        s3_c=s1*0.8
-        s3_c2=1+s1*(-0.2)
+        s3 = 1 - s1 * 0.2
+        s3_c = s1 * 0.8
+        s3_c2 = 1 + s1 * (-0.2)
 
-        self.assertTrue(np.allclose(s3.core_y,s3_c.core_y))
+        self.assertTrue(np.allclose(s3.core_y, s3_c.core_y))
 
-        self.assertTrue(np.allclose(s3.core_y,s3_c2.core_y))
+        self.assertTrue(np.allclose(s3.core_y, s3_c2.core_y))
 
-        s4=1/(s1*2)
-        s4_c=s1*0.5
+        s4 = 1 / (s1 * 2)
+        s4_c = s1 * 0.5
 
-        self.assertTrue(np.allclose(s4.core_y,s4_c.core_y))
-
-
-
-
+        self.assertTrue(np.allclose(s4.core_y, s4_c.core_y))
 
 
 if __name__ == '__main__':

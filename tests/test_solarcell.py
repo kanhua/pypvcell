@@ -1,7 +1,10 @@
 import unittest
-from pypvcell.illumination import Illumination
-from pypvcell.solarcell import SQCell, MJCell
+import numpy as np
 import matplotlib.pyplot as plt
+
+from pypvcell.illumination import Illumination
+from pypvcell.solarcell import SQCell, MJCell, DBCell
+from pypvcell.photocurrent import gen_step_qe
 
 
 class MyTestCase(unittest.TestCase):
@@ -45,6 +48,49 @@ class MyTestCase(unittest.TestCase):
         tj_cell.set_input_spectrum(self.input_ill)
 
         print("3J eta: %s" % tj_cell.get_eta())
+
+    def test_dbcell(self):
+
+        gaas_qe = gen_step_qe(1.42, 1)
+
+        gaas_db = DBCell(qe=gaas_qe, rad_eta=1, T=300)
+
+        gaas_db.set_input_spectrum(Illumination("AM1.5g"))
+
+        gaas_db_eta = gaas_db.get_eta()
+
+        sq_gaas = SQCell(eg=1.42, cell_T=300)
+        sq_gaas.set_input_spectrum(Illumination("AM1.5g"))
+
+        sq_gaas_eta = sq_gaas.get_eta()
+
+        self.assertTrue(np.isclose(gaas_db_eta, sq_gaas_eta, rtol=5e-3))
+
+    def test_dbcell2(self):
+
+        qe_val = 0.8
+
+        ill = Illumination("AM1.5g")
+
+        gaas_qe = gen_step_qe(1.42, qe_val)
+
+        gaas_db = DBCell(qe=gaas_qe, rad_eta=1, T=300)
+
+        gaas_db.set_input_spectrum(ill)
+
+        trans_sp = gaas_db.get_transmit_spectrum()
+
+        # Compare the expected and transmitted spectrum
+
+        x = np.linspace(1.5, 2, num=10)
+
+        trans = trans_sp.get_interp_spectrum(x, to_x_unit='eV')
+
+        orig = ill.get_interp_spectrum(x, to_x_unit='eV') * (1 - qe_val)
+
+        cp = np.allclose(trans[1, :], orig[1, :])
+
+        self.assertTrue(cp)
 
 
 if __name__ == '__main__':

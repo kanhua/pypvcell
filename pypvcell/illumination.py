@@ -5,7 +5,6 @@ from pypvcell.units_system import UnitsSystem
 from pypvcell.spectrum import Spectrum
 import pickle
 
-
 us = UnitsSystem()
 
 
@@ -21,7 +20,6 @@ def load_default_spectrum(fname):
     cache_spectrum["AM1.5d"] = spectrumfile[:, 3]
     cache_spectrum["AM0"] = spectrumfile[:, 1]
 
-    print("spectrum loaded!")
     return cache_spectrum
 
 
@@ -32,25 +30,21 @@ spec_data = load_default_spectrum(os.path.join(this_dir, "astmg173.csv"))
 
 class Illumination(Spectrum):
     def __init__(self, spectrum="AM1.5g", concentration=1):
-
         """
         Initialise a standard spectrum.
         """
 
-        #flux, wl = self.read_from_csv(spectrum)
+        # flux, wl = self.read_from_csv(spectrum)
 
-        wl=spec_data["wl"]
-        flux=spec_data[spectrum]
+        wl = spec_data["wl"]
+        flux = spec_data[spectrum]
 
         Spectrum.__init__(self, wl, flux * concentration, 'nm',
                           y_area_unit='m-2', is_photon_flux=False, is_spec_density=True)
 
     def total_power(self):
-
         # Calculate power using different methods
         return np.trapz(self.core_y, self.core_x)
-
-
 
 
 class BpFilter(Spectrum):
@@ -98,8 +92,10 @@ class QeFilter(Spectrum):
     QeFilter is essentially a Spectrum of QE.
     It calculates the transmission of QE. i.e., this spectrum gives 1-EQE(E)
     """
+
     def __init__(self, qe_wavelength, qe_in_ratio, x_unit):
         Spectrum.__init__(self, qe_wavelength, 1 - qe_in_ratio, x_unit=x_unit)
 
-if __name__=="__main__":
+
+if __name__ == "__main__":
     pass

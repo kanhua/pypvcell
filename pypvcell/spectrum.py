@@ -46,9 +46,11 @@ Spectrum calss also supports arithmetic operations with single float number, for
     # Multiply a spectrum by a single number
     s2=s1*0.5
 
+or ::
+
+    s2=0.5*s1
+
 This operation multiply all the y values in s1 by 0.5 and return the result to s2.
-
-
 
 
 """
