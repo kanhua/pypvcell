@@ -4,12 +4,12 @@ import unittest
 import numpy as np
 from pypvcell.spectrum import Spectrum, _energy_to_length
 import scipy.constants as sc
-from pypvcell.units_system import UnitsSystem
 from pypvcell.photocurrent import gen_step_qe
 from pypvcell.illumination import Illumination
 import matplotlib.pyplot as plt
+from pint import UnitRegistry
 
-us = UnitsSystem()
+ug=UnitRegistry()
 
 
 class SpectrumTestCases(unittest.TestCase):
@@ -55,7 +55,7 @@ class SpectrumTestCases(unittest.TestCase):
                                                             is_spec_density=False)
 
         self.assertTrue(np.all(np.isclose(y_data, new_y_data)))
-        self.assertTrue(np.all(np.isclose(x_data, us.eVnm(new_x_data))))
+        self.assertTrue(np.all(np.isclose(x_data, _energy_to_length(new_x_data,'eV','nm'))))
 
         x_data = np.linspace(300, 1000, num=1000)  # use trapz to check the result, therefore num has to be large
         y_data = np.ones(x_data.shape)
@@ -65,7 +65,7 @@ class SpectrumTestCases(unittest.TestCase):
                                                             from_y_area_unit='', to_y_area_unit='',
                                                             is_spec_density=True)
 
-        self.assertTrue(np.all(np.isclose(x_data, us.eVnm(new_x_data))))
+        self.assertTrue(np.all(np.isclose(x_data, _energy_to_length(new_x_data,'eV','nm'))))
         area_after_conv = np.trapz(new_y_data[::-1], new_x_data[::-1])
         area_before_conv = np.trapz(y_data, x_data)
         self.assertTrue(np.isclose(area_before_conv, area_after_conv, rtol=1e-3))
@@ -75,7 +75,7 @@ class SpectrumTestCases(unittest.TestCase):
                                                             from_y_area_unit='m**-2', to_y_area_unit='cm**-2',
                                                             is_spec_density=True)
 
-        self.assertTrue(np.all(np.isclose(x_data, us.eVnm(new_x_data))))
+        self.assertTrue(np.all(np.isclose(x_data, _energy_to_length(new_x_data,'eV','nm'))))
         area_after_conv = np.trapz(new_y_data[::-1], new_x_data[::-1])
         area_before_conv = np.trapz(y_data, x_data)
         self.assertTrue(np.isclose(area_before_conv, area_after_conv * 10000, rtol=1e-3))
@@ -84,7 +84,7 @@ class SpectrumTestCases(unittest.TestCase):
                                                             from_y_area_unit='m**-2', to_y_area_unit='m**-2',
                                                             is_spec_density=True)
 
-        self.assertTrue(np.all(np.isclose(x_data, us.eVnm(new_x_data))))
+        self.assertTrue(np.all(np.isclose(x_data, _energy_to_length(new_x_data,'eV','nm'))))
         area_after_conv = np.trapz(new_y_data[::-1], new_x_data[::-1])
         area_before_conv = np.trapz(y_data, x_data)
         self.assertTrue(np.isclose(area_before_conv, area_after_conv, rtol=1e-3))
@@ -97,7 +97,7 @@ class SpectrumTestCases(unittest.TestCase):
                                                             from_y_area_unit='', to_y_area_unit='',
                                                             is_spec_density=True)
 
-        self.assertTrue(np.all(np.isclose(x_data, us.eVnm(new_x_data))))
+        self.assertTrue(np.all(np.isclose(x_data, _energy_to_length(new_x_data,'eV','nm'))))
         area_after_conv = np.trapz(new_y_data[::-1], new_x_data[::-1])
         area_before_conv = np.trapz(y_data, x_data)
         self.assertTrue(np.isclose(area_before_conv, area_after_conv, rtol=1e-3))
@@ -113,7 +113,7 @@ class SpectrumTestCases(unittest.TestCase):
         area_after_conv = np.trapz(new_y_data[::-1], new_x_data[::-1])
         area_before_conv = np.trapz(y_data, x_data)
 
-        self.assertTrue(np.all(np.isclose(x_data, us.eVnm(new_x_data))))
+        self.assertTrue(np.all(np.isclose(x_data, _energy_to_length(new_x_data,'eV','nm'))))
 
         self.assertTrue(np.isclose(area_before_conv, area_after_conv * 10000, rtol=1e-2))
 
@@ -139,7 +139,7 @@ class SpectrumTestCases(unittest.TestCase):
 
         spectrum = spec_base2.get_spectrum(to_x_unit='nm', to_y_area_unit='')
 
-        self.assertTrue(np.all(np.isclose(spectrum[0, :], np.sort(us.eVnm(init_wl2)))))
+        self.assertTrue(np.all(np.isclose(spectrum[0, :], np.sort(_energy_to_length(init_wl2,'eV','nm')))))
 
         area_before = np.trapz(init_spec2, init_wl2)
         area_after = np.trapz(spectrum[1, :], spectrum[0, :])
@@ -160,7 +160,7 @@ class SpectrumTestCases(unittest.TestCase):
         test_spec_base = Spectrum(x_data=init_wl, y_data=init_spec, x_unit='eV', y_unit="")
         spectrum = test_spec_base.get_spectrum(to_x_unit='nm', to_y_area_unit="")
 
-        assert np.all(np.isclose(spectrum[0, :], np.sort(us.eVnm(init_wl))))
+        assert np.all(np.isclose(spectrum[0, :], np.sort(_energy_to_length(init_wl,'eV','nm'))))
 
     def test_energy_flux_conversion(self):
         """
@@ -174,7 +174,7 @@ class SpectrumTestCases(unittest.TestCase):
         spectrum = test_spec_base.get_spectrum(to_x_unit='nm')
 
         # Prepare an expected spectrum for comparsion
-        expect_spec = init_spec * sc.h * sc.c / us.siUnits(init_wl, 'nm')
+        expect_spec = init_spec * sc.h * sc.c / (init_wl*1e-9)
 
         # Since the values of the spectrum are very small, causing the errors in np.isclose()
         # ( both are in the order of ~1e-19) Need renormalise them for proper comparison.
@@ -191,7 +191,7 @@ class SpectrumTestCases(unittest.TestCase):
         test_spec_base = Spectrum(init_wl, init_spec, 'nm', is_photon_flux=False)
         spectrum = test_spec_base.get_spectrum('nm', to_photon_flux=True)
 
-        expect_spec = init_spec / (sc.h * sc.c / us.siUnits(init_wl, 'nm'))
+        expect_spec = init_spec / (sc.h * sc.c / (init_wl*1e-9))
 
         assert np.all(np.isclose(spectrum[1, :], expect_spec))
 

@@ -1,5 +1,5 @@
 import unittest
-from illumination import Illumination
+from pypvcell.illumination import Illumination
 
 
 class MyTestCase(unittest.TestCase):
