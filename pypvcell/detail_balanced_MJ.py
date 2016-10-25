@@ -4,7 +4,7 @@ detalied balance calculation of many junction devices
 
 import numpy as np
 import copy
-from pypvcell.illumination import QeFilter, Illumination
+from pypvcell.illumination import Illumination
 from pypvcell.fom import voc
 from pypvcell.ivsolver import calculate_j01, calculate_j02_from_rad_eff, \
     gen_rec_iv, gen_rec_iv_with_rs_by_newton, solve_mj_iv, \
@@ -92,7 +92,8 @@ def extract_voc(voltage, current, qe, spectrum="AM1.5g"):
     :return: the calculated Voc
     """
 
-    input_ill = Illumination(x_data=1, y_data=1, x_unit=null)
+    # TODO: assign concentration, or use Illumination() class as input
+    input_ill = Illumination(spectrum=spectrum,concentration=1)
     jsc = calc_jsc(input_ill, qe=qe)
 
     gen_current = current - jsc

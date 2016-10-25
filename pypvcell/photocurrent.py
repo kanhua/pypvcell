@@ -94,7 +94,7 @@ def calc_jsc(input_illumination, qe):
 
     # initialise a QE interp object
 
-    ill_array = input_illumination.get_spectrum(to_photon_flux=True, to_x_unit='eV', to_y_area_unit='m-2')
+    ill_array = input_illumination.get_spectrum(to_photon_flux=True, to_x_unit='eV', to_y_area_unit='m**-2')
 
     qe_array = qe.get_interp_spectrum(ill_array[0, :], 'eV')
 
@@ -114,11 +114,11 @@ def calc_jsc_from_eg(input_illumination, eg):
     if not isinstance(input_illumination, Spectrum):
         raise TypeError("input_illumination should be a subclass of Spectrum, preferably Illumination class")
 
-    ill_array = input_illumination.get_spectrum(to_x_unit='eV', to_y_area_unit='m-2', to_photon_flux=True)
+    ill_array = input_illumination.get_spectrum(to_x_unit='eV', to_y_area_unit='m**-2', to_photon_flux=True)
 
     ill_array = input_illumination.get_interp_spectrum(np.linspace(eg, ill_array[0, :].max(), num=100),
                                                        to_x_unit='eV',
-                                                       to_y_area_unit='m-2',
+                                                       to_y_area_unit='m**-2',
                                                        to_photon_flux=True)
 
     jsc = sc.e * np.trapz(ill_array[1, :], ill_array[0, :])

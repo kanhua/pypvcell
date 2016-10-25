@@ -128,7 +128,7 @@ class DBCell(SolarCell):
         :return:
         """
 
-        if (np.all(self.qe.core_y>=0) and np.all(self.qe.core_y<1))==False:
+        if (np.all(self.qe.core_y>=0) and np.all(self.qe.core_y<=1))==False:
             raise ValueError("The values of QE should be between 0 and 1.")
 
 

@@ -5,11 +5,9 @@ from scipy.optimize import newton_krylov
 import scipy.constants as sc
 # from spectrum_base import spectrum_base
 from pypvcell.spectrum import Spectrum
-from pypvcell.units_system import UnitsSystem
 import copy
 from pypvcell.fom import max_power
 
-us = UnitsSystem()
 
 
 def gen_rec_iv(j01, j02, n1, n2, temperature, rshunt, voltage, jsc=0):

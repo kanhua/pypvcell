@@ -9,6 +9,7 @@ from units_system import UnitsSystem
 
 us = UnitsSystem()
 
+# TODO Need to do some work here. Apprently this test class does not work. Some of the tests are not necessary after the arithmetic operations are implemented
 
 class FiltersTestCase(unittest.TestCase):
     def test_bpFilter(self):

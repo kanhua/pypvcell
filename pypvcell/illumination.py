@@ -1,19 +1,12 @@
 import numpy as np
 import os
-from scipy.interpolate import interp1d
-from pypvcell.units_system import UnitsSystem
 from pypvcell.spectrum import Spectrum
-import pickle
-
-us = UnitsSystem()
 
 
 def load_default_spectrum(fname):
     cache_spectrum = {}
-    spectrumfile = np.loadtxt(os.path.join(this_dir, "astmg173.csv"),
+    spectrumfile = np.loadtxt(os.path.join(this_dir, fname),
                               dtype=float, delimiter=',', skiprows=2)
-
-    wl = spectrumfile[:, 0]
 
     cache_spectrum["wl"] = spectrumfile[:, 0]
     cache_spectrum["AM1.5g"] = spectrumfile[:, 2]
