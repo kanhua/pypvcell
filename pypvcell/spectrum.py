@@ -62,21 +62,63 @@ import copy
 ug = UnitRegistry()
 
 # for unit comparision. Declared here for perfomance purpose.
-_lu = ug.parse_units('m').dimensionality
-_eu = ug.parse_units('J').dimensionality
+_lu = ug.parse_units('m').dimensionality  # length
+_eu = ug.parse_units('J').dimensionality  # energy
 
 # define constants for unit conversions
-_planck_c = sc.h * ug.parse_expression('J s')
-_light_speed = sc.c * ug.parse_expression('m/s')
+_h_unit = ug.parse_expression('J s')
+_c_unit = ug.parse_expression('m/s')
 
 
 def _energy_to_length(value, e_unit, l_unit):
-    # TODO: need some performance optimization here
-    # TODO: add dimensionality check
-    h = ug.convert(sc.h, 'J s', '%s s' % e_unit)
-    c = ug.convert(sc.c, 'm/s', '%s/s' % l_unit)
+    """
+    Convert wavelength to photon energy. The conversion is bi-directional. As a result, instead of using source and destination as input parameters, it uses "energy unit" and "length unit" as inputs.
+
+    :param value: The unit to be converted
+    :param e_unit: the unit of energy, such as 'J', 'eV'
+    :type e_unit: str
+    :param l_unit: the unit of wavelength, such as 'm', 'nm'
+    :type l_unit: str
+    :return:
+    """
+
+    c, h = _energy_to_length_factor(e_unit, l_unit)
 
     return h * c / value
+
+
+def _energy_to_length_factor(e_unit, l_unit):
+    dest_h_u = ug.parse_units('%s s' % e_unit)
+    dest_c_u = ug.parse_units('%s/s' % l_unit)
+    if dest_h_u.dimensionality != _h_unit.dimensionality:
+        raise ValueError("e_unit should be a valid energy unit")
+    if dest_c_u.dimensionality != _c_unit.dimensionality:
+        raise ValueError('l_unit should be a valid length unit')
+    h = ug.convert(sc.h, _h_unit, dest_h_u)
+    c = ug.convert(sc.c, _c_unit, dest_c_u)
+    return c, h
+
+
+def _spec_density_conversion(x, y, e_unit, l_unit):
+    """
+    Convert the units of spectral density.
+
+    :param x: x_data
+    :type x: np.ndarray
+    :param y: y_data
+    :type y: np.ndarray
+    :param e_unit: the unit of energy, such as 'J', 'eV'
+    :type e_unit: str
+    :param l_unit: the unit of wavelength, such as 'm', 'nm'
+    :type l_unit: str
+    :return: x, y
+    """
+
+    c, h = _energy_to_length_factor(e_unit, l_unit)
+
+    new_y = y * c * h / x ** 2
+
+    return x, new_y
 
 
 def compare_wavelength_dimension(unit_1, unit_2):
@@ -104,7 +146,7 @@ class Spectrum(object):
 
     """
 
-    def __init__(self, x_data, y_data, x_unit, y_area_unit="", is_spec_density=False, is_photon_flux=False):
+    def __init__(self, x_data, y_data, x_unit, y_unit="", is_spec_density=False, is_photon_flux=False):
         """
         Constructor of the spectrum y(x)
 
@@ -112,13 +154,13 @@ class Spectrum(object):
         :param x_data: x data of the spectrum (1d numpy array)
         :param y_data: y data of the spectrum (1d numpy array)
         :param x_unit: the unit of x (string), e.g. 'nm', 'eV'
-        :param y_area_unit: (string) If y is per area, put area unit here, e.g. 'm-2' or 'cm-2'.
+        :param y_unit: (string) If y is per area, put area unit here, e.g. 'm-2' or 'cm-2'.
                 Put null string '' if y does not have area unit
         :param is_photon_flux: (boolean). True if y is number of photons.
         """
 
         self.set_spectrum(x_data=x_data, y_data=y_data, x_unit=x_unit,
-                          y_area_unit=y_area_unit,
+                          y_area_unit=y_unit,
                           is_photon_flux=is_photon_flux,
                           is_spec_density=is_spec_density)
 
@@ -231,8 +273,6 @@ class Spectrum(object):
                 else:
                     new_y_data = y_data
 
-
-
         elif src_x_udim == _lu and des_x_udim == _eu:
 
             new_x_data = _energy_to_length(x_data, to_x_unit, from_x_unit)
@@ -240,10 +280,7 @@ class Spectrum(object):
             new_y_data = ug.convert(y_data, au1, au2)
 
             if is_spec_density:
-                conversion_constant = ug.convert(sc.c, 'm/s', '%s/s' % from_x_unit) * ug.convert(sc.h, 'J s',
-                                                                                                 '%s s' % to_x_unit)
-                new_y_data = new_y_data * conversion_constant / new_x_data ** 2
-
+                new_x_data, new_y_data = _spec_density_conversion(new_x_data, new_y_data, to_x_unit, from_x_unit)
 
         elif src_x_udim == _eu and des_x_udim == _lu:
 
@@ -252,9 +289,7 @@ class Spectrum(object):
             new_y_data = ug.convert(y_data, au1, au2)
 
             if is_spec_density:
-                conversion_constant = ug.convert(sc.c, 'm/s', '%s/s' % to_x_unit) * ug.convert(sc.h, 'J s',
-                                                                                               '%s s' % from_x_unit)
-                new_y_data = new_y_data * conversion_constant / new_x_data ** 2
+                new_x_data, new_y_data = _spec_density_conversion(new_x_data, new_y_data, from_x_unit, to_x_unit)
 
         return new_x_data, new_y_data
 

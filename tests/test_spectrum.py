@@ -2,7 +2,7 @@ __author__ = 'kanhua'
 
 import unittest
 import numpy as np
-from pypvcell.spectrum import Spectrum,_energy_to_length
+from pypvcell.spectrum import Spectrum, _energy_to_length
 import scipy.constants as sc
 from pypvcell.units_system import UnitsSystem
 from pypvcell.photocurrent import gen_step_qe
@@ -17,12 +17,13 @@ class SpectrumTestCases(unittest.TestCase):
         # set up cases for length wavelength conversions
         self.init_wl = np.linspace(300, 1000, num=5)
         self.init_spec = np.ones((self.init_wl.shape[0],))
-        self.spec_base = Spectrum(self.init_wl, self.init_spec, x_unit="nm", y_area_unit="m**-2")
+        self.spec_base = Spectrum(self.init_wl, self.init_spec, x_unit="nm", y_unit="m**-2")
 
         # set up cases
         self.init_wl2 = np.linspace(1, 5, num=1000)
         self.init_spec2 = np.linspace(1, 5, num=1000)
-        self.spec_base2 = Spectrum(self.init_wl2, self.init_spec2, x_unit="eV", y_area_unit="m**-2", is_spec_density=True)
+        self.spec_base2 = Spectrum(self.init_wl2, self.init_spec2, x_unit="eV", y_unit="m**-2",
+                                   is_spec_density=True)
 
     def test_convert_spectrum_unit(self):
         x_data = np.linspace(300, 1000, num=3)
@@ -30,8 +31,8 @@ class SpectrumTestCases(unittest.TestCase):
 
         # test without area units
 
-        spec = Spectrum(x_data=x_data, y_data=y_data, x_unit='nm',
-                        y_area_unit='', is_spec_density=False, is_photon_flux=False)
+        spec = Spectrum(x_data=x_data, y_data=y_data, x_unit='nm', y_unit='', is_spec_density=False,
+                        is_photon_flux=False)
 
         new_x_data, new_y_data = spec.convert_spectrum_unit(x_data, y_data, from_x_unit='nm', to_x_unit='nm',
                                                             from_y_area_unit='', to_y_area_unit='',
@@ -117,7 +118,7 @@ class SpectrumTestCases(unittest.TestCase):
         self.assertTrue(np.isclose(area_before_conv, area_after_conv * 10000, rtol=1e-2))
 
     def test_1(self):
-        spectrum = self.spec_base.get_spectrum(to_x_unit="nm",to_y_area_unit='m**-2')
+        spectrum = self.spec_base.get_spectrum(to_x_unit="nm", to_y_area_unit='m**-2')
         assert np.all(np.isclose(spectrum[0, :], self.init_wl))
         assert np.all(np.isclose(spectrum[1, :], self.init_spec))
 
@@ -134,7 +135,7 @@ class SpectrumTestCases(unittest.TestCase):
         init_wl2 = np.linspace(1, 5, num=1000)
         init_spec2 = np.linspace(1, 5, num=1000)
 
-        spec_base2 = Spectrum(init_wl2, init_spec2, x_unit="eV", y_area_unit="", is_spec_density=True)
+        spec_base2 = Spectrum(init_wl2, init_spec2, x_unit="eV", y_unit="", is_spec_density=True)
 
         spectrum = spec_base2.get_spectrum(to_x_unit='nm', to_y_area_unit='')
 
@@ -156,7 +157,7 @@ class SpectrumTestCases(unittest.TestCase):
         init_wl = np.linspace(1, 5, num=10)
         init_spec = np.ones(init_wl.shape)
 
-        test_spec_base = Spectrum(x_data=init_wl, y_data=init_spec, x_unit='eV', y_area_unit="")
+        test_spec_base = Spectrum(x_data=init_wl, y_data=init_spec, x_unit='eV', y_unit="")
         spectrum = test_spec_base.get_spectrum(to_x_unit='nm', to_y_area_unit="")
 
         assert np.all(np.isclose(spectrum[0, :], np.sort(us.eVnm(init_wl))))
@@ -194,9 +195,7 @@ class SpectrumTestCases(unittest.TestCase):
 
         assert np.all(np.isclose(spectrum[1, :], expect_spec))
 
-
     def test_wrong_units(self):
-
         init_wl = np.linspace(300, 500, num=10)
         init_spec = np.ones(init_wl.shape)
 
@@ -284,13 +283,10 @@ class SpectrumTestCases(unittest.TestCase):
 
         self.assertTrue(np.allclose(s4.core_y, s4_c.core_y))
 
-
     def test_evnm_conversion(self):
-
-        val=_energy_to_length(1.42,'eV','nm')
+        val = _energy_to_length(1.42, 'eV', 'nm')
 
         print(val)
-
 
 
 if __name__ == '__main__':

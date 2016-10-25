@@ -40,7 +40,7 @@ class Illumination(Spectrum):
         flux = spec_data[spectrum]
 
         Spectrum.__init__(self, wl, flux * concentration, 'nm',
-                          y_area_unit='m**-2', is_photon_flux=False, is_spec_density=True)
+                          y_unit='m**-2', is_photon_flux=False, is_spec_density=True)
 
     def total_power(self):
         # Calculate power using different methods
@@ -86,15 +86,6 @@ class material_filter(Spectrum):
 
         Spectrum.__init__(self, abs_spec[0, :], attenuation, 'm')
 
-
-class QeFilter(Spectrum):
-    """
-    QeFilter is essentially a Spectrum of QE.
-    It calculates the transmission of QE. i.e., this spectrum gives 1-EQE(E)
-    """
-
-    def __init__(self, qe_wavelength, qe_in_ratio, x_unit):
-        Spectrum.__init__(self, qe_wavelength, 1 - qe_in_ratio, x_unit=x_unit)
 
 
 if __name__ == "__main__":
