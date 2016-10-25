@@ -56,10 +56,30 @@ This operation multiply all the y values in s1 by 0.5 and return the result to s
 """
 import numpy as np
 import scipy.constants as sc
+from pint import UnitRegistry
 from pypvcell.units_system import UnitsSystem
 import copy
 
 us = UnitsSystem()
+ug=UnitRegistry()
+
+# for unit comparision. Declared here for perfomance purpose.
+_lu=ug.parse_units('m').dimensionality
+_eu=ug.parse_units('J').dimensionality
+
+def compare_wavelength_dimension(unit_1, unit_2):
+
+    un1=ug.parse_units(unit_1).dimensionality
+    un2=ug.parse_units(unit_2).dimensionality
+
+    if un1==un2:
+        return True
+    elif set([un1,un2])==set([_lu,_eu]):
+        return True
+    else:
+        return False
+
+
 
 class Spectrum(object):
     """
@@ -165,7 +185,7 @@ class Spectrum(object):
         if x_data.size != y_data.size:
             raise ValueError("The array size of x_data and y_data do not match.")
 
-        if not us.compare_wavelength_dimension(from_x_unit, to_x_unit):
+        if not compare_wavelength_dimension(from_x_unit, to_x_unit):
             raise ValueError("The dimension of from_x_unit and to_x_unit do not match.")
 
         if not us.compare_dimension(from_y_area_unit, to_y_area_unit):

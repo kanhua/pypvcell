@@ -194,6 +194,17 @@ class SpectrumTestCases(unittest.TestCase):
 
         assert np.all(np.isclose(spectrum[1, :], expect_spec))
 
+
+    def test_wrong_units(self):
+
+        init_wl = np.linspace(300, 500, num=10)
+        init_spec = np.ones(init_wl.shape)
+
+        test_spec_base = Spectrum(init_wl, init_spec, 'nm', is_photon_flux=False)
+
+        with self.assertRaises(ValueError):
+            test_spec_base.get_spectrum(to_x_unit='s')
+
     def test_9(self):
         """
         This test sets up a spectrum, and filter it with GaAs substrate.
