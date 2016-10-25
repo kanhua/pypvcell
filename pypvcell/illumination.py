@@ -40,7 +40,7 @@ class Illumination(Spectrum):
         flux = spec_data[spectrum]
 
         Spectrum.__init__(self, wl, flux * concentration, 'nm',
-                          y_area_unit='m-2', is_photon_flux=False, is_spec_density=True)
+                          y_area_unit='m**-2', is_photon_flux=False, is_spec_density=True)
 
     def total_power(self):
         # Calculate power using different methods

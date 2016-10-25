@@ -57,28 +57,38 @@ This operation multiply all the y values in s1 by 0.5 and return the result to s
 import numpy as np
 import scipy.constants as sc
 from pint import UnitRegistry
-from pypvcell.units_system import UnitsSystem
 import copy
 
-us = UnitsSystem()
-ug=UnitRegistry()
+ug = UnitRegistry()
 
 # for unit comparision. Declared here for perfomance purpose.
-_lu=ug.parse_units('m').dimensionality
-_eu=ug.parse_units('J').dimensionality
+_lu = ug.parse_units('m').dimensionality
+_eu = ug.parse_units('J').dimensionality
+
+# define constants for unit conversions
+_planck_c = sc.h * ug.parse_expression('J s')
+_light_speed = sc.c * ug.parse_expression('m/s')
+
+
+def _energy_to_length(value, e_unit, l_unit):
+    # TODO: need some performance optimization here
+    # TODO: add dimensionality check
+    h = ug.convert(sc.h, 'J s', '%s s' % e_unit)
+    c = ug.convert(sc.c, 'm/s', '%s/s' % l_unit)
+
+    return h * c / value
+
 
 def compare_wavelength_dimension(unit_1, unit_2):
+    un1 = ug.parse_units(unit_1).dimensionality
+    un2 = ug.parse_units(unit_2).dimensionality
 
-    un1=ug.parse_units(unit_1).dimensionality
-    un2=ug.parse_units(unit_2).dimensionality
-
-    if un1==un2:
+    if un1 == un2:
         return True
-    elif set([un1,un2])==set([_lu,_eu]):
+    elif set([un1, un2]) == set([_lu, _eu]):
         return True
     else:
         return False
-
 
 
 class Spectrum(object):
@@ -121,7 +131,7 @@ class Spectrum(object):
         :param y_data: y data of the spectrum (1d numpy array)
         :param x_unit: the unit of x (string), e.g. 'nm', 'eV'
         :type x_unit: str
-        :param y_area_unit: If y is per area, put area unit here, e.g. 'm-2' or 'cm-2'. Put null string '' if y does not have area unit
+        :param y_area_unit: If y is per area, put area unit here, e.g. 'm**-2' or 'cm**-2'. Put null string '' if y does not have area unit
         :type y_area_unit: str
         :param is_photon_flux: True if y is number of photons.
         :type is_photon_flux: bool
@@ -143,9 +153,9 @@ class Spectrum(object):
 
         if y_area_unit != '':
             self.core_x, self.core_y = self.convert_spectrum_unit(x_data, y_data, from_x_unit=x_unit, to_x_unit='m',
-                                                                  from_y_area_unit=y_area_unit, to_y_area_unit='m-2',
+                                                                  from_y_area_unit=y_area_unit, to_y_area_unit='m**-2',
                                                                   is_spec_density=self.is_spec_density)
-            self.y_area_unit = 'm-2'
+            self.y_area_unit = 'm**-2'
         else:
             self.core_x, self.core_y = self.convert_spectrum_unit(x_data, y_data, from_x_unit=x_unit, to_x_unit='m',
                                                                   from_y_area_unit='', to_y_area_unit='',
@@ -155,7 +165,6 @@ class Spectrum(object):
         # Convert photon flux to energy (J) representation
         if is_photon_flux:
             self.core_y = self._as_energy(self.core_x, self.core_y)
-
 
     def convert_spectrum_unit(self, x_data, y_data, from_x_unit, to_x_unit,
                               from_y_area_unit, to_y_area_unit,
@@ -182,18 +191,24 @@ class Spectrum(object):
         assert isinstance(to_y_area_unit, str)
         assert isinstance(is_spec_density, bool)
 
+        src_x_udim = ug.parse_units(from_x_unit).dimensionality
+        des_x_udim = ug.parse_units(to_x_unit).dimensionality
+
+        au1 = ug.parse_units(from_y_area_unit)
+        au2 = ug.parse_units(to_y_area_unit)
+
         if x_data.size != y_data.size:
             raise ValueError("The array size of x_data and y_data do not match.")
 
         if not compare_wavelength_dimension(from_x_unit, to_x_unit):
             raise ValueError("The dimension of from_x_unit and to_x_unit do not match.")
 
-        if not us.compare_dimension(from_y_area_unit, to_y_area_unit):
+        if not au1.dimensionality == au2.dimensionality:
             raise ValueError("The dimension of from y_area_unit and to_y_area_unit do not match.")
 
         if is_spec_density:
-            from_dx_unit = from_x_unit + "-1"
-            to_dx_unit = to_x_unit + "-1"
+            from_dx_unit = from_x_unit + "**-1"
+            to_dx_unit = to_x_unit + "**-1"
         else:
             from_dx_unit = ""
             to_dx_unit = ""
@@ -202,37 +217,43 @@ class Spectrum(object):
         new_orig_y_div_unit = to_y_area_unit + " " + to_dx_unit
 
         # Simple case
-        if us.guess_dimension(from_x_unit) == us.guess_dimension(to_x_unit):
+        if src_x_udim == des_x_udim:
 
-            new_x_data = us.convert(x_data, from_x_unit, to_x_unit)
-
-            new_y_data = us.convert(y_data, orig_y_div_unit,
-                                    new_orig_y_div_unit)
-
-
-        elif us.guess_dimension(from_x_unit) == 'length' and us.guess_dimension(to_x_unit) == 'energy':
-
-            new_x_data = us.convert(x_data, from_x_unit, 'nm')
-            new_x_data = us.eVnm(new_x_data)
-            new_x_data = us.convert(new_x_data, 'eV', to_x_unit)
-
-            new_y_data = us.convert(y_data, from_y_area_unit, to_y_area_unit)
+            new_x_data = ug.convert(x_data, ug.parse_units(from_x_unit), ug.parse_units(to_x_unit))
 
             if is_spec_density:
-                conversion_constant = us.asUnit(sc.h, to_x_unit + " s") * us.asUnit(sc.c, from_x_unit + " s-1")
+                new_y_data = ug.convert(y_data, ug.parse_units(orig_y_div_unit),
+                                        ug.parse_units(new_orig_y_div_unit))
+            else:
+                if from_y_area_unit != '' and to_y_area_unit != '':
+                    new_y_data = ug.convert(y_data, au1, au2)
+
+                else:
+                    new_y_data = y_data
+
+
+
+        elif src_x_udim == _lu and des_x_udim == _eu:
+
+            new_x_data = _energy_to_length(x_data, to_x_unit, from_x_unit)
+
+            new_y_data = ug.convert(y_data, au1, au2)
+
+            if is_spec_density:
+                conversion_constant = ug.convert(sc.c, 'm/s', '%s/s' % from_x_unit) * ug.convert(sc.h, 'J s',
+                                                                                                 '%s s' % to_x_unit)
                 new_y_data = new_y_data * conversion_constant / new_x_data ** 2
 
 
-        elif us.guess_dimension(from_x_unit) == 'energy' and us.guess_dimension(to_x_unit) == 'length':
+        elif src_x_udim == _eu and des_x_udim == _lu:
 
-            new_x_data = us.convert(x_data, from_x_unit, 'eV')
-            new_x_data = us.eVnm(new_x_data)
-            new_x_data = us.convert(new_x_data, 'nm', to_x_unit)
+            new_x_data = _energy_to_length(x_data, from_x_unit, to_x_unit)
 
-            new_y_data = us.convert(y_data, from_y_area_unit, to_y_area_unit)
+            new_y_data = ug.convert(y_data, au1, au2)
 
             if is_spec_density:
-                conversion_constant = us.asUnit(sc.h, from_x_unit + " s") * us.asUnit(sc.c, to_x_unit + " s-1")
+                conversion_constant = ug.convert(sc.c, 'm/s', '%s/s' % to_x_unit) * ug.convert(sc.h, 'J s',
+                                                                                               '%s s' % from_x_unit)
                 new_y_data = new_y_data * conversion_constant / new_x_data ** 2
 
         return new_x_data, new_y_data
@@ -307,35 +328,31 @@ class Spectrum(object):
 
         return self._arith_op(s2, np.multiply)
 
-    def __radd__(self,s2):
+    def __radd__(self, s2):
 
         return self._arith_op(s2, np.add)
 
-    def __rsub__(self,s2):
+    def __rsub__(self, s2):
 
-        return self._arith_op(s2,np.subtract)*(-1)
+        return self._arith_op(s2, np.subtract) * (-1)
 
-    def __rmul__(self,s2):
+    def __rmul__(self, s2):
 
-        return self._arith_op(s2,np.multiply)
+        return self._arith_op(s2, np.multiply)
 
-    def __rtruediv__(self,s2):
+    def __rtruediv__(self, s2):
 
-        return self._inverse()._arith_op(s2,np.multiply)
-
+        return self._inverse()._arith_op(s2, np.multiply)
 
     def _inverse(self):
 
-        if self.y_area_unit !='':
+        if self.y_area_unit != '':
             print("Warning: y data is not dimensionless!")
 
-        newobj=copy.deepcopy(self)
-        newobj.core_y=1/newobj.core_y
+        newobj = copy.deepcopy(self)
+        newobj.core_y = 1 / newobj.core_y
 
         return newobj
-
-
-
 
     def _arith_op(self, s2, op):
         """
@@ -361,7 +378,8 @@ class Spectrum(object):
 
                 return newobj
             except (TypeError, AttributeError) as err:
-                raise err("Runtime Error: The multipler should either be a scalar or a Spectrum class object when doing Spectrum multiplication")
+                raise err(
+                    "Runtime Error: The multipler should either be a scalar or a Spectrum class object when doing Spectrum multiplication")
 
     def _spec_arith_op(self, s2, op, inplace=True):
         """
@@ -394,62 +412,6 @@ class Spectrum(object):
 
     def _as_energy(self, wavelength, photon_flux):
         return photon_flux * (sc.h * sc.c) / wavelength
-
-    def _conv_wl_to_si(self, wavelength, unit):
-        """
-        Convert wavelength to meters.
-        :param wavelength:
-        :param unit:
-        :return:
-        """
-
-        assert isinstance(unit, str)
-
-        if unit == 'J':
-            new_wl = us.mJ(wavelength)
-
-        elif unit == 'eV':
-            new_wl = us.eVnm(wavelength)
-            new_wl = us.siUnits(new_wl, 'nm')
-
-        else:
-            new_wl = us.siUnits(wavelength, unit)
-
-        return new_wl
-
-    def _conv_x_to_unit(self, x_data, from_x_unit, to_x_unit):
-
-        if us.guess_dimension(from_x_unit) == us.guess_dimension(to_x_unit):
-            return us.convert(x_data, from_unit=from_x_unit, to_unit=to_x_unit)
-
-        elif us.guess_dimension(from_x_unit) == 'energy' and us.guess_dimension(to_x_unit) == 'length':
-
-            new_x_data = us.convert(x_data, from_x_unit, 'J')
-            new_x_data = us.mJ(new_x_data)
-
-            return us.convert(new_x_data, 'm', to_x_unit)
-
-        elif us.guess_dimension(from_x_unit) == 'length' and us.guess_dimension(to_x_unit) == 'energy':
-
-            new_x_data = us.convert(x_data, from_x_unit, 'm')
-            new_x_data = us.mJ(new_x_data)
-
-            return us.convert(new_x_data, 'J', to_x_unit)
-
-        else:
-            raise ValueError("The input units (from_x_unit and to_x_unit) do not match")
-
-    def _check_x_unit(self, from_x_unit, to_x_unit):
-
-        d1 = us.guess_dimension(from_x_unit)
-        d2 = us.guess_dimension(to_x_unit)
-
-        if d1 == d2 and (d1 in ['length', 'energy']):
-            return True
-        elif set([d1, d2]) == set(['length', 'energy']):
-            return True
-        else:
-            return False
 
 
 if __name__ == "__main__":
