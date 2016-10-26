@@ -64,6 +64,8 @@ ug = UnitRegistry()
 # for unit comparision. Declared here for perfomance purpose.
 _lu = ug.parse_units('m').dimensionality  # length
 _eu = ug.parse_units('J').dimensionality  # energy
+_ilu = ug.parse_units('1/m').dimensionality  # 1/length
+_itu = ug.parse_units('1/s').dimensionality  # 1/s, frequency
 
 # define constants for unit conversions
 _h_unit = ug.parse_expression('J s')
@@ -129,6 +131,10 @@ def compare_wavelength_dimension(unit_1, unit_2):
         return True
     elif set([un1, un2]) == set([_lu, _eu]):
         return True
+    elif set([un1, un2]) == set([_lu, _ilu]):
+        return True
+    elif set([un1,un2]) == set([_lu,_itu]):
+        return True
     else:
         return False
 
@@ -159,6 +165,7 @@ class Spectrum(object):
         :param is_photon_flux: (boolean). True if y is number of photons.
         """
 
+        # TODO: fix docstring's y unit
         self.set_spectrum(x_data=x_data, y_data=y_data, x_unit=x_unit,
                           y_area_unit=y_unit,
                           is_photon_flux=is_photon_flux,
@@ -233,8 +240,11 @@ class Spectrum(object):
         assert isinstance(to_y_area_unit, str)
         assert isinstance(is_spec_density, bool)
 
-        src_x_udim = ug.parse_units(from_x_unit).dimensionality
-        des_x_udim = ug.parse_units(to_x_unit).dimensionality
+        src_x_u = ug.parse_units(from_x_unit)
+        des_x_u = ug.parse_units(to_x_unit)
+
+        src_x_udim = src_x_u.dimensionality
+        des_x_udim = des_x_u.dimensionality
 
         au1 = ug.parse_units(from_y_area_unit)
         au2 = ug.parse_units(to_y_area_unit)
@@ -290,6 +300,66 @@ class Spectrum(object):
 
             if is_spec_density:
                 new_x_data, new_y_data = _spec_density_conversion(new_x_data, new_y_data, from_x_unit, to_x_unit)
+
+        elif set([src_x_udim, des_x_udim]) == set([_lu, _ilu]):
+
+            # The conversion is bi-directional, we use nm -> cm^-1 as the example for the following comments
+
+            x_data_q = x_data * src_x_u # attach the unit to the quantities
+
+            inv_scr_x_u=1/src_x_u # get the inverse unit of x for converting y, nm -> nm-1
+
+            x_data_q = 1 / x_data_q # Do the inverse of x data and its unit
+
+            new_x_data = x_data_q.to(des_x_u).m # Do the unit conversion and retrieve the value
+
+            new_y_data = ug.convert(y_data, au1, au2)
+
+            if is_spec_density:
+
+                # Convert the values of y, for example, from  []/nm to []/cm, assuming that we are converting x from [nm] to [cm]
+                new_y_data=ug.convert(new_y_data,inv_scr_x_u,des_x_u)
+
+                # Then run dk=d(lambda)/lambda^2
+                new_y_data = new_y_data / new_x_data ** 2
+
+        elif src_x_udim==_eu and des_x_udim==_ilu:
+
+            # TODO The below line is wrong. Although is block is not used because the class convert every thing to [meter] first
+            c,h=_energy_to_length_factor(src_x_u,des_x_u)
+
+            new_x_data=x_data/(h*c)
+
+            new_y_data = ug.convert(y_data, au1, au2)
+
+            if is_spec_density:
+
+                new_y_data=new_y_data*(h*c)
+
+        elif src_x_udim==_lu and des_x_udim==_itu:
+
+            c=ug.convert(sc.c,'m/s',from_x_unit+' '+to_x_unit)
+
+            new_x_data= c/x_data
+
+            new_y_data = ug.convert(y_data, au1, au2)
+
+            if is_spec_density:
+
+                new_y_data=new_y_data*c/new_x_data**2
+
+        elif src_x_udim==_itu and des_x_udim==_lu:
+
+            c=ug.convert(sc.c,'m/s',to_x_unit+' '+from_x_unit)
+
+            new_x_data= c/x_data
+
+            new_y_data = ug.convert(y_data, au1, au2)
+
+            if is_spec_density:
+
+                new_y_data=new_y_data*c/new_x_data**2
+
 
         return new_x_data, new_y_data
 

@@ -288,6 +288,58 @@ class SpectrumTestCases(unittest.TestCase):
 
         print(val)
 
+    def test_cm_1_conversion(self):
+
+        init_wl = np.linspace(300, 500, num=100)
+        init_spec = np.ones(init_wl.shape)
+
+        s1 = Spectrum(init_wl, init_spec, 'nm', is_photon_flux=False,is_spec_density=True)
+
+        x,y=s1.get_spectrum(to_x_unit='cm**-1')
+
+        c_wl=np.sort(1/(init_wl*1e-7))
+
+        self.assertTrue(np.allclose(x,c_wl))
+
+        # Compare the integration. For testing the conversion of spectral density
+        int1=np.trapz(init_spec,init_wl)
+        int2=np.trapz(y,x)
+
+        self.assertTrue(np.isclose(int1,int2,rtol=1e-3))
+
+    def test_eV_to_hz_conv(self):
+
+        init_wl = np.logspace(np.log10(200), np.log10(30000), num=100)
+        init_spec = np.ones(init_wl.shape)
+
+        s1 = Spectrum(init_wl, init_spec, x_unit='cm**-1', is_photon_flux=False,is_spec_density=True)
+
+        x,y=s1.get_spectrum(to_x_unit='s**-1')
+
+        # Compare the integration. For testing the conversion of spectral density
+        int1=np.trapz(init_spec,init_wl)
+        int2=np.trapz(y,x)
+
+        self.assertTrue(np.isclose(int1,int2,rtol=1e-3))
+
+
+    def test_hz_to_something_conv(self):
+
+        init_wl = np.logspace(np.log10(2.4e14), np.log10(2.4e17), num=100)
+        init_spec = np.ones(init_wl.shape)
+
+        s1 = Spectrum(init_wl, init_spec, x_unit='s**-1', is_photon_flux=False,is_spec_density=True)
+
+        x,y=s1.get_spectrum(to_x_unit='eV')
+
+        # Compare the integration. For testing the conversion of spectral density
+        int1=np.trapz(init_spec,init_wl)
+        int2=np.trapz(y,x)
+
+        self.assertTrue(np.isclose(int1,int2,rtol=1e-3))
+
+
+
 
 if __name__ == '__main__':
     unittest.main()
