@@ -1,0 +1,238 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>Module: photocurrent &#8212; pypvcell 0.1.0 documentation</title>
+    
+    <link rel="stylesheet" href="_static/alabaster.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    './',
+        VERSION:     '0.1.0',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="_static/jquery.js"></script>
+    <script type="text/javascript" src="_static/underscore.js"></script>
+    <script type="text/javascript" src="_static/doctools.js"></script>
+    <script type="text/javascript" src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="top" title="pypvcell 0.1.0 documentation" href="index.html" />
+    <link rel="next" title="Module: fom" href="fom_m.html" />
+    <link rel="prev" title="Spectrum" href="spectrum_class.html" />
+   
+  <link rel="stylesheet" href="_static/custom.css" type="text/css" />
+  
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
+
+  </head>
+  <body role="document">
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <div class="section" id="module-photocurrent">
+<h1>Module: photocurrent<a class="headerlink" href="#module-photocurrent" title="Permalink to this headline">¶</a></h1>
+<p>This module provide some useful functions for perfoming calculation related to photocurrent of solar cells.</p>
+<div class="section" id="module-pypvcell.photocurrent">
+<span id="methods-in-this-module"></span><h2>Methods in this module<a class="headerlink" href="#module-pypvcell.photocurrent" title="Permalink to this headline">¶</a></h2>
+<dl class="function">
+<dt id="pypvcell.photocurrent.calc_jsc">
+<code class="descclassname">pypvcell.photocurrent.</code><code class="descname">calc_jsc</code><span class="sig-paren">(</span><em>input_illumination</em>, <em>qe</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pypvcell/photocurrent.html#calc_jsc"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pypvcell.photocurrent.calc_jsc" title="Permalink to this definition">¶</a></dt>
+<dd><p>Calculate Jsc from given QE and illumination</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>input_illumination</strong> (<em>Illumination</em>) &#8211; illumination spectrum</li>
+<li><strong>qe</strong> (<a class="reference internal" href="spectrum_class.html#pypvcell.spectrum.Spectrum" title="pypvcell.spectrum.Spectrum"><em>Spectrum</em></a>) &#8211; QE</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last">value of Jsc (A/m^2)</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="pypvcell.photocurrent.calc_jsc_from_eg">
+<code class="descclassname">pypvcell.photocurrent.</code><code class="descname">calc_jsc_from_eg</code><span class="sig-paren">(</span><em>input_illumination</em>, <em>eg</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pypvcell/photocurrent.html#calc_jsc_from_eg"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pypvcell.photocurrent.calc_jsc_from_eg" title="Permalink to this definition">¶</a></dt>
+<dd><p>Calculate the Jsc by assuming 100% above-band-gap EQE</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>input_illumination</strong> (<em>Illumination</em>) &#8211; illumination (class)</li>
+<li><strong>eg</strong> &#8211; Band gap of the material (in eV)</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last">value of Jsc (A/m^2)</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="pypvcell.photocurrent.conv_abs_to_qe">
+<code class="descclassname">pypvcell.photocurrent.</code><code class="descname">conv_abs_to_qe</code><span class="sig-paren">(</span><em>absorption</em>, <em>layer_thickness</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pypvcell/photocurrent.html#conv_abs_to_qe"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pypvcell.photocurrent.conv_abs_to_qe" title="Permalink to this definition">¶</a></dt>
+<dd><p>Calculate the QE (absorptivity) from absorption coefficient and layer_thickness
+Note that the unit of the absorption should match the layer thickness.
+For example, if the unit of <code class="docutils literal"><span class="pre">absorption</span></code> is 1/meter, the layer_thickness should be meter.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>absorption</strong> (<a class="reference internal" href="spectrum_class.html#pypvcell.spectrum.Spectrum" title="pypvcell.spectrum.Spectrum"><em>Spectrum</em></a>) &#8211; Spectrum class instance, the unit of absorption: 1/m</li>
+<li><strong>layer_thickness</strong> (<em>float</em>) &#8211; layer thickness, unit: m</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first">QE, a Spectrum class instance</p>
+</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><p class="first last"><a class="reference internal" href="spectrum_class.html#pypvcell.spectrum.Spectrum" title="pypvcell.spectrum.Spectrum">Spectrum</a></p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="pypvcell.photocurrent.gen_step_qe">
+<code class="descclassname">pypvcell.photocurrent.</code><code class="descname">gen_step_qe</code><span class="sig-paren">(</span><em>bandEdge_in_eV</em>, <em>qe_in_ratio</em>, <em>qe_below_edge=1e-06</em>, <em>wl_bound=(0.0001</em>, <em>5)</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pypvcell/photocurrent.html#gen_step_qe"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pypvcell.photocurrent.gen_step_qe" title="Permalink to this definition">¶</a></dt>
+<dd><p>Generate a staircase QE array. Same as gen_square_qe_array() except that it generates a Spectrum class object.
+EQE(E)= qe if E &gt;= Eg
+EQE(E)= z (z~0) if E&lt;Eg</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>bandEdge_in_eV</strong> (<em>float</em>) &#8211; set Eg</li>
+<li><strong>qe_in_ratio</strong> (<em>float</em>) &#8211; set qe value (qe) above Eg</li>
+<li><strong>qe_below_edge</strong> &#8211; set qe value (z) below Eg</li>
+<li><strong>wl_bound</strong> (<em>Tuple[float,float]</em>) &#8211; tuple: (minE, maxE), The minimum and maximum of photon energy of this array</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first">A Spectrum object</p>
+</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><p class="first last"><a class="reference internal" href="spectrum_class.html#pypvcell.spectrum.Spectrum" title="pypvcell.spectrum.Spectrum">Spectrum</a></p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="pypvcell.photocurrent.gen_step_qe_array">
+<code class="descclassname">pypvcell.photocurrent.</code><code class="descname">gen_step_qe_array</code><span class="sig-paren">(</span><em>bandEdge_in_eV</em>, <em>qe_in_ratio</em>, <em>qe_below_edge=0.001</em>, <em>wl_bound=(0.01</em>, <em>5)</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pypvcell/photocurrent.html#gen_step_qe_array"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pypvcell.photocurrent.gen_step_qe_array" title="Permalink to this definition">¶</a></dt>
+<dd><p>Generate a staircase QE array :
+EQE(E)= qe if E &gt;= Eg
+EQE(E)= z (z~0) if E&lt;Eg</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>bandEdge_in_eV</strong> (<em>float</em>) &#8211; set Eg</li>
+<li><strong>qe_in_ratio</strong> (<em>float</em>) &#8211; set qe value (qe) above Eg</li>
+<li><strong>qe_below_edge</strong> &#8211; set qe value (z) below Eg</li>
+<li><strong>wl_bound</strong> (<em>Tuple[float,float]</em>) &#8211; tuple: (minE, maxE), The minimum and maximum of photon energy of this array</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first">A 4x2 array, the first column is photon energy (in eV) and the second column is the qe</p>
+</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><p class="first last">np.ndarray</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+  <h3><a href="index.html">Table Of Contents</a></h3>
+  <ul>
+<li><a class="reference internal" href="#">Module: photocurrent</a><ul>
+<li><a class="reference internal" href="#module-pypvcell.photocurrent">Methods in this module</a></li>
+</ul>
+</li>
+</ul>
+<div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="index.html">Documentation overview</a><ul>
+      <li>Previous: <a href="spectrum_class.html" title="previous chapter">Spectrum</a></li>
+      <li>Next: <a href="fom_m.html" title="next chapter">Module: fom</a></li>
+  </ul></li>
+</ul>
+</div>
+  <div role="note" aria-label="source link">
+    <h3>This Page</h3>
+    <ul class="this-page-menu">
+      <li><a href="_sources/photocurrent_m.txt"
+            rel="nofollow">Show Source</a></li>
+    </ul>
+   </div>
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <form class="search" action="search.html" method="get">
+      <div><input type="text" name="q" /></div>
+      <div><input type="submit" value="Go" /></div>
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &copy;2016, Kan-Hua Lee.
+      
+      |
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 1.4.8</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.9</a>
+      
+      |
+      <a href="_sources/photocurrent_m.txt"
+          rel="nofollow">Page source</a>
+    </div>
+
+    
+
+    
+  </body>
+</html>
