@@ -90,6 +90,17 @@ def _energy_to_length(value, e_unit, l_unit):
 
 
 def _energy_to_length_factor(e_unit, l_unit):
+    """
+    Convert the units of Planck's constant and speed of light
+
+    :param e_unit:
+    :type e_unit: str
+    :param l_unit:
+    :type l_unit: str
+    :return: c,h
+    """
+
+
     dest_h_u = ug.parse_units('%s s' % e_unit)
     dest_c_u = ug.parse_units('%s/s' % l_unit)
     if dest_h_u.dimensionality != _h_unit.dimensionality:
@@ -124,6 +135,23 @@ def _spec_density_conversion(x, y, e_unit, l_unit):
 
 
 def compare_wavelength_dimension(unit_1, unit_2):
+    """
+    Check whether the unit_1 and unit_2 are valid units.
+    It returns true when:
+
+    unit_1==unit_2
+    set(unit_1,unit_2)=set([length],[energy])
+    set(unit_1,unit_2)=set([length],1/[length])
+    set(unit_1,unit_2)=set([length],[frequency])
+
+    :param unit_1: unit 1, e.g. 'm', 'J',etc.
+    :type unit_1: str
+    :param unit_2: unit 2, e.g. 'm', 'J',etc.
+    :type unit_2: str
+    :return: boolean value
+    :rtype: bool
+    """
+
     un1 = ug.parse_units(unit_1).dimensionality
     un2 = ug.parse_units(unit_2).dimensionality
 
@@ -221,6 +249,13 @@ class Spectrum(object):
 
         """
         A general method for converting the spectrum y(x) from one set of unit to another.
+        Note that this only supports the conversion of x from:
+        [length]<->[frequency]
+        [length]<-> 1/[length]
+        [length]<->[energy]
+
+        This is because Spectrum class converts the units of x to [length] first when initilizing or new spectrum is set.
+        Therefore this function only implments the bi-direction unit conversions that involves [length].
 
         :param x_data: data of x (numpy array)
         :param y_data: data of y (numpy array)
@@ -322,19 +357,6 @@ class Spectrum(object):
 
                 # Then run dk=d(lambda)/lambda^2
                 new_y_data = new_y_data / new_x_data ** 2
-
-        elif src_x_udim==_eu and des_x_udim==_ilu:
-
-            # TODO The below line is wrong. Although is block is not used because the class convert every thing to [meter] first
-            c,h=_energy_to_length_factor(src_x_u,des_x_u)
-
-            new_x_data=x_data/(h*c)
-
-            new_y_data = ug.convert(y_data, au1, au2)
-
-            if is_spec_density:
-
-                new_y_data=new_y_data*(h*c)
 
         elif src_x_udim==_lu and des_x_udim==_itu:
 
