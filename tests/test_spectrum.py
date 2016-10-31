@@ -6,7 +6,7 @@ from pypvcell.spectrum import Spectrum, _energy_to_length
 import scipy.constants as sc
 from pypvcell.photocurrent import gen_step_qe
 from pypvcell.illumination import Illumination
-import matplotlib.pyplot as plt
+#import matplotlib.pyplot as plt
 from pint import UnitRegistry
 
 ug=UnitRegistry()
@@ -220,15 +220,15 @@ class SpectrumTestCases(unittest.TestCase):
 
         assert isinstance(filtered_ill, Illumination)
 
-        plt.plot(filtered_ill.get_spectrum('eV')[0, :], filtered_ill.get_spectrum('eV')[1, :], label="filtered")
-        plt.plot(test_ill.get_spectrum('eV')[0, :], test_ill.get_spectrum('eV')[1, :], label="original")
+        #plt.plot(filtered_ill.get_spectrum('eV')[0, :], filtered_ill.get_spectrum('eV')[1, :], label="filtered")
+        #plt.plot(test_ill.get_spectrum('eV')[0, :], test_ill.get_spectrum('eV')[1, :], label="original")
 
-        plt.xlabel('wavelength (eV)')
-        plt.ylabel('spectrum (W/eV/m^2)')
+        #plt.xlabel('wavelength (eV)')
+        #plt.ylabel('spectrum (W/eV/m^2)')
 
-        plt.legend()
+        #plt.legend()
 
-        plt.show()
+        #plt.show()
 
     def test_mul_scalar(self):
         init_wl = np.linspace(300, 500, num=10)

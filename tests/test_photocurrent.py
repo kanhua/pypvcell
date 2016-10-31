@@ -1,9 +1,9 @@
 __author__ = 'kanhua'
 
 import unittest
-from photocurrent import gen_qe_from_abs, calc_jsc, gen_square_qe, calc_jsc_from_eg
-from illumination import illumination
-from spectrum_base_update import Spectrum
+from pypvcell.photocurrent import gen_qe_from_abs, calc_jsc, gen_square_qe, calc_jsc_from_eg
+from pypvcell.illumination import illumination
+from pypvcell.spectrum_base_update import Spectrum
 import numpy as np
 import matplotlib.pyplot as plt
 
