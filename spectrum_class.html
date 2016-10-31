@@ -8,7 +8,7 @@
     
     <title>Spectrum &#8212; pypvcell 0.1 documentation</title>
     
-    <link rel="stylesheet" href="_static/classic.css" type="text/css" />
+    <link rel="stylesheet" href="_static/alabaster.css" type="text/css" />
     <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
     
     <script type="text/javascript">
@@ -24,29 +24,20 @@
     <script type="text/javascript" src="_static/underscore.js"></script>
     <script type="text/javascript" src="_static/doctools.js"></script>
     <script type="text/javascript" src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
     <link rel="top" title="pypvcell 0.1 documentation" href="index.html" />
     <link rel="next" title="Module: photocurrent" href="photocurrent_m.html" />
-    <link rel="prev" title="Pypvcell: An extensible programming framework for modeling solar cell" href="index.html" /> 
+    <link rel="prev" title="Pypvcell: An extensible programming framework for modeling solar cell" href="index.html" />
+   
+  <link rel="stylesheet" href="_static/custom.css" type="text/css" />
+  
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
+
   </head>
   <body role="document">
-    <div class="related" role="navigation" aria-label="related navigation">
-      <h3>Navigation</h3>
-      <ul>
-        <li class="right" style="margin-right: 10px">
-          <a href="genindex.html" title="General Index"
-             accesskey="I">index</a></li>
-        <li class="right" >
-          <a href="py-modindex.html" title="Python Module Index"
-             >modules</a> |</li>
-        <li class="right" >
-          <a href="photocurrent_m.html" title="Module: photocurrent"
-             accesskey="N">next</a> |</li>
-        <li class="right" >
-          <a href="index.html" title="Pypvcell: An extensible programming framework for modeling solar cell"
-             accesskey="P">previous</a> |</li>
-        <li class="nav-item nav-item-0"><a href="index.html">pypvcell 0.1 documentation</a> &#187;</li> 
-      </ul>
-    </div>  
+  
 
     <div class="document">
       <div class="documentwrapper">
@@ -82,19 +73,19 @@ When modeling solar cells, we often have to deal with spectrum with different un
 <div class="section" id="arithmetic-operations">
 <h2>Arithmetic operations<a class="headerlink" href="#arithmetic-operations" title="Permalink to this headline">¶</a></h2>
 <p>Spectrum class supports arithmetic operations between different spectrum, for example:</p>
-<div class="highlight-default"><div class="highlight"><pre><span class="c1"># Multiplication of two spectrum</span>
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="c1"># Multiplication of two spectrum</span>
 <span class="n">s3</span><span class="o">=</span><span class="n">s1</span><span class="o">*</span><span class="n">s2</span>
 </pre></div>
 </div>
 <p>If s1 and s2 have different x, the function will interpolate s2 based on the values of x in s1.
 After that, it does the multiplication of y in s1 and s2.</p>
 <p>Spectrum calss also supports arithmetic operations with single float number, for example:</p>
-<div class="highlight-default"><div class="highlight"><pre><span class="c1"># Multiply a spectrum by a single number</span>
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="c1"># Multiply a spectrum by a single number</span>
 <span class="n">s2</span><span class="o">=</span><span class="n">s1</span><span class="o">*</span><span class="mf">0.5</span>
 </pre></div>
 </div>
 <p>or</p>
-<div class="highlight-default"><div class="highlight"><pre><span class="n">s2</span><span class="o">=</span><span class="mf">0.5</span><span class="o">*</span><span class="n">s1</span>
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="n">s2</span><span class="o">=</span><span class="mf">0.5</span><span class="o">*</span><span class="n">s1</span>
 </pre></div>
 </div>
 <p>This operation multiply all the y values in s1 by 0.5 and return the result to s2.</p>
@@ -261,13 +252,15 @@ It converts everything to standard MKS unit. x_data: &#8216;m&#8217;, y_data: &#
 </ul>
 </li>
 </ul>
-
-  <h4>Previous topic</h4>
-  <p class="topless"><a href="index.html"
-                        title="previous chapter">Pypvcell: An extensible programming framework for modeling solar cell</a></p>
-  <h4>Next topic</h4>
-  <p class="topless"><a href="photocurrent_m.html"
-                        title="next chapter">Module: photocurrent</a></p>
+<div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="index.html">Documentation overview</a><ul>
+      <li>Previous: <a href="index.html" title="previous chapter">Pypvcell: An extensible programming framework for modeling solar cell</a></li>
+      <li>Next: <a href="photocurrent_m.html" title="next chapter">Module: photocurrent</a></li>
+  </ul></li>
+</ul>
+</div>
   <div role="note" aria-label="source link">
     <h3>This Page</h3>
     <ul class="this-page-menu">
@@ -289,27 +282,20 @@ It converts everything to standard MKS unit. x_data: &#8216;m&#8217;, y_data: &#
       </div>
       <div class="clearer"></div>
     </div>
-    <div class="related" role="navigation" aria-label="related navigation">
-      <h3>Navigation</h3>
-      <ul>
-        <li class="right" style="margin-right: 10px">
-          <a href="genindex.html" title="General Index"
-             >index</a></li>
-        <li class="right" >
-          <a href="py-modindex.html" title="Python Module Index"
-             >modules</a> |</li>
-        <li class="right" >
-          <a href="photocurrent_m.html" title="Module: photocurrent"
-             >next</a> |</li>
-        <li class="right" >
-          <a href="index.html" title="Pypvcell: An extensible programming framework for modeling solar cell"
-             >previous</a> |</li>
-        <li class="nav-item nav-item-0"><a href="index.html">pypvcell 0.1 documentation</a> &#187;</li> 
-      </ul>
+    <div class="footer">
+      &copy;2016, Kan-Hua Lee.
+      
+      |
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 1.4.8</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.9</a>
+      
+      |
+      <a href="_sources/spectrum_class.txt"
+          rel="nofollow">Page source</a>
     </div>
-    <div class="footer" role="contentinfo">
-        &#169; Copyright 2016, Kan-Hua Lee.
-      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.4.6.
-    </div>
+
+    
+
+    
   </body>
 </html>
