@@ -8,3 +8,4 @@ __pycache__
 *.mat
 *.png
 _build/
+pypvcell.egg-info/
