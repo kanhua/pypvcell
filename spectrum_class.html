@@ -82,13 +82,17 @@ After that, it does the multiplication of y in s1 and s2.</p>
 <span class="n">s2</span><span class="o">=</span><span class="n">s1</span><span class="o">*</span><span class="mf">0.5</span>
 </pre></div>
 </div>
+<p>or</p>
+<div class="highlight-default"><div class="highlight"><pre><span class="n">s2</span><span class="o">=</span><span class="mf">0.5</span><span class="o">*</span><span class="n">s1</span>
+</pre></div>
+</div>
 <p>This operation multiply all the y values in s1 by 0.5 and return the result to s2.</p>
 </div>
 <div class="section" id="spectrum-class-api">
 <h2>Spectrum class API<a class="headerlink" href="#spectrum-class-api" title="Permalink to this headline">¶</a></h2>
 <dl class="class">
 <dt id="pypvcell.spectrum.Spectrum">
-<em class="property">class </em><code class="descclassname">pypvcell.spectrum.</code><code class="descname">Spectrum</code><span class="sig-paren">(</span><em>x_data</em>, <em>y_data</em>, <em>x_unit</em>, <em>y_area_unit=''</em>, <em>is_spec_density=False</em>, <em>is_photon_flux=False</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pypvcell/spectrum.html#Spectrum"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pypvcell.spectrum.Spectrum" title="Permalink to this definition">¶</a></dt>
+<em class="property">class </em><code class="descclassname">pypvcell.spectrum.</code><code class="descname">Spectrum</code><span class="sig-paren">(</span><em>x_data</em>, <em>y_data</em>, <em>x_unit</em>, <em>y_unit=''</em>, <em>is_spec_density=False</em>, <em>is_photon_flux=False</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pypvcell/spectrum.html#Spectrum"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pypvcell.spectrum.Spectrum" title="Permalink to this definition">¶</a></dt>
 <dd><p>This class handles the operation of the spectrum y(x), including unit conversion and multiplication.</p>
 <p>It can handle unit conversions of different types of spectrum, including:</p>
 <ul class="simple">
@@ -98,7 +102,7 @@ After that, it does the multiplication of y in s1 and s2.</p>
 </ul>
 <dl class="method">
 <dt id="pypvcell.spectrum.Spectrum.__init__">
-<code class="descname">__init__</code><span class="sig-paren">(</span><em>x_data</em>, <em>y_data</em>, <em>x_unit</em>, <em>y_area_unit=''</em>, <em>is_spec_density=False</em>, <em>is_photon_flux=False</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pypvcell/spectrum.html#Spectrum.__init__"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pypvcell.spectrum.Spectrum.__init__" title="Permalink to this definition">¶</a></dt>
+<code class="descname">__init__</code><span class="sig-paren">(</span><em>x_data</em>, <em>y_data</em>, <em>x_unit</em>, <em>y_unit=''</em>, <em>is_spec_density=False</em>, <em>is_photon_flux=False</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pypvcell/spectrum.html#Spectrum.__init__"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pypvcell.spectrum.Spectrum.__init__" title="Permalink to this definition">¶</a></dt>
 <dd><p>Constructor of the spectrum y(x)</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
@@ -109,7 +113,7 @@ After that, it does the multiplication of y in s1 and s2.</p>
 <li><strong>x_data</strong> &#8211; x data of the spectrum (1d numpy array)</li>
 <li><strong>y_data</strong> &#8211; y data of the spectrum (1d numpy array)</li>
 <li><strong>x_unit</strong> &#8211; the unit of x (string), e.g. &#8216;nm&#8217;, &#8216;eV&#8217;</li>
-<li><strong>y_area_unit</strong> &#8211; (string) If y is per area, put area unit here, e.g. &#8216;m-2&#8217; or &#8216;cm-2&#8217;.
+<li><strong>y_unit</strong> &#8211; (string) If y is per area, put area unit here, e.g. &#8216;m-2&#8217; or &#8216;cm-2&#8217;.
 Put null string &#8216;&#8217; if y does not have area unit</li>
 <li><strong>is_photon_flux</strong> &#8211; (boolean). True if y is number of photons.</li>
 </ul>
@@ -122,7 +126,13 @@ Put null string &#8216;&#8217; if y does not have area unit</li>
 <dl class="method">
 <dt id="pypvcell.spectrum.Spectrum.convert_spectrum_unit">
 <code class="descname">convert_spectrum_unit</code><span class="sig-paren">(</span><em>x_data</em>, <em>y_data</em>, <em>from_x_unit</em>, <em>to_x_unit</em>, <em>from_y_area_unit</em>, <em>to_y_area_unit</em>, <em>is_spec_density</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pypvcell/spectrum.html#Spectrum.convert_spectrum_unit"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pypvcell.spectrum.Spectrum.convert_spectrum_unit" title="Permalink to this definition">¶</a></dt>
-<dd><p>A general method for converting the spectrum y(x) from one set of unit to another.</p>
+<dd><p>A general method for converting the spectrum y(x) from one set of unit to another.
+Note that this only supports the conversion of x from:
+[length]&lt;-&gt;[frequency]
+[length]&lt;-&gt; 1/[length]
+[length]&lt;-&gt;[energy]</p>
+<p>This is because Spectrum class converts the units of x to [length] first when initilizing or new spectrum is set.
+Therefore this function only implments the bi-direction unit conversions that involves [length].</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
 <col class="field-body" />
@@ -205,7 +215,7 @@ It converts everything to standard MKS unit. x_data: &#8216;m&#8217;, y_data: &#
 <li><strong>x_data</strong> &#8211; x data of the spectrum (1d numpy array)</li>
 <li><strong>y_data</strong> &#8211; y data of the spectrum (1d numpy array)</li>
 <li><strong>x_unit</strong> (<em>str</em>) &#8211; the unit of x (string), e.g. &#8216;nm&#8217;, &#8216;eV&#8217;</li>
-<li><strong>y_area_unit</strong> (<em>str</em>) &#8211; If y is per area, put area unit here, e.g. &#8216;m-2&#8217; or &#8216;cm-2&#8217;. Put null string &#8216;&#8217; if y does not have area unit</li>
+<li><strong>y_area_unit</strong> (<em>str</em>) &#8211; If y is per area, put area unit here, e.g. &#8216;m**-2&#8217; or &#8216;cm**-2&#8217;. Put null string &#8216;&#8217; if y does not have area unit</li>
 <li><strong>is_photon_flux</strong> (<em>bool</em>) &#8211; True if y is number of photons.</li>
 <li><strong>is_spec_density</strong> (<em>bool</em>) &#8211; True if y is spectral density.</li>
 </ul>

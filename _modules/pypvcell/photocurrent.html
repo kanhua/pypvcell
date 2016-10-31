@@ -130,7 +130,7 @@
 <span class="sd">    :return: value of Jsc (A/m^2)</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
-    <span class="k">if</span> <span class="ow">not</span> <span class="nb">issubclass</span><span class="p">(</span><span class="n">input_illumination</span><span class="p">,</span> <span class="n">Spectrum</span><span class="p">):</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">input_illumination</span><span class="p">,</span> <span class="n">Spectrum</span><span class="p">):</span>
         <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="s2">&quot;input_illumination should be a subclass of Spectrum&quot;</span><span class="p">)</span>
 
     <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">qe</span><span class="p">,</span> <span class="n">Spectrum</span><span class="p">):</span>
@@ -138,7 +138,7 @@
 
     <span class="c1"># initialise a QE interp object</span>
 
-    <span class="n">ill_array</span> <span class="o">=</span> <span class="n">input_illumination</span><span class="o">.</span><span class="n">get_spectrum</span><span class="p">(</span><span class="n">to_photon_flux</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">to_x_unit</span><span class="o">=</span><span class="s1">&#39;eV&#39;</span><span class="p">,</span> <span class="n">to_y_area_unit</span><span class="o">=</span><span class="s1">&#39;m-2&#39;</span><span class="p">)</span>
+    <span class="n">ill_array</span> <span class="o">=</span> <span class="n">input_illumination</span><span class="o">.</span><span class="n">get_spectrum</span><span class="p">(</span><span class="n">to_photon_flux</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">to_x_unit</span><span class="o">=</span><span class="s1">&#39;eV&#39;</span><span class="p">,</span> <span class="n">to_y_area_unit</span><span class="o">=</span><span class="s1">&#39;m**-2&#39;</span><span class="p">)</span>
 
     <span class="n">qe_array</span> <span class="o">=</span> <span class="n">qe</span><span class="o">.</span><span class="n">get_interp_spectrum</span><span class="p">(</span><span class="n">ill_array</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="p">:],</span> <span class="s1">&#39;eV&#39;</span><span class="p">)</span>
 
@@ -155,14 +155,14 @@
 <span class="sd">    :return: value of Jsc (A/m^2)</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
-    <span class="k">if</span> <span class="ow">not</span> <span class="nb">issubclass</span><span class="p">(</span><span class="n">input_illumination</span><span class="p">,</span> <span class="n">Spectrum</span><span class="p">):</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">input_illumination</span><span class="p">,</span> <span class="n">Spectrum</span><span class="p">):</span>
         <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="s2">&quot;input_illumination should be a subclass of Spectrum, preferably Illumination class&quot;</span><span class="p">)</span>
 
-    <span class="n">ill_array</span> <span class="o">=</span> <span class="n">input_illumination</span><span class="o">.</span><span class="n">get_spectrum</span><span class="p">(</span><span class="n">to_x_unit</span><span class="o">=</span><span class="s1">&#39;eV&#39;</span><span class="p">,</span> <span class="n">to_y_area_unit</span><span class="o">=</span><span class="s1">&#39;m-2&#39;</span><span class="p">,</span> <span class="n">to_photon_flux</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+    <span class="n">ill_array</span> <span class="o">=</span> <span class="n">input_illumination</span><span class="o">.</span><span class="n">get_spectrum</span><span class="p">(</span><span class="n">to_x_unit</span><span class="o">=</span><span class="s1">&#39;eV&#39;</span><span class="p">,</span> <span class="n">to_y_area_unit</span><span class="o">=</span><span class="s1">&#39;m**-2&#39;</span><span class="p">,</span> <span class="n">to_photon_flux</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
 
     <span class="n">ill_array</span> <span class="o">=</span> <span class="n">input_illumination</span><span class="o">.</span><span class="n">get_interp_spectrum</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">linspace</span><span class="p">(</span><span class="n">eg</span><span class="p">,</span> <span class="n">ill_array</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="p">:]</span><span class="o">.</span><span class="n">max</span><span class="p">(),</span> <span class="n">num</span><span class="o">=</span><span class="mi">100</span><span class="p">),</span>
                                                        <span class="n">to_x_unit</span><span class="o">=</span><span class="s1">&#39;eV&#39;</span><span class="p">,</span>
-                                                       <span class="n">to_y_area_unit</span><span class="o">=</span><span class="s1">&#39;m-2&#39;</span><span class="p">,</span>
+                                                       <span class="n">to_y_area_unit</span><span class="o">=</span><span class="s1">&#39;m**-2&#39;</span><span class="p">,</span>
                                                        <span class="n">to_photon_flux</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
 
     <span class="n">jsc</span> <span class="o">=</span> <span class="n">sc</span><span class="o">.</span><span class="n">e</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">trapz</span><span class="p">(</span><span class="n">ill_array</span><span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="p">:],</span> <span class="n">ill_array</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="p">:])</span>
