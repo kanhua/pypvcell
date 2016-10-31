@@ -1,0 +1,373 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>spectrum &#8212; pypvcell 0.1 documentation</title>
+    
+    <link rel="stylesheet" href="../_static/alabaster.css" type="text/css" />
+    <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../',
+        VERSION:     '0.1',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../_static/jquery.js"></script>
+    <script type="text/javascript" src="../_static/underscore.js"></script>
+    <script type="text/javascript" src="../_static/doctools.js"></script>
+    <script type="text/javascript" src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    <link rel="top" title="pypvcell 0.1 documentation" href="../index.html" />
+    <link rel="up" title="Module code" href="index.html" />
+   
+  <link rel="stylesheet" href="../_static/custom.css" type="text/css" />
+  
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
+
+  </head>
+  <body role="document">
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <h1>Source code for spectrum</h1><div class="highlight"><pre>
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span class="kn">import</span> <span class="nn">scipy.constants</span> <span class="k">as</span> <span class="nn">sc</span>
+<span class="kn">from</span> <span class="nn">units_system</span> <span class="k">import</span> <span class="n">UnitsSystem</span>
+<span class="kn">import</span> <span class="nn">copy</span>
+
+<span class="n">us</span> <span class="o">=</span> <span class="n">UnitsSystem</span><span class="p">()</span>
+
+
+<div class="viewcode-block" id="Spectrum"><a class="viewcode-back" href="../spectrum_class.html#spectrum.Spectrum">[docs]</a><span class="k">class</span> <span class="nc">Spectrum</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    This class handles the operation of the spectrum y(x), including unit conversion and multiplication.</span>
+
+
+<span class="sd">    It can handle unit conversions of different types of spectrum, including:</span>
+
+<span class="sd">    1. Standard spectrum. The unit of y is independent of x, e.g. quantum efficiency, absorption spectrum, etc.</span>
+<span class="sd">    2. Sepctral density. The unit of y is per [x-unit].</span>
+<span class="sd">    For example, the Black-body radiation spectrum is often in the unit of energy/nm/m^2</span>
+<span class="sd">    3. Photon flux: y is number of photons. When converting y into energy (J), it has to be multiplied by its photon energy.</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">x_data</span><span class="p">,</span> <span class="n">y_data</span><span class="p">,</span> <span class="n">x_unit</span><span class="p">,</span> <span class="n">y_area_unit</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">is_photon_flux</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Constructor of the spectrum y(x)</span>
+
+<span class="sd">        :param x_data: x data of the spectrum (1d numpy array)</span>
+<span class="sd">        :param y_data: y data of the spectrum (1d numpy array)</span>
+<span class="sd">        :param x_unit: the unit of x (string), e.g. &#39;nm&#39;, &#39;eV&#39;</span>
+<span class="sd">        :param y_area_unit: (string) If y is per area, put area unit here, e.g. &#39;m-2&#39; or &#39;cm-2&#39;.</span>
+<span class="sd">        :param is_photon_flux: (boolean). True if y is number of photons.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">core_wl</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">core_spec</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">area_unit</span> <span class="o">=</span> <span class="n">y_area_unit</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">is_photon_flux</span> <span class="o">=</span> <span class="n">is_photon_flux</span>
+
+        <span class="k">if</span> <span class="n">y_area_unit</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">set_spectrum</span><span class="p">(</span><span class="n">x_data</span><span class="o">=</span><span class="n">x_data</span><span class="p">,</span> <span class="n">y_data</span><span class="o">=</span><span class="n">y_data</span><span class="p">,</span> <span class="n">x_unit</span><span class="o">=</span><span class="n">x_unit</span><span class="p">,</span> <span class="n">is_photon_flux</span><span class="o">=</span><span class="n">is_photon_flux</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">set_spectrum_density</span><span class="p">(</span><span class="n">x_data</span><span class="o">=</span><span class="n">x_data</span><span class="p">,</span> <span class="n">y_data</span><span class="o">=</span><span class="n">y_data</span><span class="p">,</span> <span class="n">y_area_unit</span><span class="o">=</span><span class="n">y_area_unit</span><span class="p">,</span> <span class="n">x_unit</span><span class="o">=</span><span class="n">x_unit</span><span class="p">,</span>
+                                      <span class="n">is_photon_flux</span><span class="o">=</span><span class="n">is_photon_flux</span><span class="p">)</span>
+
+<div class="viewcode-block" id="Spectrum.set_spectrum_density"><a class="viewcode-back" href="../spectrum_class.html#spectrum.Spectrum.set_spectrum_density">[docs]</a>    <span class="k">def</span> <span class="nf">set_spectrum_density</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">x_data</span><span class="p">,</span> <span class="n">y_data</span><span class="p">,</span> <span class="n">y_area_unit</span><span class="p">,</span> <span class="n">x_unit</span><span class="p">,</span> <span class="n">is_photon_flux</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Convert the input spectrum density to standard units defined in this class:</span>
+<span class="sd">        spectrum density: W/m^2-m</span>
+<span class="sd">        wavelength: m</span>
+
+<span class="sd">        :param x_data: an ndarray that stores the wavelength</span>
+<span class="sd">        :param y_data: an ndarray that stores the spectral density</span>
+<span class="sd">        :param y_area_unit: the unit of the area, ex. m-2, cm-2</span>
+<span class="sd">        :param x_unit: the unit of wavelength, ex: nm, m, eV, J</span>
+<span class="sd">        :param is_photon_flux: True/False, specify whether the input spectrum is photon flux or not</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="k">assert</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">x_data</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">)</span>
+        <span class="k">assert</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">y_data</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">)</span>
+
+        <span class="n">flux_unit_factor</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;photon_flux&quot;</span><span class="p">,</span> <span class="s2">&quot;J&quot;</span><span class="p">]</span>
+        <span class="n">energy_wavelength_unit_factor</span> <span class="o">=</span> <span class="p">{</span><span class="s2">&quot;J&quot;</span><span class="p">:</span> <span class="mi">1</span><span class="p">,</span> <span class="s2">&quot;eV&quot;</span><span class="p">:</span> <span class="n">sc</span><span class="o">.</span><span class="n">e</span><span class="p">}</span>
+
+        <span class="c1"># Convert everything to photon energy : w/m^2-m</span>
+
+        <span class="k">if</span> <span class="n">us</span><span class="o">.</span><span class="n">guess_dimension</span><span class="p">(</span><span class="n">x_unit</span><span class="p">)</span> <span class="o">==</span> <span class="s1">&#39;length&#39;</span><span class="p">:</span>
+
+            <span class="c1"># Convert [flux]/[Area][Length] to [Flux]/[m^2][m]</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">core_spec</span> <span class="o">=</span> <span class="n">us</span><span class="o">.</span><span class="n">convert</span><span class="p">(</span><span class="n">y_data</span><span class="p">,</span> <span class="n">y_area_unit</span> <span class="o">+</span> <span class="s2">&quot; &quot;</span> <span class="o">+</span> <span class="n">x_unit</span> <span class="o">+</span> <span class="s2">&quot;-1&quot;</span><span class="p">,</span> <span class="s2">&quot;m-2 m-1&quot;</span><span class="p">)</span>
+
+            <span class="c1"># Convert wavelength unit to [m]</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">core_wl</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_conv_wl_to_si</span><span class="p">(</span><span class="n">x_data</span><span class="p">,</span> <span class="n">x_unit</span><span class="p">)</span>
+
+        <span class="k">elif</span> <span class="n">x_unit</span> <span class="ow">in</span> <span class="n">energy_wavelength_unit_factor</span><span class="o">.</span><span class="n">keys</span><span class="p">():</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">core_wl</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_conv_wl_to_si</span><span class="p">(</span><span class="n">x_data</span><span class="p">,</span> <span class="n">x_unit</span><span class="p">)</span>
+
+            <span class="c1"># Convert [flux]/[Area][Energy] to [flux]/[Area][J] first, and then convert [flux]/[Area][J] to []/[Area][m]</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">core_spec</span> <span class="o">=</span> <span class="n">us</span><span class="o">.</span><span class="n">convert</span><span class="p">(</span><span class="n">y_data</span><span class="p">,</span> <span class="n">x_unit</span> <span class="o">+</span> <span class="s1">&#39;-1&#39;</span><span class="p">,</span> <span class="s1">&#39;J-1&#39;</span><span class="p">)</span> <span class="o">*</span> <span class="n">sc</span><span class="o">.</span><span class="n">h</span> <span class="o">*</span> <span class="n">sc</span><span class="o">.</span><span class="n">c</span> <span class="o">/</span> <span class="n">np</span><span class="o">.</span><span class="n">power</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">core_wl</span><span class="p">,</span>
+                                                                                               <span class="mi">2</span><span class="p">)</span>
+
+            <span class="c1"># Convert [flux]/[Area][Energy] to [flux]/[m^2][J]</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">core_spec</span> <span class="o">=</span> <span class="n">us</span><span class="o">.</span><span class="n">convert</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">core_spec</span><span class="p">,</span> <span class="n">y_area_unit</span><span class="p">,</span> <span class="s2">&quot;m-2&quot;</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="n">is_photon_flux</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">core_spec</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_as_energy</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">core_wl</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">core_spec</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="Spectrum.set_spectrum"><a class="viewcode-back" href="../spectrum_class.html#spectrum.Spectrum.set_spectrum">[docs]</a>    <span class="k">def</span> <span class="nf">set_spectrum</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">x_data</span><span class="p">,</span> <span class="n">y_data</span><span class="p">,</span> <span class="n">x_unit</span><span class="p">,</span> <span class="n">is_photon_flux</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        The spectrum can be anything that is a function of wavelength, ex. absorption coefficient, qe, etc.</span>
+<span class="sd">        This method only converts the wavelength. For coverting spectral density, use read_speactrum_density()</span>
+<span class="sd">        :param x_data: an ndarray that stores the wavelength</span>
+<span class="sd">        :param y_data: an ndarray that stores the spectral density</span>
+<span class="sd">        :param x_unit: length units (m, nm, ...) or &quot;J&quot; or &quot;eV&quot;</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">length_wavelength_unit_factor</span> <span class="o">=</span> <span class="p">(</span><span class="s1">&#39;m&#39;</span><span class="p">,</span> <span class="s1">&#39;cm&#39;</span><span class="p">,</span> <span class="s1">&#39;nm&#39;</span><span class="p">,</span> <span class="s1">&#39;um&#39;</span><span class="p">)</span>
+        <span class="n">energy_wavelength_unit_factor</span> <span class="o">=</span> <span class="p">{</span><span class="s2">&quot;J&quot;</span><span class="p">:</span> <span class="mi">1</span><span class="p">,</span> <span class="s2">&quot;eV&quot;</span><span class="p">:</span> <span class="n">sc</span><span class="o">.</span><span class="n">e</span><span class="p">}</span>
+
+        <span class="c1"># Convert everything to photon energy : w/m^2-m</span>
+
+        <span class="k">if</span> <span class="n">x_unit</span> <span class="ow">in</span> <span class="n">length_wavelength_unit_factor</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">core_wl</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_conv_wl_to_si</span><span class="p">(</span><span class="n">x_data</span><span class="p">,</span> <span class="n">x_unit</span><span class="p">)</span>
+
+        <span class="k">elif</span> <span class="n">x_unit</span> <span class="ow">in</span> <span class="n">energy_wavelength_unit_factor</span><span class="o">.</span><span class="n">keys</span><span class="p">():</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">core_wl</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_conv_wl_to_si</span><span class="p">(</span><span class="n">x_data</span><span class="p">,</span> <span class="n">x_unit</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="n">is_photon_flux</span><span class="p">:</span>
+            <span class="n">y_data</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_as_energy</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">core_wl</span><span class="p">,</span> <span class="n">y_data</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">core_spec</span> <span class="o">=</span> <span class="n">y_data</span></div>
+
+<div class="viewcode-block" id="Spectrum.get_spectrum_density"><a class="viewcode-back" href="../spectrum_class.html#spectrum.Spectrum.get_spectrum_density">[docs]</a>    <span class="k">def</span> <span class="nf">get_spectrum_density</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">area_unit</span><span class="p">,</span> <span class="n">wavelength_unit</span><span class="p">,</span> <span class="n">flux</span><span class="o">=</span><span class="s2">&quot;energy&quot;</span><span class="p">):</span>
+
+        <span class="sd">&quot;&quot;&quot;</span>
+
+<span class="sd">        :param area_unit:</span>
+<span class="sd">        :param wavelength_unit:</span>
+<span class="sd">        :param flux:</span>
+<span class="sd">        :return:</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="n">length_wavelength_unit_factor</span> <span class="o">=</span> <span class="p">(</span><span class="s1">&#39;m&#39;</span><span class="p">,</span> <span class="s1">&#39;cm&#39;</span><span class="p">,</span> <span class="s1">&#39;nm&#39;</span><span class="p">)</span>
+        <span class="n">energy_wavelength_unit_factor</span> <span class="o">=</span> <span class="p">{</span><span class="s2">&quot;J&quot;</span><span class="p">:</span> <span class="mi">1</span><span class="p">,</span> <span class="s2">&quot;eV&quot;</span><span class="p">:</span> <span class="n">sc</span><span class="o">.</span><span class="n">e</span><span class="p">}</span>
+
+        <span class="n">wl</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="n">spec</span> <span class="o">=</span> <span class="kc">None</span>
+
+        <span class="k">if</span> <span class="n">wavelength_unit</span> <span class="ow">in</span> <span class="n">length_wavelength_unit_factor</span><span class="p">:</span>
+            <span class="n">wl</span> <span class="o">=</span> <span class="n">us</span><span class="o">.</span><span class="n">asUnit</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">core_wl</span><span class="p">,</span> <span class="n">wavelength_unit</span><span class="p">)</span>
+            <span class="n">spec</span> <span class="o">=</span> <span class="n">us</span><span class="o">.</span><span class="n">convert</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">core_spec</span><span class="p">,</span> <span class="s1">&#39;m-2&#39;</span><span class="p">,</span> <span class="n">area_unit</span><span class="p">)</span>
+            <span class="n">spec</span> <span class="o">=</span> <span class="n">us</span><span class="o">.</span><span class="n">convert</span><span class="p">(</span><span class="n">spec</span><span class="p">,</span> <span class="s1">&#39;m-1&#39;</span><span class="p">,</span> <span class="n">wavelength_unit</span> <span class="o">+</span> <span class="s1">&#39;-1&#39;</span><span class="p">)</span>
+
+        <span class="k">elif</span> <span class="n">wavelength_unit</span> <span class="ow">in</span> <span class="n">energy_wavelength_unit_factor</span><span class="o">.</span><span class="n">keys</span><span class="p">():</span>
+            <span class="n">wl</span> <span class="o">=</span> <span class="n">sc</span><span class="o">.</span><span class="n">h</span> <span class="o">*</span> <span class="n">sc</span><span class="o">.</span><span class="n">c</span> <span class="o">/</span> <span class="bp">self</span><span class="o">.</span><span class="n">core_wl</span>
+            <span class="n">wl</span> <span class="o">=</span> <span class="n">us</span><span class="o">.</span><span class="n">convert</span><span class="p">(</span><span class="n">wl</span><span class="p">,</span> <span class="s1">&#39;J&#39;</span><span class="p">,</span> <span class="n">wavelength_unit</span><span class="p">)</span>
+
+            <span class="n">spec</span> <span class="o">=</span> <span class="n">us</span><span class="o">.</span><span class="n">convert</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">core_spec</span><span class="p">,</span> <span class="s1">&#39;m-2&#39;</span><span class="p">,</span> <span class="n">area_unit</span><span class="p">)</span>
+            <span class="n">spec</span> <span class="o">=</span> <span class="n">spec</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">power</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">core_wl</span><span class="p">,</span> <span class="mi">2</span><span class="p">)</span> <span class="o">/</span> <span class="p">(</span><span class="n">sc</span><span class="o">.</span><span class="n">h</span> <span class="o">*</span> <span class="n">sc</span><span class="o">.</span><span class="n">c</span><span class="p">)</span>
+            <span class="n">spec</span> <span class="o">=</span> <span class="n">us</span><span class="o">.</span><span class="n">convert</span><span class="p">(</span><span class="n">spec</span><span class="p">,</span> <span class="s1">&#39;J-1&#39;</span><span class="p">,</span> <span class="n">wavelength_unit</span> <span class="o">+</span> <span class="s1">&#39;-1&#39;</span><span class="p">)</span>
+
+        <span class="c1"># convert the spectrum to photon flux if necessary</span>
+        <span class="k">if</span> <span class="n">flux</span> <span class="o">==</span> <span class="s2">&quot;photon&quot;</span><span class="p">:</span>
+            <span class="n">spec</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_as_photon_flux</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">core_wl</span><span class="p">,</span> <span class="n">spec</span><span class="p">)</span>
+
+        <span class="c1"># Sort the spectrum by wavelength</span>
+        <span class="n">sorted_idx</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">argsort</span><span class="p">(</span><span class="n">wl</span><span class="p">)</span>
+        <span class="n">wl</span> <span class="o">=</span> <span class="n">wl</span><span class="p">[</span><span class="n">sorted_idx</span><span class="p">]</span>
+        <span class="n">spec</span> <span class="o">=</span> <span class="n">spec</span><span class="p">[</span><span class="n">sorted_idx</span><span class="p">]</span>
+
+        <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">vstack</span><span class="p">((</span><span class="n">wl</span><span class="p">,</span> <span class="n">spec</span><span class="p">))</span></div>
+
+    <span class="k">def</span> <span class="nf">get_spectrum</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">x_unit</span><span class="p">,</span> <span class="n">flux</span><span class="o">=</span><span class="s2">&quot;energy&quot;</span><span class="p">):</span>
+
+        <span class="n">length_wavelength_unit_factor</span> <span class="o">=</span> <span class="p">(</span><span class="s1">&#39;m&#39;</span><span class="p">,</span> <span class="s1">&#39;cm&#39;</span><span class="p">,</span> <span class="s1">&#39;nm&#39;</span><span class="p">)</span>
+        <span class="n">energy_wavelength_unit_factor</span> <span class="o">=</span> <span class="p">{</span><span class="s2">&quot;J&quot;</span><span class="p">:</span> <span class="mi">1</span><span class="p">,</span> <span class="s2">&quot;eV&quot;</span><span class="p">:</span> <span class="n">sc</span><span class="o">.</span><span class="n">e</span><span class="p">}</span>
+
+        <span class="n">spectrum</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="mi">2</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">core_wl</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]))</span>
+
+        <span class="k">if</span> <span class="n">x_unit</span> <span class="ow">in</span> <span class="n">length_wavelength_unit_factor</span><span class="p">:</span>
+            <span class="n">spectrum</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="p">:]</span> <span class="o">=</span> <span class="n">us</span><span class="o">.</span><span class="n">asUnit</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">core_wl</span><span class="p">,</span> <span class="n">x_unit</span><span class="p">)</span>
+
+        <span class="k">elif</span> <span class="n">x_unit</span> <span class="ow">in</span> <span class="n">energy_wavelength_unit_factor</span><span class="o">.</span><span class="n">keys</span><span class="p">():</span>
+            <span class="n">spectrum</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="p">:]</span> <span class="o">=</span> <span class="n">sc</span><span class="o">.</span><span class="n">h</span> <span class="o">*</span> <span class="n">sc</span><span class="o">.</span><span class="n">c</span> <span class="o">/</span> <span class="bp">self</span><span class="o">.</span><span class="n">core_wl</span>
+            <span class="n">spectrum</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="p">:]</span> <span class="o">=</span> <span class="n">us</span><span class="o">.</span><span class="n">convert</span><span class="p">(</span><span class="n">spectrum</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="p">:],</span> <span class="s1">&#39;J&#39;</span><span class="p">,</span> <span class="n">x_unit</span><span class="p">)</span>
+
+        <span class="n">spectrum</span><span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="p">:]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">core_spec</span>
+
+        <span class="c1"># convert the spectrum to photon flux if necessary</span>
+        <span class="k">if</span> <span class="n">flux</span> <span class="o">==</span> <span class="s2">&quot;photon&quot;</span><span class="p">:</span>
+            <span class="n">spectrum</span><span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="p">:]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_as_photon_flux</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">core_wl</span><span class="p">,</span> <span class="n">spectrum</span><span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="p">:])</span>
+
+        <span class="c1"># sort the spectrum by wavelength</span>
+        <span class="n">sorted_idx</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">argsort</span><span class="p">(</span><span class="n">spectrum</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="p">:])</span>
+        <span class="n">spectrum</span> <span class="o">=</span> <span class="n">spectrum</span><span class="p">[:,</span> <span class="n">sorted_idx</span><span class="p">]</span>
+
+        <span class="k">return</span> <span class="n">spectrum</span>
+
+    <span class="k">def</span> <span class="nf">get_interp_spectrum</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">x_data</span><span class="p">,</span> <span class="n">x_unit</span><span class="p">,</span> <span class="n">flux</span><span class="o">=</span><span class="s2">&quot;energy&quot;</span><span class="p">):</span>
+
+        <span class="n">orig_spectrum</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_spectrum</span><span class="p">(</span><span class="n">x_unit</span><span class="p">,</span> <span class="n">flux</span><span class="p">)</span>
+
+        <span class="n">output_spectrum</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="mi">2</span><span class="p">,</span> <span class="n">x_data</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]))</span>
+
+        <span class="n">output_spectrum</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="p">:]</span> <span class="o">=</span> <span class="n">x_data</span>
+        <span class="n">output_spectrum</span><span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="p">:]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">interp</span><span class="p">(</span><span class="n">x_data</span><span class="p">,</span> <span class="n">orig_spectrum</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="p">:],</span> <span class="n">orig_spectrum</span><span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="p">:])</span>
+
+        <span class="k">return</span> <span class="n">output_spectrum</span>
+
+    <span class="k">def</span> <span class="nf">get_interp_spectrum_density</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">x_data</span><span class="p">,</span> <span class="n">y_area_unit</span><span class="p">,</span> <span class="n">x_unit</span><span class="p">,</span> <span class="n">flux</span><span class="o">=</span><span class="s2">&quot;energy&quot;</span><span class="p">):</span>
+
+        <span class="n">orig_spectral_density</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_spectrum_density</span><span class="p">(</span><span class="n">y_area_unit</span><span class="p">,</span> <span class="n">x_unit</span><span class="p">,</span> <span class="n">flux</span><span class="o">=</span><span class="n">flux</span><span class="p">)</span>
+
+        <span class="n">output_spectrum</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="mi">2</span><span class="p">,</span> <span class="n">x_data</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]))</span>
+
+        <span class="n">output_spectrum</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="p">:]</span> <span class="o">=</span> <span class="n">x_data</span>
+        <span class="n">output_spectrum</span><span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="p">:]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">interp</span><span class="p">(</span><span class="n">x_data</span><span class="p">,</span>
+                                          <span class="n">orig_spectral_density</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="p">:],</span> <span class="n">orig_spectral_density</span><span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="p">:])</span>
+
+        <span class="k">return</span> <span class="n">output_spectrum</span>
+
+    <span class="k">def</span> <span class="nf">__mul__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">other</span><span class="p">):</span>
+
+        <span class="k">if</span> <span class="nb">type</span><span class="p">(</span><span class="n">other</span><span class="p">)</span> <span class="o">==</span> <span class="nb">int</span> <span class="ow">or</span> <span class="nb">type</span><span class="p">(</span><span class="n">other</span><span class="p">)</span> <span class="o">==</span> <span class="nb">float</span><span class="p">:</span>
+            <span class="n">newobj</span> <span class="o">=</span> <span class="n">copy</span><span class="o">.</span><span class="n">deepcopy</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
+            <span class="n">newobj</span><span class="o">.</span><span class="n">core_spec</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">core_spec</span> <span class="o">*</span> <span class="n">other</span>
+            <span class="k">return</span> <span class="n">newobj</span>
+        <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">other</span><span class="p">,</span> <span class="n">Spectrum</span><span class="p">):</span>
+            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">attenuation_single</span><span class="p">(</span><span class="n">other</span><span class="p">,</span> <span class="n">inplace</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;The multipler should either be a scalar or a Spectrum calss object.&quot;</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">attenuation_single</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="nb">filter</span><span class="p">,</span> <span class="n">inplace</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
+        <span class="k">assert</span> <span class="nb">isinstance</span><span class="p">(</span><span class="nb">filter</span><span class="p">,</span> <span class="n">Spectrum</span><span class="p">)</span>
+
+        <span class="n">atten_spec</span> <span class="o">=</span> <span class="nb">filter</span><span class="o">.</span><span class="n">get_interp_spectrum</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">core_wl</span><span class="p">,</span> <span class="s1">&#39;m&#39;</span><span class="p">)</span>
+
+        <span class="n">new_core_spec</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">core_spec</span> <span class="o">*</span> <span class="n">atten_spec</span><span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="p">:]</span>
+
+        <span class="k">if</span> <span class="n">inplace</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">core_spec</span> <span class="o">=</span> <span class="n">new_core_spec</span>
+            <span class="k">return</span> <span class="kc">None</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">newobj</span> <span class="o">=</span> <span class="n">copy</span><span class="o">.</span><span class="n">deepcopy</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
+            <span class="n">newobj</span><span class="o">.</span><span class="n">core_spec</span> <span class="o">=</span> <span class="n">new_core_spec</span>
+            <span class="k">return</span> <span class="n">newobj</span>
+
+<div class="viewcode-block" id="Spectrum.attenuation"><a class="viewcode-back" href="../spectrum_class.html#spectrum.Spectrum.attenuation">[docs]</a>    <span class="k">def</span> <span class="nf">attenuation</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">filters</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Do attenuation of a list of filters</span>
+<span class="sd">        :param filters: a list of filter instances</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">assert</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">filters</span><span class="p">,</span> <span class="nb">list</span><span class="p">)</span>
+
+        <span class="k">for</span> <span class="n">f</span> <span class="ow">in</span> <span class="n">filters</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">attenuation_single</span><span class="p">(</span><span class="n">f</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="n">copy</span><span class="o">.</span><span class="n">deepcopy</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span></div>
+
+    <span class="k">def</span> <span class="nf">_as_photon_flux</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">wavelength</span><span class="p">,</span> <span class="n">energy_flux</span><span class="p">):</span>
+        <span class="k">return</span> <span class="n">energy_flux</span> <span class="o">/</span> <span class="p">(</span><span class="n">sc</span><span class="o">.</span><span class="n">h</span> <span class="o">*</span> <span class="n">sc</span><span class="o">.</span><span class="n">c</span><span class="p">)</span> <span class="o">*</span> <span class="n">wavelength</span>
+
+    <span class="k">def</span> <span class="nf">_as_energy</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">wavelength</span><span class="p">,</span> <span class="n">photon_flux</span><span class="p">):</span>
+        <span class="k">return</span> <span class="n">photon_flux</span> <span class="o">*</span> <span class="p">(</span><span class="n">sc</span><span class="o">.</span><span class="n">h</span> <span class="o">*</span> <span class="n">sc</span><span class="o">.</span><span class="n">c</span><span class="p">)</span> <span class="o">/</span> <span class="n">wavelength</span>
+
+    <span class="k">def</span> <span class="nf">_conv_wl_to_si</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">wavelength</span><span class="p">,</span> <span class="n">unit</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Convert wavelength to meters.</span>
+<span class="sd">        :param wavelength:</span>
+<span class="sd">        :param unit:</span>
+<span class="sd">        :return:</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="k">assert</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">unit</span><span class="p">,</span> <span class="nb">str</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="n">unit</span> <span class="o">==</span> <span class="s1">&#39;J&#39;</span><span class="p">:</span>
+            <span class="n">new_wl</span> <span class="o">=</span> <span class="n">us</span><span class="o">.</span><span class="n">mJ</span><span class="p">(</span><span class="n">wavelength</span><span class="p">)</span>
+
+        <span class="k">elif</span> <span class="n">unit</span> <span class="o">==</span> <span class="s1">&#39;eV&#39;</span><span class="p">:</span>
+            <span class="n">new_wl</span> <span class="o">=</span> <span class="n">us</span><span class="o">.</span><span class="n">eVnm</span><span class="p">(</span><span class="n">wavelength</span><span class="p">)</span>
+            <span class="n">new_wl</span> <span class="o">=</span> <span class="n">us</span><span class="o">.</span><span class="n">siUnits</span><span class="p">(</span><span class="n">new_wl</span><span class="p">,</span> <span class="s1">&#39;nm&#39;</span><span class="p">)</span>
+
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">new_wl</span> <span class="o">=</span> <span class="n">us</span><span class="o">.</span><span class="n">siUnits</span><span class="p">(</span><span class="n">wavelength</span><span class="p">,</span> <span class="n">unit</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="n">new_wl</span></div>
+
+
+<span class="k">if</span> <span class="n">__name__</span> <span class="o">==</span> <span class="s2">&quot;__main__&quot;</span><span class="p">:</span>
+    <span class="kn">from</span> <span class="nn">illumination</span> <span class="k">import</span> <span class="n">illumination</span>
+
+    <span class="n">ill</span> <span class="o">=</span> <span class="n">illumination</span><span class="p">()</span>
+
+    <span class="n">test_spec</span> <span class="o">=</span> <span class="n">Spectrum</span><span class="p">(</span><span class="n">us</span><span class="o">.</span><span class="n">asUnit</span><span class="p">(</span><span class="n">ill</span><span class="o">.</span><span class="n">wl</span><span class="p">,</span> <span class="s1">&#39;nm&#39;</span><span class="p">),</span> <span class="n">ill</span><span class="o">.</span><span class="n">photon_flux_in_W</span> <span class="o">/</span> <span class="mi">1</span><span class="n">e9</span><span class="p">,</span> <span class="s2">&quot;nm&quot;</span><span class="p">,</span> <span class="n">area_unit</span><span class="o">=</span><span class="s2">&quot;m-2&quot;</span><span class="p">)</span>
+
+    <span class="c1"># test_spec.set_spectrum_density(ill.wl_in_eV, ill.photon_flux_in_W_perEV, &quot;m-2&quot;, &quot;eV&quot;)</span>
+
+    <span class="kn">import</span> <span class="nn">matplotlib.pyplot</span> <span class="k">as</span> <span class="nn">plt</span>
+
+    <span class="c1"># plt.plot(asUnit(test_spec.core_wl,&#39;nm&#39;),test_spec.core_spec/1e9,hold=True)</span>
+
+    <span class="n">nspectrum</span> <span class="o">=</span> <span class="n">test_spec</span><span class="o">.</span><span class="n">get_spectrum_density</span><span class="p">(</span><span class="s1">&#39;m-2&#39;</span><span class="p">,</span> <span class="s1">&#39;m&#39;</span><span class="p">)</span>
+
+    <span class="n">plt</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">nspectrum</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="p">:],</span> <span class="n">nspectrum</span><span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="p">:],</span> <span class="n">hold</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+
+    <span class="n">plt</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">ill</span><span class="o">.</span><span class="n">wl</span><span class="p">,</span> <span class="n">ill</span><span class="o">.</span><span class="n">photon_flux_in_W</span><span class="p">)</span>
+    <span class="n">plt</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
+</pre></div>
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper"><div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="../index.html">Documentation overview</a><ul>
+  <li><a href="index.html">Module code</a><ul>
+  </ul></li>
+  </ul></li>
+</ul>
+</div>
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <form class="search" action="../search.html" method="get">
+      <div><input type="text" name="q" /></div>
+      <div><input type="submit" value="Go" /></div>
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &copy;2016, Kan-Hua Lee.
+      
+      |
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 1.4.6</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.9</a>
+      
+    </div>
+
+    
+
+    
+  </body>
+</html>

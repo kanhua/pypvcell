@@ -1,0 +1,222 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>Tutorial-Dealing with spectrum data &#8212; pypvcell 0.1 documentation</title>
+    
+    <link rel="stylesheet" href="../_static/alabaster.css" type="text/css" />
+    <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../',
+        VERSION:     '0.1',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../_static/jquery.js"></script>
+    <script type="text/javascript" src="../_static/underscore.js"></script>
+    <script type="text/javascript" src="../_static/doctools.js"></script>
+    <script type="text/javascript" src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    <link rel="top" title="pypvcell 0.1 documentation" href="../index.html" />
+   
+  <link rel="stylesheet" href="../_static/custom.css" type="text/css" />
+  
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
+
+  </head>
+  <body role="document">
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <div class="section" id="tutorial-dealing-with-spectrum-data">
+<h1>Tutorial-Dealing with spectrum data<a class="headerlink" href="#tutorial-dealing-with-spectrum-data" title="Permalink to this headline">¶</a></h1>
+<p>Modeling solar cell often involves reading and dealing with different
+type of spectrum, such as solar spectrum, absorption specturm, etc. To
+put these spectrum together, one often has to various steps of unit
+conversion, interpolation and multiplication of spectrum data. This
+process can be very tedious and error-prone. Pypvcell provides a easy
+and robust way to deal with spectrum data by using the python class
+<code class="docutils literal"><span class="pre">Spectrum</span></code>.</p>
+<div class="code python highlight-default"><div class="highlight"><pre><span class="o">%</span><span class="n">matplotlib</span> <span class="n">inline</span>
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span class="kn">import</span> <span class="nn">scipy.constants</span> <span class="k">as</span> <span class="nn">sc</span>
+<span class="kn">import</span> <span class="nn">matplotlib.pyplot</span> <span class="k">as</span> <span class="nn">plt</span>
+<span class="kn">from</span> <span class="nn">pypvcell.spectrum</span> <span class="k">import</span> <span class="n">Spectrum</span>
+</pre></div>
+</div>
+<p>Let&#8217;s start with a simple example. We setup a generalized planck
+distribution:</p>
+<div class="code python highlight-default"><div class="highlight"><pre><span class="c1"># TODO: add latex equation of Generalized Planck distribution</span>
+</pre></div>
+</div>
+<div class="code python highlight-default"><div class="highlight"><pre><span class="c1"># set up an array of photon energy in eV</span>
+<span class="n">pe</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">linspace</span><span class="p">(</span><span class="mf">0.5</span><span class="p">,</span><span class="mi">1</span><span class="p">)</span>
+
+<span class="c1"># set up a Planck-like spectrum</span>
+<span class="n">pk_spec</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">power</span><span class="p">(</span><span class="n">pe</span><span class="o">*</span><span class="n">sc</span><span class="o">.</span><span class="n">e</span><span class="p">,</span><span class="mi">2</span><span class="p">)</span><span class="o">/</span><span class="n">np</span><span class="o">.</span><span class="n">exp</span><span class="p">(</span><span class="n">pe</span><span class="o">*</span><span class="n">sc</span><span class="o">.</span><span class="n">e</span><span class="o">/</span><span class="p">(</span><span class="n">sc</span><span class="o">.</span><span class="n">k</span><span class="o">*</span><span class="mi">300</span><span class="p">))</span>
+
+<span class="n">plt</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">pe</span><span class="p">,</span><span class="n">pk_spec</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">xlabel</span><span class="p">(</span><span class="s2">&quot;photon energy (eV)&quot;</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">ylabel</span><span class="p">(</span><span class="s2">&quot;emission intensity (abu)&quot;</span><span class="p">)</span>
+</pre></div>
+</div>
+<div class="highlight-default"><div class="highlight"><pre><span class="n">Text</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="mf">0.5</span><span class="p">,</span><span class="s1">&#39;emission intensity (abu)&#39;</span><span class="p">)</span>
+</pre></div>
+</div>
+<img alt="../_images/output_5_1.png" src="../_images/output_5_1.png" />
+<div class="section" id="initialize-a-spectrum-class">
+<h2>Initialize a Spectrum class<a class="headerlink" href="#initialize-a-spectrum-class" title="Permalink to this headline">¶</a></h2>
+<p>Let&#8217;s try to do something with it. First we load these arrays into an
+instance of <code class="docutils literal"><span class="pre">Spectrum</span></code> class:</p>
+<div class="code python highlight-default"><div class="highlight"><pre><span class="n">planck_sp</span><span class="o">=</span><span class="n">Spectrum</span><span class="p">(</span><span class="n">x_data</span><span class="o">=</span><span class="n">pe</span><span class="p">,</span><span class="n">y_data</span><span class="o">=</span><span class="n">pk_spec</span><span class="p">,</span><span class="n">x_unit</span><span class="o">=</span><span class="s1">&#39;eV&#39;</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>Note that it is mandatory to assign the unit of <code class="docutils literal"><span class="pre">x_data</span></code>, since the
+program needs to know how to convert the data into different units. It
+currently supports many common units such as: - length: m, cm, um,
+nm...etc. - energy: J, eV</p>
+</div>
+<div class="section" id="get-the-magnitueds-of-a-spectrum-instance">
+<h2>Get the magnitueds of a <code class="docutils literal"><span class="pre">Spectrum</span></code> instance<a class="headerlink" href="#get-the-magnitueds-of-a-spectrum-instance" title="Permalink to this headline">¶</a></h2>
+<p>There are two ways to convert the values of <code class="docutils literal"><span class="pre">Spectrum</span></code> into numpy
+arrays. One is without interpolation, just get the array that we loaded
+when the class was initialized. Again, the unit of x_data has to be
+assigned:</p>
+<div class="section" id="retrieve-the-values-without-interpolation">
+<h3>Retrieve the values without interpolation<a class="headerlink" href="#retrieve-the-values-without-interpolation" title="Permalink to this headline">¶</a></h3>
+<div class="code python highlight-default"><div class="highlight"><pre><span class="n">sp_values</span><span class="o">=</span><span class="n">planck_sp</span><span class="o">.</span><span class="n">get_spectrum</span><span class="p">(</span><span class="n">to_x_unit</span><span class="o">=</span><span class="s2">&quot;eV&quot;</span><span class="p">)</span>
+</pre></div>
+</div>
+<div class="code python highlight-default"><div class="highlight"><pre><span class="n">plt</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">sp_values</span><span class="p">[</span><span class="mi">0</span><span class="p">,:],</span><span class="n">sp_values</span><span class="p">[</span><span class="mi">1</span><span class="p">,:])</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">xlabel</span><span class="p">(</span><span class="s2">&quot;photon energy (eV)&quot;</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">ylabel</span><span class="p">(</span><span class="s2">&quot;emission intensity (abu)&quot;</span><span class="p">)</span>
+</pre></div>
+</div>
+<div class="highlight-default"><div class="highlight"><pre><span class="n">Text</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="mf">0.5</span><span class="p">,</span><span class="s1">&#39;emission intensity (abu)&#39;</span><span class="p">)</span>
+</pre></div>
+</div>
+<img alt="../_images/output_12_1.png" src="../_images/output_12_1.png" />
+<p>Alternatively, we could convert the unit of x_data to nm:</p>
+<div class="code python highlight-default"><div class="highlight"><pre><span class="n">sp_values</span><span class="o">=</span><span class="n">planck_sp</span><span class="o">.</span><span class="n">get_spectrum</span><span class="p">(</span><span class="n">to_x_unit</span><span class="o">=</span><span class="s2">&quot;nm&quot;</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">sp_values</span><span class="p">[</span><span class="mi">0</span><span class="p">,:],</span><span class="n">sp_values</span><span class="p">[</span><span class="mi">1</span><span class="p">,:])</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">xlabel</span><span class="p">(</span><span class="s2">&quot;wavelength (nm)&quot;</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">ylabel</span><span class="p">(</span><span class="s2">&quot;emission intensity (abu)&quot;</span><span class="p">)</span>
+</pre></div>
+</div>
+<div class="highlight-default"><div class="highlight"><pre><span class="n">Text</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="mf">0.5</span><span class="p">,</span><span class="s1">&#39;emission intensity (abu)&#39;</span><span class="p">)</span>
+</pre></div>
+</div>
+<img alt="../_images/output_14_1.png" src="../_images/output_14_1.png" />
+</div>
+<div class="section" id="retrieve-the-values-with-interpolation">
+<h3>Retrieve the values with interpolation<a class="headerlink" href="#retrieve-the-values-with-interpolation" title="Permalink to this headline">¶</a></h3>
+<p>We can also retrieve the values of the spectrum by assigning the values
+of x data. The program will try to interpolate the value of y at the
+point that original x values are missing.</p>
+<div class="code python highlight-default"><div class="highlight"><pre><span class="n">new_x_data</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">linspace</span><span class="p">(</span><span class="mf">0.5</span><span class="p">,</span><span class="mi">1</span><span class="p">,</span><span class="n">num</span><span class="o">=</span><span class="mi">10</span><span class="p">)</span>
+<span class="n">sp_values</span><span class="o">=</span><span class="n">planck_sp</span><span class="o">.</span><span class="n">get_spectrum</span><span class="p">(</span><span class="n">to_x_unit</span><span class="o">=</span><span class="s1">&#39;eV&#39;</span><span class="p">)</span>
+<span class="n">interped_sp_values</span><span class="o">=</span><span class="n">planck_sp</span><span class="o">.</span><span class="n">get_interp_spectrum</span><span class="p">(</span><span class="n">to_x_data</span><span class="o">=</span><span class="n">new_x_data</span><span class="p">,</span><span class="n">to_x_unit</span><span class="o">=</span><span class="s1">&#39;eV&#39;</span><span class="p">)</span>
+
+<span class="n">plt</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">sp_values</span><span class="p">[</span><span class="mi">0</span><span class="p">,:],</span><span class="n">sp_values</span><span class="p">[</span><span class="mi">1</span><span class="p">,:],</span><span class="s1">&#39;o&#39;</span><span class="p">,</span><span class="n">label</span><span class="o">=</span><span class="s2">&quot;original&quot;</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">interped_sp_values</span><span class="p">[</span><span class="mi">0</span><span class="p">,:],</span><span class="n">interped_sp_values</span><span class="p">[</span><span class="mi">1</span><span class="p">,:],</span><span class="s1">&#39;o&#39;</span><span class="p">,</span><span class="n">label</span><span class="o">=</span><span class="s2">&quot;interpolated&quot;</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">xlabel</span><span class="p">(</span><span class="s2">&quot;photon energy (eV)&quot;</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">ylabel</span><span class="p">(</span><span class="s2">&quot;emission intensity (abu)&quot;</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">legend</span><span class="p">()</span>
+</pre></div>
+</div>
+<div class="highlight-default"><div class="highlight"><pre><span class="o">&lt;</span><span class="n">matplotlib</span><span class="o">.</span><span class="n">legend</span><span class="o">.</span><span class="n">Legend</span> <span class="n">at</span> <span class="mh">0x108a8c860</span><span class="o">&gt;</span>
+</pre></div>
+</div>
+<img alt="../_images/output_16_1.png" src="../_images/output_16_1.png" />
+<div class="code python highlight-default"><div class="highlight"><pre><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">TO DO list:</span>
+<span class="sd">- The explaination of the key components in Spectrum class</span>
+<span class="sd">- The main spirit of the design: why assigning x_unit is necessary.</span>
+<span class="sd">- Conversion of spectral density</span>
+<span class="sd">- Multiplication of spectrum</span>
+
+<span class="sd">&quot;&quot;&quot;</span>
+</pre></div>
+</div>
+<pre class="literal-block">
+'nTO DO list:n- The explaination of the key components in Spectrum classn- The main spirit of the design: why assigning x_unit is necessary.n- Conversion of spectral densityn- Multiplication of spectrumnn'
+</pre>
+</div>
+</div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+  <h3><a href="../index.html">Table Of Contents</a></h3>
+  <ul>
+<li><a class="reference internal" href="#">Tutorial-Dealing with spectrum data</a><ul>
+<li><a class="reference internal" href="#initialize-a-spectrum-class">Initialize a Spectrum class</a></li>
+<li><a class="reference internal" href="#get-the-magnitueds-of-a-spectrum-instance">Get the magnitueds of a <code class="docutils literal"><span class="pre">Spectrum</span></code> instance</a><ul>
+<li><a class="reference internal" href="#retrieve-the-values-without-interpolation">Retrieve the values without interpolation</a></li>
+<li><a class="reference internal" href="#retrieve-the-values-with-interpolation">Retrieve the values with interpolation</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+<div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="../index.html">Documentation overview</a><ul>
+  </ul></li>
+</ul>
+</div>
+  <div role="note" aria-label="source link">
+    <h3>This Page</h3>
+    <ul class="this-page-menu">
+      <li><a href="../_sources/Tutorial-Dealing with spectrum data/Tutorial-Dealing with spectrum data.txt"
+            rel="nofollow">Show Source</a></li>
+    </ul>
+   </div>
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <form class="search" action="../search.html" method="get">
+      <div><input type="text" name="q" /></div>
+      <div><input type="submit" value="Go" /></div>
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &copy;2016, Kan-Hua Lee.
+      
+      |
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 1.4.6</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.9</a>
+      
+      |
+      <a href="../_sources/Tutorial-Dealing with spectrum data/Tutorial-Dealing with spectrum data.txt"
+          rel="nofollow">Page source</a>
+    </div>
+
+    
+
+    
+  </body>
+</html>

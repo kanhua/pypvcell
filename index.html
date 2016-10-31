@@ -1,0 +1,189 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>Pypvcell: An extensible programming framework for modeling solar cell &#8212; pypvcell 0.1 documentation</title>
+    
+    <link rel="stylesheet" href="_static/alabaster.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    './',
+        VERSION:     '0.1',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="_static/jquery.js"></script>
+    <script type="text/javascript" src="_static/underscore.js"></script>
+    <script type="text/javascript" src="_static/doctools.js"></script>
+    <script type="text/javascript" src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    <link rel="top" title="pypvcell 0.1 documentation" href="#" />
+    <link rel="next" title="Spectrum" href="spectrum_class.html" />
+   
+  <link rel="stylesheet" href="_static/custom.css" type="text/css" />
+  
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
+
+  </head>
+  <body role="document">
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <div class="section" id="pypvcell-an-extensible-programming-framework-for-modeling-solar-cell">
+<h1>Pypvcell: An extensible programming framework for modeling solar cell<a class="headerlink" href="#pypvcell-an-extensible-programming-framework-for-modeling-solar-cell" title="Permalink to this headline">¶</a></h1>
+<p>Pypvcell is collection of python functions for simulating the I-V characteristics of solar cell.
+It is designed to be Pypvcell is a robust, extensible, easy-to-use framework for modeling the I-V characteristics of solar cells.
+It currently specialized in modeling multi-junction solar cell.</p>
+<div class="section" id="features">
+<h2>Features<a class="headerlink" href="#features" title="Permalink to this headline">¶</a></h2>
+<ul class="simple">
+<li>Written in pure python and its ecosystem</li>
+<li>Adopt innovative designs to simplify the codes</li>
+<li>Documented and tested</li>
+</ul>
+</div>
+<div class="section" id="examples">
+<h2>Examples<a class="headerlink" href="#examples" title="Permalink to this headline">¶</a></h2>
+<p>In Pypvcell, a type of solar cell is defined as class. For example, here&#8217;s a way to define a solar cell class.
+The following code demonstrates how to set up a solar cell at Shockley-Queisser limit:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="kn">from</span> <span class="nn">pypvcell.illumination</span> <span class="kn">import</span> <span class="n">Illumination</span>
+<span class="kn">from</span> <span class="nn">pypvcell.solarcell</span> <span class="kn">import</span> <span class="n">SQCell</span>
+
+<span class="c1">#Setup the illumination</span>
+<span class="n">input_ill</span> <span class="o">=</span> <span class="n">Illumination</span><span class="p">(</span><span class="s2">&quot;AM1.5g&quot;</span><span class="p">,</span> <span class="n">concentration</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+
+<span class="c1"># Setup the solar cell at a band gap of 1.42 eV</span>
+<span class="n">sq_cell</span> <span class="o">=</span> <span class="n">SQCell</span><span class="p">(</span><span class="n">eg</span><span class="o">=</span><span class="mf">1.42</span><span class="p">,</span> <span class="n">cell_T</span><span class="o">=</span><span class="mi">293</span><span class="p">,</span> <span class="n">n_c</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">n_s</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+<span class="n">sq_cell</span><span class="o">.</span><span class="n">set_input_spectrum</span><span class="p">(</span><span class="n">input_spectrum</span><span class="o">=</span><span class="n">input_ill</span><span class="p">)</span>
+
+<span class="c1"># Print out the efficiency</span>
+<span class="k">print</span><span class="p">(</span><span class="n">sq_cell</span><span class="o">.</span><span class="n">get_eta</span><span class="p">())</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="prerequisites">
+<h2>Prerequisites<a class="headerlink" href="#prerequisites" title="Permalink to this headline">¶</a></h2>
+<ul class="simple">
+<li>Pypvcell support both Python 2.x and 3. However, we recommend using Python 3.</li>
+<li>Numpy, Scipy, Matplotlib</li>
+</ul>
+</div>
+<div class="section" id="liscence">
+<h2>Liscence:<a class="headerlink" href="#liscence" title="Permalink to this headline">¶</a></h2>
+<p>MIT</p>
+</div>
+<div class="section" id="acknowledgement">
+<h2>Acknowledgement<a class="headerlink" href="#acknowledgement" title="Permalink to this headline">¶</a></h2>
+<p>The development of this software is partly suppored by Japan New Energy and Industrial Technology Development Organization (NEDO).
+Pypvcell is inspired by Solcore by Markus Furher et al.</p>
+</div>
+<div class="section" id="modules">
+<h2>Modules<a class="headerlink" href="#modules" title="Permalink to this headline">¶</a></h2>
+<div class="toctree-wrapper compound">
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="spectrum_class.html">Spectrum</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="spectrum_class.html#introduction">Introduction</a></li>
+<li class="toctree-l2"><a class="reference internal" href="spectrum_class.html#design-of-spectrum-class">Design of <code class="docutils literal"><span class="pre">Spectrum</span></code> class</a></li>
+<li class="toctree-l2"><a class="reference internal" href="spectrum_class.html#access-the-values-in-spectrum">Access the values in <code class="docutils literal"><span class="pre">Spectrum</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="spectrum_class.html#arithmetic-operations">Arithmetic operations</a></li>
+<li class="toctree-l2"><a class="reference internal" href="spectrum_class.html#spectrum-class-api">Spectrum class API</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="photocurrent_m.html">Module: photocurrent</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="photocurrent_m.html#module-pypvcell.photocurrent">Methods in this module</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="fom_m.html">Module: fom</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="fom_m.html#module-pypvcell.fom">Methods in this module</a></li>
+</ul>
+</li>
+</ul>
+</div>
+</div>
+</div>
+<div class="section" id="indices-and-tables">
+<h1>Indices and tables<a class="headerlink" href="#indices-and-tables" title="Permalink to this headline">¶</a></h1>
+<ul class="simple">
+<li><a class="reference internal" href="genindex.html"><span class="std std-ref">Index</span></a></li>
+<li><a class="reference internal" href="py-modindex.html"><span class="std std-ref">Module Index</span></a></li>
+<li><a class="reference internal" href="search.html"><span class="std std-ref">Search Page</span></a></li>
+</ul>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+  <h3><a href="#">Table Of Contents</a></h3>
+  <ul>
+<li><a class="reference internal" href="#">Pypvcell: An extensible programming framework for modeling solar cell</a><ul>
+<li><a class="reference internal" href="#features">Features</a></li>
+<li><a class="reference internal" href="#examples">Examples</a></li>
+<li><a class="reference internal" href="#prerequisites">Prerequisites</a></li>
+<li><a class="reference internal" href="#liscence">Liscence:</a></li>
+<li><a class="reference internal" href="#acknowledgement">Acknowledgement</a></li>
+<li><a class="reference internal" href="#modules">Modules</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#indices-and-tables">Indices and tables</a></li>
+</ul>
+<div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="#">Documentation overview</a><ul>
+      <li>Next: <a href="spectrum_class.html" title="next chapter">Spectrum</a></li>
+  </ul></li>
+</ul>
+</div>
+  <div role="note" aria-label="source link">
+    <h3>This Page</h3>
+    <ul class="this-page-menu">
+      <li><a href="_sources/index.txt"
+            rel="nofollow">Show Source</a></li>
+    </ul>
+   </div>
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <form class="search" action="search.html" method="get">
+      <div><input type="text" name="q" /></div>
+      <div><input type="submit" value="Go" /></div>
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &copy;2016, Kan-Hua Lee.
+      
+      |
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 1.4.6</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.9</a>
+      
+      |
+      <a href="_sources/index.txt"
+          rel="nofollow">Page source</a>
+    </div>
+
+    
+
+    
+  </body>
+</html>
