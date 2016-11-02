@@ -24,8 +24,6 @@
     <script type="text/javascript" src="_static/underscore.js"></script>
     <script type="text/javascript" src="_static/doctools.js"></script>
     <script type="text/javascript" src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
-    <link rel="index" title="Index" href="genindex.html" />
-    <link rel="search" title="Search" href="search.html" />
     <link rel="top" title="pypvcell 0.1.0 documentation" href="#" />
     <link rel="next" title="Spectrum" href="spectrum_class.html" />
    
@@ -56,11 +54,19 @@ It currently specialized in modeling multi-junction solar cell.</p>
 <li>Documented and tested</li>
 </ul>
 </div>
+<div class="section" id="overview-of-the-model">
+<h2>Overview of the model<a class="headerlink" href="#overview-of-the-model" title="Permalink to this headline">¶</a></h2>
+<img alt="_images/pypvcell_architecture.png" src="_images/pypvcell_architecture.png" />
+</div>
+<div class="section" id="installation-and-download">
+<h2>Installation and Download<a class="headerlink" href="#installation-and-download" title="Permalink to this headline">¶</a></h2>
+<p>See <a class="reference external" href="https://github.com/kanhua/pypvcell">https://github.com/kanhua/pypvcell</a></p>
+</div>
 <div class="section" id="examples">
 <h2>Examples<a class="headerlink" href="#examples" title="Permalink to this headline">¶</a></h2>
 <p>In Pypvcell, a type of solar cell is defined as class. For example, here&#8217;s a way to define a solar cell class.
 The following code demonstrates how to set up a solar cell at Shockley-Queisser limit:</p>
-<div class="highlight-python"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">pypvcell.illumination</span> <span class="kn">import</span> <span class="n">Illumination</span>
+<div class="highlight-python"><div class="highlight"><pre><span class="kn">from</span> <span class="nn">pypvcell.illumination</span> <span class="kn">import</span> <span class="n">Illumination</span>
 <span class="kn">from</span> <span class="nn">pypvcell.solarcell</span> <span class="kn">import</span> <span class="n">SQCell</span>
 
 <span class="c1">#Setup the illumination</span>
@@ -96,19 +102,15 @@ Pypvcell is inspired by Solcore by Markus Furher et al.</p>
 <div class="toctree-wrapper compound">
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="spectrum_class.html">Spectrum</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="spectrum_class.html#introduction">Introduction</a></li>
-<li class="toctree-l2"><a class="reference internal" href="spectrum_class.html#design-of-spectrum-class">Design of <code class="docutils literal"><span class="pre">Spectrum</span></code> class</a></li>
-<li class="toctree-l2"><a class="reference internal" href="spectrum_class.html#access-the-values-in-spectrum">Access the values in <code class="docutils literal"><span class="pre">Spectrum</span></code></a></li>
-<li class="toctree-l2"><a class="reference internal" href="spectrum_class.html#arithmetic-operations">Arithmetic operations</a></li>
 <li class="toctree-l2"><a class="reference internal" href="spectrum_class.html#spectrum-class-api">Spectrum class API</a></li>
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="photocurrent_m.html">Module: photocurrent</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="photocurrent_m.html#module-pypvcell.photocurrent">Methods in this module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="photocurrent_m.html#methods-in-this-module">Methods in this module</a></li>
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="fom_m.html">Module: fom</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="fom_m.html#module-pypvcell.fom">Methods in this module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="fom_m.html#methods-in-this-module">Methods in this module</a></li>
 </ul>
 </li>
 </ul>
@@ -134,6 +136,8 @@ Pypvcell is inspired by Solcore by Markus Furher et al.</p>
   <ul>
 <li><a class="reference internal" href="#">Pypvcell: An extensible programming framework for modeling solar cell</a><ul>
 <li><a class="reference internal" href="#features">Features</a></li>
+<li><a class="reference internal" href="#overview-of-the-model">Overview of the model</a></li>
+<li><a class="reference internal" href="#installation-and-download">Installation and Download</a></li>
 <li><a class="reference internal" href="#examples">Examples</a></li>
 <li><a class="reference internal" href="#prerequisites">Prerequisites</a></li>
 <li><a class="reference internal" href="#liscence">Liscence:</a></li>
@@ -176,7 +180,7 @@ Pypvcell is inspired by Solcore by Markus Furher et al.</p>
       &copy;2016, Kan-Hua Lee.
       
       |
-      Powered by <a href="http://sphinx-doc.org/">Sphinx 1.4.8</a>
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 1.4.6</a>
       &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.9</a>
       
       |

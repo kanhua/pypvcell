@@ -24,8 +24,6 @@
     <script type="text/javascript" src="_static/underscore.js"></script>
     <script type="text/javascript" src="_static/doctools.js"></script>
     <script type="text/javascript" src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
-    <link rel="index" title="Index" href="genindex.html" />
-    <link rel="search" title="Search" href="search.html" />
     <link rel="top" title="pypvcell 0.1.0 documentation" href="index.html" />
     <link rel="prev" title="Module: photocurrent" href="photocurrent_m.html" />
    
@@ -46,93 +44,8 @@
   <div class="section" id="module-fom">
 <h1>Module: fom<a class="headerlink" href="#module-fom" title="Permalink to this headline">¶</a></h1>
 <p>This module provides function for calculating the figure of merits of I-V characteristics.</p>
-<div class="section" id="module-pypvcell.fom">
-<span id="methods-in-this-module"></span><h2>Methods in this module<a class="headerlink" href="#module-pypvcell.fom" title="Permalink to this headline">¶</a></h2>
-<dl class="function">
-<dt id="pypvcell.fom.ff">
-<code class="descclassname">pypvcell.fom.</code><code class="descname">ff</code><span class="sig-paren">(</span><em>voltage</em>, <em>current</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pypvcell/fom.html#ff"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pypvcell.fom.ff" title="Permalink to this definition">¶</a></dt>
-<dd><p>Calculate the fill factor from an I-V curve</p>
-<table class="docutils field-list" frame="void" rules="none">
-<col class="field-name" />
-<col class="field-body" />
-<tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
-<li><strong>voltage</strong> (<em>np.ndarray</em>) &#8211; voltage array</li>
-<li><strong>current</strong> (<em>np.ndarray</em>) &#8211; current array</li>
-</ul>
-</td>
-</tr>
-<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last">fill factor (in numerics)</p>
-</td>
-</tr>
-</tbody>
-</table>
-</dd></dl>
-
-<dl class="function">
-<dt id="pypvcell.fom.isc">
-<code class="descclassname">pypvcell.fom.</code><code class="descname">isc</code><span class="sig-paren">(</span><em>voltage</em>, <em>current</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pypvcell/fom.html#isc"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pypvcell.fom.isc" title="Permalink to this definition">¶</a></dt>
-<dd><p>Calculate the short-circuit current of an I-V curve</p>
-<table class="docutils field-list" frame="void" rules="none">
-<col class="field-name" />
-<col class="field-body" />
-<tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
-<li><strong>voltage</strong> (<em>np.ndarray</em>) &#8211; voltage array</li>
-<li><strong>current</strong> (<em>np.ndarray</em>) &#8211; current array</li>
-</ul>
-</td>
-</tr>
-<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last">The value of isc</p>
-</td>
-</tr>
-</tbody>
-</table>
-</dd></dl>
-
-<dl class="function">
-<dt id="pypvcell.fom.max_power">
-<code class="descclassname">pypvcell.fom.</code><code class="descname">max_power</code><span class="sig-paren">(</span><em>voltage</em>, <em>current</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pypvcell/fom.html#max_power"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pypvcell.fom.max_power" title="Permalink to this definition">¶</a></dt>
-<dd><p>Calculate the maximum power of an I-V curve.
-Note that this function uses the convention of negative Isc.</p>
-<table class="docutils field-list" frame="void" rules="none">
-<col class="field-name" />
-<col class="field-body" />
-<tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
-<li><strong>voltage</strong> (<em>np.ndarray</em>) &#8211; voltage array</li>
-<li><strong>current</strong> (<em>np.ndarray</em>) &#8211; current array</li>
-</ul>
-</td>
-</tr>
-<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last">the value of maximum power</p>
-</td>
-</tr>
-</tbody>
-</table>
-</dd></dl>
-
-<dl class="function">
-<dt id="pypvcell.fom.voc">
-<code class="descclassname">pypvcell.fom.</code><code class="descname">voc</code><span class="sig-paren">(</span><em>voltage</em>, <em>current</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pypvcell/fom.html#voc"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pypvcell.fom.voc" title="Permalink to this definition">¶</a></dt>
-<dd><p>Calculate the open-circuit voltage of an I-V curve.</p>
-<table class="docutils field-list" frame="void" rules="none">
-<col class="field-name" />
-<col class="field-body" />
-<tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
-<li><strong>voltage</strong> (<em>np.ndarray</em>) &#8211; the array of voltage</li>
-<li><strong>current</strong> (<em>np.ndarray</em>) &#8211; the array of current</li>
-</ul>
-</td>
-</tr>
-<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last">the value of Voc</p>
-</td>
-</tr>
-</tbody>
-</table>
-</dd></dl>
-
+<div class="section" id="methods-in-this-module">
+<h2>Methods in this module<a class="headerlink" href="#methods-in-this-module" title="Permalink to this headline">¶</a></h2>
 </div>
 </div>
 
@@ -145,7 +58,7 @@ Note that this function uses the convention of negative Isc.</p>
   <h3><a href="index.html">Table Of Contents</a></h3>
   <ul>
 <li><a class="reference internal" href="#">Module: fom</a><ul>
-<li><a class="reference internal" href="#module-pypvcell.fom">Methods in this module</a></li>
+<li><a class="reference internal" href="#methods-in-this-module">Methods in this module</a></li>
 </ul>
 </li>
 </ul>
@@ -182,7 +95,7 @@ Note that this function uses the convention of negative Isc.</p>
       &copy;2016, Kan-Hua Lee.
       
       |
-      Powered by <a href="http://sphinx-doc.org/">Sphinx 1.4.8</a>
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 1.4.6</a>
       &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.9</a>
       
       |
