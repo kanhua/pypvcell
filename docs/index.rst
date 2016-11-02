@@ -12,9 +12,18 @@ Features
 * Adopt innovative designs to simplify the codes
 * Documented and tested
 
+
+Overview of the model
+-----------------------
+.. image:: ./resources/pypvcell_architecture.png
+
+
+
 Installation and Download
 --------------------------
 See https://github.com/kanhua/pypvcell
+
+
 
 
 Examples
