@@ -2,7 +2,6 @@
 Calculate the SQ-limit of 1-J cell
 This calculation compares the file with the graph in etaOpt paper
 """
-
 from pypvcell.detail_balanced_MJ import calc_1j_eta
 import numpy as np
 import matplotlib.pyplot as plt
