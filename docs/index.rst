@@ -7,8 +7,7 @@ It is designed to be robust, extensible, easy-to-use framework for modeling the 
 Features
 ------------
 
-
-* PureWritten in pure python and its ecosystem
+* Written in pure python and its ecosystem
 * Adopt innovative designs to simplify the codes
 * Documented and tested
 
@@ -45,7 +44,7 @@ The following code demonstrates how to set up a solar cell at Shockley-Queisser 
     # Print out the efficiency
     print(sq_cell.get_eta())
 
-
+More demon
 
 Prerequisites
 --------------------------
