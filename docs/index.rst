@@ -11,7 +11,6 @@ Features
 * PureWritten in pure python and its ecosystem
 * Adopt innovative designs to simplify the codes
 * Documented and tested
-*
 
 
 Overview of the model
