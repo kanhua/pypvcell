@@ -2,15 +2,16 @@ Pypvcell: An extensible programming framework for modeling solar cell
 ========================================================================
 
 Pypvcell is collection of python functions for simulating the I-V characteristics of solar cell.
-It is designed to be Pypvcell is a robust, extensible, easy-to-use framework for modeling the I-V characteristics of solar cells.
-It currently specialized in modeling multi-junction solar cell.
+It is designed to be robust, extensible, easy-to-use framework for modeling the I-V characteristics of solar cells.
 
 Features
 ------------
 
-* Written in pure python and its ecosystem
+
+* PureWritten in pure python and its ecosystem
 * Adopt innovative designs to simplify the codes
 * Documented and tested
+*
 
 
 Overview of the model
@@ -22,8 +23,6 @@ Overview of the model
 Installation and Download
 --------------------------
 See https://github.com/kanhua/pypvcell
-
-
 
 
 Examples
@@ -46,6 +45,7 @@ The following code demonstrates how to set up a solar cell at Shockley-Queisser 
 
     # Print out the efficiency
     print(sq_cell.get_eta())
+
 
 
 Prerequisites
