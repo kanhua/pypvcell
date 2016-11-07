@@ -414,6 +414,20 @@ class Spectrum(object):
 
         return np.vstack((x_data, y_data))
 
+    def to_photon_flux(self):
+        """
+
+
+
+        :return:
+        """
+
+        y_data = self._as_photon_flux(self.core_x, self.core_y)
+
+
+
+
+
     def get_interp_spectrum(self, to_x_data, to_x_unit, to_y_area_unit=None, to_photon_flux=False,
                             interp_left=None, interp_right=None):
 
