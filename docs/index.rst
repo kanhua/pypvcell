@@ -44,7 +44,13 @@ The following code demonstrates how to set up a solar cell at Shockley-Queisser 
     # Print out the efficiency
     print(sq_cell.get_eta())
 
-More demon
+Tutorials
+-------------
+
+Hanlding spectrum data with Spectrum class `Link text <./dealing_with_spectrum_data.html>`_
+
+
+
 
 Prerequisites
 --------------------------
