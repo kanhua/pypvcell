@@ -1,8 +1,7 @@
 # Pypvcell
 
 Pypvcell is a library for modelling solar cells.
-This site is still being developing and testing. The HTML version of the documentation is not ready yet.
-If you are interested in this project, please Star or Watch this repo to get update. 
+This site is still being developing and testing. If you are interested in this project, please Star or Watch this repo to get updates. 
 
 ## Documentation
 
