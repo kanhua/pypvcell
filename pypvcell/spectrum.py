@@ -414,19 +414,6 @@ class Spectrum(object):
 
         return np.vstack((x_data, y_data))
 
-    def to_photon_flux(self):
-        """
-
-
-
-        :return:
-        """
-
-        y_data = self._as_photon_flux(self.core_x, self.core_y)
-
-
-
-
 
     def get_interp_spectrum(self, to_x_data, to_x_unit, to_y_area_unit=None, to_photon_flux=False,
                             interp_left=None, interp_right=None):
@@ -553,6 +540,20 @@ class Spectrum(object):
 
     def _as_energy(self, wavelength, photon_flux):
         return photon_flux * (sc.h * sc.c) / wavelength
+
+    def trapz(self):
+        """
+        Integration of the spectrum, i.e., \int y(x)dx
+        Internally, it simply does np.trapz(y,x)
+
+        :return:  The integrated value.
+        """
+
+        if self.is_spec_density==False:
+            raise ArithmeticError("This spectrum instance is not integrable, since self.is_spec_density is false")
+
+        else:
+            return np.trapz(self.core_y, self.core_x)
 
 
 if __name__ == "__main__":
