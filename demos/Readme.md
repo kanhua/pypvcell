@@ -9,6 +9,6 @@ This folder collects a number of examples of the capabilities of pypvcell.
 Spectrum class is an important data structure in Pypvcell that does the heavy-lifting of
  arithmetic operations and unit conversions of spectrum data. See this ipynb file for more details.
  
-- [Optimal band gap calculation](./efficiency_vs_bandgap)
+- [Optimal band gap calculation](./efficiency_vs_bandgap.ipynb)
 
 This example demonstrates how to calculate optimal band gaps of single and multi-junction solar cells by using pypvcell.
