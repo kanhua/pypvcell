@@ -2,6 +2,20 @@ Installing Pypvcell
 ====================
 
 
+Install Pypvcell via pip
+-------------------------
+
+
+
+
+
+P.S.
+
+
+
+
+
+
 Package requirements
 --------------------------
 
