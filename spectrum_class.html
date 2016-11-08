@@ -25,8 +25,6 @@
     <script type="text/javascript" src="_static/doctools.js"></script>
     <script type="text/javascript" src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
     <link rel="top" title="pypvcell 0.1.0 documentation" href="index.html" />
-    <link rel="next" title="Module: photocurrent" href="photocurrent_m.html" />
-    <link rel="prev" title="Pypvcell: An extensible programming framework for modeling solar cell" href="index.html" />
 
    
   <link rel="stylesheet" href="_static/custom.css" type="text/css" />
@@ -236,13 +234,15 @@ It converts everything to standard MKS unit. x_data: &#8216;m&#8217;, y_data: &#
 </dd></dl>
 
 <dl class="method">
-<dt id="pypvcell.spectrum.Spectrum.to_photon_flux">
-<code class="descname">to_photon_flux</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/pypvcell/spectrum.html#Spectrum.to_photon_flux"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pypvcell.spectrum.Spectrum.to_photon_flux" title="Permalink to this definition">¶</a></dt>
-<dd><table class="docutils field-list" frame="void" rules="none">
+<dt id="pypvcell.spectrum.Spectrum.trapz">
+<code class="descname">trapz</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/pypvcell/spectrum.html#Spectrum.trapz"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pypvcell.spectrum.Spectrum.trapz" title="Permalink to this definition">¶</a></dt>
+<dd><p>Integration of the spectrum, i.e., int y(x)dx
+Internally, it simply does np.trapz(y,x)</p>
+<table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body"></td>
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">The integrated value.</td>
 </tr>
 </tbody>
 </table>
@@ -274,8 +274,6 @@ It converts everything to standard MKS unit. x_data: &#8216;m&#8217;, y_data: &#
 <h3>Related Topics</h3>
 <ul>
   <li><a href="index.html">Documentation overview</a><ul>
-      <li>Previous: <a href="index.html" title="previous chapter">Pypvcell: An extensible programming framework for modeling solar cell</a></li>
-      <li>Next: <a href="photocurrent_m.html" title="next chapter">Module: photocurrent</a></li>
   </ul></li>
 </ul>
 </div>

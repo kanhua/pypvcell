@@ -465,19 +465,6 @@
 
         <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">vstack</span><span class="p">((</span><span class="n">x_data</span><span class="p">,</span> <span class="n">y_data</span><span class="p">))</span></div>
 
-<div class="viewcode-block" id="Spectrum.to_photon_flux"><a class="viewcode-back" href="../../spectrum_class.html#pypvcell.spectrum.Spectrum.to_photon_flux">[docs]</a>    <span class="k">def</span> <span class="nf">to_photon_flux</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;</span>
-
-
-
-<span class="sd">        :return:</span>
-<span class="sd">        &quot;&quot;&quot;</span>
-
-        <span class="n">y_data</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_as_photon_flux</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">core_x</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">core_y</span><span class="p">)</span></div>
-
-
-
-
 
 <div class="viewcode-block" id="Spectrum.get_interp_spectrum"><a class="viewcode-back" href="../../spectrum_class.html#pypvcell.spectrum.Spectrum.get_interp_spectrum">[docs]</a>    <span class="k">def</span> <span class="nf">get_interp_spectrum</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">to_x_data</span><span class="p">,</span> <span class="n">to_x_unit</span><span class="p">,</span> <span class="n">to_y_area_unit</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">to_photon_flux</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
                             <span class="n">interp_left</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">interp_right</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
@@ -603,7 +590,21 @@
         <span class="k">return</span> <span class="n">energy_flux</span> <span class="o">/</span> <span class="p">(</span><span class="n">sc</span><span class="o">.</span><span class="n">h</span> <span class="o">*</span> <span class="n">sc</span><span class="o">.</span><span class="n">c</span><span class="p">)</span> <span class="o">*</span> <span class="n">wavelength</span>
 
     <span class="k">def</span> <span class="nf">_as_energy</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">wavelength</span><span class="p">,</span> <span class="n">photon_flux</span><span class="p">):</span>
-        <span class="k">return</span> <span class="n">photon_flux</span> <span class="o">*</span> <span class="p">(</span><span class="n">sc</span><span class="o">.</span><span class="n">h</span> <span class="o">*</span> <span class="n">sc</span><span class="o">.</span><span class="n">c</span><span class="p">)</span> <span class="o">/</span> <span class="n">wavelength</span></div>
+        <span class="k">return</span> <span class="n">photon_flux</span> <span class="o">*</span> <span class="p">(</span><span class="n">sc</span><span class="o">.</span><span class="n">h</span> <span class="o">*</span> <span class="n">sc</span><span class="o">.</span><span class="n">c</span><span class="p">)</span> <span class="o">/</span> <span class="n">wavelength</span>
+
+<div class="viewcode-block" id="Spectrum.trapz"><a class="viewcode-back" href="../../spectrum_class.html#pypvcell.spectrum.Spectrum.trapz">[docs]</a>    <span class="k">def</span> <span class="nf">trapz</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Integration of the spectrum, i.e., \int y(x)dx</span>
+<span class="sd">        Internally, it simply does np.trapz(y,x)</span>
+
+<span class="sd">        :return:  The integrated value.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">is_spec_density</span><span class="o">==</span><span class="kc">False</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ArithmeticError</span><span class="p">(</span><span class="s2">&quot;This spectrum instance is not integrable, since self.is_spec_density is false&quot;</span><span class="p">)</span>
+
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">trapz</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">core_y</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">core_x</span><span class="p">)</span></div></div>
 
 
 <span class="k">if</span> <span class="n">__name__</span> <span class="o">==</span> <span class="s2">&quot;__main__&quot;</span><span class="p">:</span>

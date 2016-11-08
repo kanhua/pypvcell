@@ -1,0 +1,289 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>Dealing with spectrum data &#8212; pypvcell 0.1.0 documentation</title>
+    
+    <link rel="stylesheet" href="_static/alabaster.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    './',
+        VERSION:     '0.1.0',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="_static/jquery.js"></script>
+    <script type="text/javascript" src="_static/underscore.js"></script>
+    <script type="text/javascript" src="_static/doctools.js"></script>
+    <script type="text/javascript" src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    <link rel="top" title="pypvcell 0.1.0 documentation" href="index.html" />
+
+   
+  <link rel="stylesheet" href="_static/custom.css" type="text/css" />
+  
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
+
+<script type="text/javascript">
+    var _gaq = _gaq || [];
+    _gaq.push(['_setAccount', 'XXX account number XXX']);
+    _gaq.push(['_trackPageview']);
+</script>
+
+  </head>
+  <body role="document">
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <div class="section" id="dealing-with-spectrum-data">
+<h1>Dealing with spectrum data<a class="headerlink" href="#dealing-with-spectrum-data" title="Permalink to this headline">¶</a></h1>
+<p>This tutorial demonstrates how to use Spectrum class to do various
+arithmetic operations of Spectrum. This demo uses the Jsc calculation as
+an example, namely</p>
+<p>where <span class="math">\(\phi\)</span> is the illumination spectrum in photon flux,
+<span class="math">\(E\)</span> is the photon energy and <span class="math">\(QE\)</span> is the quantum efficiency.</p>
+<div class="code python highlight-default"><div class="highlight"><pre><span class="o">%</span><span class="n">matplotlib</span> <span class="n">inline</span>
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span class="kn">import</span> <span class="nn">scipy.constants</span> <span class="k">as</span> <span class="nn">sc</span>
+<span class="kn">import</span> <span class="nn">matplotlib.pyplot</span> <span class="k">as</span> <span class="nn">plt</span>
+<span class="kn">from</span> <span class="nn">pypvcell.spectrum</span> <span class="k">import</span> <span class="n">Spectrum</span>
+<span class="kn">from</span> <span class="nn">pypvcell.illumination</span> <span class="k">import</span> <span class="n">Illumination</span>
+<span class="kn">from</span> <span class="nn">pypvcell.photocurrent</span> <span class="k">import</span> <span class="n">gen_step_qe_array</span>
+</pre></div>
+</div>
+<div class="section" id="quantum-efficiency">
+<h2>Quantum efficiency<a class="headerlink" href="#quantum-efficiency" title="Permalink to this headline">¶</a></h2>
+<p>We first use a function <code class="docutils literal"><span class="pre">gen_step_qe_array</span></code> to generate a quantum
+efficiency spectrum. This spectrum is a step function with a cut-off at
+the band gap of 1.42 eV.</p>
+<div class="code python highlight-default"><div class="highlight"><pre><span class="n">qe</span><span class="o">=</span><span class="n">gen_step_qe_array</span><span class="p">(</span><span class="mf">1.42</span><span class="p">,</span><span class="mf">0.9</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">qe</span><span class="p">[:,</span><span class="mi">0</span><span class="p">],</span><span class="n">qe</span><span class="p">[:,</span><span class="mi">1</span><span class="p">])</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">xlabel</span><span class="p">(</span><span class="s1">&#39;photon energy (eV)&#39;</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">ylabel</span><span class="p">(</span><span class="s1">&#39;QE&#39;</span><span class="p">)</span>
+</pre></div>
+</div>
+<div class="highlight-default"><div class="highlight"><pre><span class="n">Text</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="mf">0.5</span><span class="p">,</span><span class="s1">&#39;QE&#39;</span><span class="p">)</span>
+</pre></div>
+</div>
+<img alt="_images/dealing_with_spectrum_data_5_1.png" src="_images/dealing_with_spectrum_data_5_1.png" />
+<p><code class="docutils literal"><span class="pre">qe</span></code> is a numpy array. The recommeneded way to handle it is converting
+it to <code class="docutils literal"><span class="pre">Spectrum</span></code> class:</p>
+<div class="code python highlight-default"><div class="highlight"><pre><span class="n">qe_sp</span><span class="o">=</span><span class="n">Spectrum</span><span class="p">(</span><span class="n">x_data</span><span class="o">=</span><span class="n">qe</span><span class="p">[:,</span><span class="mi">0</span><span class="p">],</span><span class="n">y_data</span><span class="o">=</span><span class="n">qe</span><span class="p">[:,</span><span class="mi">1</span><span class="p">],</span><span class="n">x_unit</span><span class="o">=</span><span class="s1">&#39;eV&#39;</span><span class="p">)</span>
+</pre></div>
+</div>
+<div class="section" id="unit-conversion">
+<h3>Unit conversion<a class="headerlink" href="#unit-conversion" title="Permalink to this headline">¶</a></h3>
+<p>When we want to retrieve the value of <code class="docutils literal"><span class="pre">qe_sp</span></code> we have to specicify the
+unit of the wavelength. For example, say, converting the wavelength to
+nanometer:</p>
+<div class="code python highlight-default"><div class="highlight"><pre><span class="n">qe</span><span class="o">=</span><span class="n">qe_sp</span><span class="o">.</span><span class="n">get_spectrum</span><span class="p">(</span><span class="n">to_x_unit</span><span class="o">=</span><span class="s1">&#39;nm&#39;</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">qe</span><span class="p">[</span><span class="mi">0</span><span class="p">,:],</span><span class="n">qe</span><span class="p">[</span><span class="mi">1</span><span class="p">,:])</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">xlabel</span><span class="p">(</span><span class="s1">&#39;wavelength (nm)&#39;</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">ylabel</span><span class="p">(</span><span class="s1">&#39;QE&#39;</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">xlim</span><span class="p">([</span><span class="mi">300</span><span class="p">,</span><span class="mi">1100</span><span class="p">])</span>
+</pre></div>
+</div>
+<div class="highlight-default"><div class="highlight"><pre><span class="p">(</span><span class="mi">300</span><span class="p">,</span> <span class="mi">1100</span><span class="p">)</span>
+</pre></div>
+</div>
+<img alt="_images/dealing_with_spectrum_data_9_1.png" src="_images/dealing_with_spectrum_data_9_1.png" />
+</div>
+<div class="section" id="arithmetic-operation">
+<h3>Arithmetic operation<a class="headerlink" href="#arithmetic-operation" title="Permalink to this headline">¶</a></h3>
+<p>We can do arithmetic operation directly with Spectrum class such as</p>
+<div class="code python highlight-default"><div class="highlight"><pre><span class="c1"># Calulate the portion of &quot;non-absorbed&quot; photons, assuming QE is equivalent to absorptivity</span>
+<span class="n">tr_sp</span><span class="o">=</span><span class="mi">1</span><span class="o">-</span><span class="n">qe_sp</span>
+</pre></div>
+</div>
+<div class="code python highlight-default"><div class="highlight"><pre><span class="n">tr</span><span class="o">=</span><span class="n">tr_sp</span><span class="o">.</span><span class="n">get_spectrum</span><span class="p">(</span><span class="n">to_x_unit</span><span class="o">=</span><span class="s1">&#39;nm&#39;</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">tr</span><span class="p">[</span><span class="mi">0</span><span class="p">,:],</span><span class="n">tr</span><span class="p">[</span><span class="mi">1</span><span class="p">,:])</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">xlabel</span><span class="p">(</span><span class="s1">&#39;wavelength (nm)&#39;</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">ylabel</span><span class="p">(</span><span class="s1">&#39;QE&#39;</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">xlim</span><span class="p">([</span><span class="mi">300</span><span class="p">,</span><span class="mi">1100</span><span class="p">])</span>
+</pre></div>
+</div>
+<div class="highlight-default"><div class="highlight"><pre><span class="p">(</span><span class="mi">300</span><span class="p">,</span> <span class="mi">1100</span><span class="p">)</span>
+</pre></div>
+</div>
+<img alt="_images/dealing_with_spectrum_data_12_1.png" src="_images/dealing_with_spectrum_data_12_1.png" />
+</div>
+</div>
+<div class="section" id="illumination-spectrum">
+<h2>Illumination spectrum<a class="headerlink" href="#illumination-spectrum" title="Permalink to this headline">¶</a></h2>
+<p>pypvcell has a class Illumination that is inherited from <code class="docutils literal"><span class="pre">Spectrum</span></code> to
+handle the illumination. It inherits all the capability of <code class="docutils literal"><span class="pre">Spectrum</span></code>
+but has several methods specifically for sun illumination.</p>
+<p>Some default standard spectrum is embedded in the <code class="docutils literal"><span class="pre">pypvcell</span></code>:</p>
+<div class="code python highlight-default"><div class="highlight"><pre><span class="n">std_ill</span><span class="o">=</span><span class="n">Illumination</span><span class="p">(</span><span class="s2">&quot;AM1.5g&quot;</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>Show the values of the data</p>
+<div class="code python highlight-default"><div class="highlight"><pre><span class="n">ill</span><span class="o">=</span><span class="n">std_ill</span><span class="o">.</span><span class="n">get_spectrum</span><span class="p">(</span><span class="s1">&#39;nm&#39;</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="o">*</span><span class="n">ill</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">xlabel</span><span class="p">(</span><span class="s2">&quot;wavelength (nm)&quot;</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">ylabel</span><span class="p">(</span><span class="s2">&quot;intensity (W/m^2-nm)&quot;</span><span class="p">)</span>
+</pre></div>
+</div>
+<div class="highlight-default"><div class="highlight"><pre><span class="n">Text</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="mf">0.5</span><span class="p">,</span><span class="s1">&#39;intensity (W/m^2-nm)&#39;</span><span class="p">)</span>
+</pre></div>
+</div>
+<img alt="_images/dealing_with_spectrum_data_17_1.png" src="_images/dealing_with_spectrum_data_17_1.png" />
+<p>Calcuate the total intensity in W/m^2</p>
+<div class="code python highlight-default"><div class="highlight"><pre><span class="n">std_ill</span><span class="o">.</span><span class="n">total_power</span><span class="p">()</span>
+</pre></div>
+</div>
+<div class="highlight-default"><div class="highlight"><pre><span class="mf">1000.3706555734423</span>
+</pre></div>
+</div>
+<div class="section" id="unit-conversion-of-illumination-spectrum">
+<h3>Unit conversion of illumination spectrum<a class="headerlink" href="#unit-conversion-of-illumination-spectrum" title="Permalink to this headline">¶</a></h3>
+<p>It requires a bit of attention of converting spectrum that is in the
+form of <span class="math">\(\phi(E)dE\)</span>, i.e., the value of integration is a
+meaningful quantitfy such as total power. This has been also handled by
+<code class="docutils literal"><span class="pre">Illumination</span></code> class. In the following case, we convert the wavelength
+to eV. Please note that the units of intensity is also changed to
+W/m^2-eV.</p>
+<div class="code python highlight-default"><div class="highlight"><pre><span class="n">ill</span><span class="o">=</span><span class="n">std_ill</span><span class="o">.</span><span class="n">get_spectrum</span><span class="p">(</span><span class="s1">&#39;eV&#39;</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="o">*</span><span class="n">ill</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">xlabel</span><span class="p">(</span><span class="s2">&quot;wavelength (eV)&quot;</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">ylabel</span><span class="p">(</span><span class="s2">&quot;intensity (W/m^2-eV)&quot;</span><span class="p">)</span>
+</pre></div>
+</div>
+<div class="highlight-default"><div class="highlight"><pre><span class="n">Text</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="mf">0.5</span><span class="p">,</span><span class="s1">&#39;intensity (W/m^2-eV)&#39;</span><span class="p">)</span>
+</pre></div>
+</div>
+<img alt="_images/dealing_with_spectrum_data_21_1.png" src="_images/dealing_with_spectrum_data_21_1.png" />
+</div>
+</div>
+<div class="section" id="spectrum-multiplication">
+<h2>Spectrum multiplication<a class="headerlink" href="#spectrum-multiplication" title="Permalink to this headline">¶</a></h2>
+<p>To calcualte the overall photocurrent, we have to calculate
+<span class="math">\(\phi(E)QE(E) dE\)</span> first. This would involves some unit conversion
+and interpolation between two spectrum. However, this is easily dealt by
+<code class="docutils literal"><span class="pre">Spectrum</span></code> class:</p>
+<div class="code python highlight-default"><div class="highlight"><pre><span class="c1"># calculate \phi(E)QE(E) dE.</span>
+<span class="c1"># Spectrum class automatically convert the units and align the x-data by interpolating std_ill</span>
+<span class="n">jsc_e</span><span class="o">=</span><span class="n">std_ill</span><span class="o">*</span><span class="n">qe_sp</span>
+</pre></div>
+</div>
+<p>Here&#8217;s a more delicate point. We should convert the unit to photon flux
+in order to calculate Jsc.</p>
+<div class="code python highlight-default"><div class="highlight"><pre><span class="n">jsc_e_a</span><span class="o">=</span><span class="n">jsc_e</span><span class="o">.</span><span class="n">get_spectrum</span><span class="p">(</span><span class="s1">&#39;nm&#39;</span><span class="p">,</span><span class="n">to_photon_flux</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="o">*</span><span class="n">jsc_e_a</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">xlim</span><span class="p">([</span><span class="mi">300</span><span class="p">,</span><span class="mi">1100</span><span class="p">])</span>
+</pre></div>
+</div>
+<div class="highlight-default"><div class="highlight"><pre><span class="p">(</span><span class="mi">300</span><span class="p">,</span> <span class="mi">1100</span><span class="p">)</span>
+</pre></div>
+</div>
+<img alt="_images/dealing_with_spectrum_data_25_1.png" src="_images/dealing_with_spectrum_data_25_1.png" />
+<p>Integrate it yields the total photocurrent density in A/m^2</p>
+<div class="code python highlight-default"><div class="highlight"><pre><span class="n">sc</span><span class="o">.</span><span class="n">e</span><span class="o">*</span><span class="n">np</span><span class="o">.</span><span class="n">trapz</span><span class="p">(</span><span class="n">y</span><span class="o">=</span><span class="n">jsc_e_a</span><span class="p">[</span><span class="mi">1</span><span class="p">,:],</span><span class="n">x</span><span class="o">=</span><span class="n">jsc_e_a</span><span class="p">[</span><span class="mi">0</span><span class="p">,:])</span>
+</pre></div>
+</div>
+<div class="highlight-default"><div class="highlight"><pre><span class="mf">289.05897743220532</span>
+</pre></div>
+</div>
+<p>In fact, <code class="docutils literal"><span class="pre">pypvcell</span></code> already provides a function <code class="docutils literal"><span class="pre">calc_jsc()</span></code> for
+calculating Jsc from given spectrum and QE:</p>
+<div class="code python highlight-default"><div class="highlight"><pre><span class="kn">from</span> <span class="nn">pypvcell.photocurrent</span> <span class="k">import</span> <span class="n">calc_jsc</span>
+<span class="n">calc_jsc</span><span class="p">(</span><span class="n">std_ill</span><span class="p">,</span><span class="n">qe_sp</span><span class="p">)</span>
+</pre></div>
+</div>
+<div class="highlight-default"><div class="highlight"><pre><span class="mf">289.05944839925456</span>
+</pre></div>
+</div>
+</div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+  <h3><a href="index.html">Table Of Contents</a></h3>
+  <ul>
+<li><a class="reference internal" href="#">Dealing with spectrum data</a><ul>
+<li><a class="reference internal" href="#quantum-efficiency">Quantum efficiency</a><ul>
+<li><a class="reference internal" href="#unit-conversion">Unit conversion</a></li>
+<li><a class="reference internal" href="#arithmetic-operation">Arithmetic operation</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#illumination-spectrum">Illumination spectrum</a><ul>
+<li><a class="reference internal" href="#unit-conversion-of-illumination-spectrum">Unit conversion of illumination spectrum</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#spectrum-multiplication">Spectrum multiplication</a></li>
+</ul>
+</li>
+</ul>
+<div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="index.html">Documentation overview</a><ul>
+  </ul></li>
+</ul>
+</div>
+  <div role="note" aria-label="source link">
+    <h3>This Page</h3>
+    <ul class="this-page-menu">
+      <li><a href="_sources/dealing_with_spectrum_data.txt"
+            rel="nofollow">Show Source</a></li>
+    </ul>
+   </div>
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <form class="search" action="search.html" method="get">
+      <div><input type="text" name="q" /></div>
+      <div><input type="submit" value="Go" /></div>
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+
+    <div class="footer">
+      &copy;2016, Kan-Hua Lee.
+      
+      |
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 1.4.6</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.9</a>
+      
+      |
+      <a href="_sources/dealing_with_spectrum_data.txt"
+          rel="nofollow">Page source</a>
+    </div>
+
+    
+
+    
+<script>
+    (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+                (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+            m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+    })(window,document,'script','https://www.google-analytics.com/analytics.js','ga');
+
+    ga('create', 'UA-86849941-1', 'auto');
+    ga('send', 'pageview');
+
+</script>
+
+  </body>
+</html>
