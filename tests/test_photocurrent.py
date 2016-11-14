@@ -1,9 +1,9 @@
 __author__ = 'kanhua'
 
 import unittest
-from pypvcell.photocurrent import gen_qe_from_abs, calc_jsc, gen_square_qe, calc_jsc_from_eg
-from pypvcell.illumination import illumination
-from pypvcell.spectrum_base_update import Spectrum
+from pypvcell.photocurrent import conv_abs_to_qe, calc_jsc, gen_step_qe, calc_jsc_from_eg
+from pypvcell.illumination import Illumination
+from pypvcell.spectrum import Spectrum
 import numpy as np
 import matplotlib.pyplot as plt
 
@@ -15,9 +15,9 @@ class MyTestCase(unittest.TestCase):
         abs_array=np.array([[300,1e7],[400,1e8]])
         layer_thickness=500e-6
 
-        abs = Spectrum(wavelength=abs_array[:, 0], spectrum=abs_array[:, 1], wavelength_unit='nm')
+        abs = Spectrum(abs_array[:, 0], abs_array[:, 1], x_unit='nm')
 
-        qe=gen_qe_from_abs(abs,layer_thickness)
+        qe=conv_abs_to_qe(abs,layer_thickness)
 
         qe_a = qe.get_spectrum(to_x_unit='nm')
 
@@ -28,11 +28,10 @@ class MyTestCase(unittest.TestCase):
         abs_file='./si_alpha.csv'
         abs_array=np.loadtxt(abs_file,delimiter=',')
 
-        abs = Spectrum(wavelength=abs_array[:, 0], spectrum=abs_array[:, 1], wavelength_unit='m')
+        abs = Spectrum(abs_array[:, 0], abs_array[:, 1], x_unit='m')
+        qe_1=conv_abs_to_qe(abs,500e-6)
 
-        qe_1=gen_qe_from_abs(abs,500e-6)
-
-        qe_2=gen_qe_from_abs(abs,5e-6)
+        qe_2=conv_abs_to_qe(abs,5e-6)
 
         qe_1_a = qe_1.get_spectrum(to_x_unit='nm')
 
@@ -48,8 +47,8 @@ class MyTestCase(unittest.TestCase):
         :return:
         """
 
-        ill = illumination(x_data="AM1.5g", y_data=null, x_unit)
-        qe = gen_square_qe(1.42, 1)
+        ill = Illumination(x_data="AM1.5g")
+        qe = gen_step_qe(1.42, 1)
 
         jsc = calc_jsc(ill, qe)
 

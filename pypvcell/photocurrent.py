@@ -94,9 +94,17 @@ def calc_jsc(input_illumination, qe):
 
     # initialise a QE interp object
 
-    ill_array = input_illumination.get_spectrum(to_photon_flux=True, to_x_unit='eV', to_y_area_unit='m**-2')
+    ix=input_illumination.core_x
+    qx=qe.core_x
 
-    qe_array = qe.get_interp_spectrum(ill_array[0, :], 'eV')
+    new_x=np.concatenate((ix,qx))
+    new_x=np.sort(new_x)
+
+    ill_array=input_illumination.get_interp_spectrum(new_x,to_x_unit='m',to_y_area_unit='m**-2',to_photon_flux=True,
+                                                     interp_left=0,interp_right=0,raise_error=False)
+
+    qe_array=qe.get_interp_spectrum(new_x,to_x_unit='m')
+
 
     return sc.e * np.trapz(ill_array[1, :] * qe_array[1, :], ill_array[0, :])
 
