@@ -1,3 +1,10 @@
+"""
+
+
+
+
+"""
+
 from pypvcell.illumination import Illumination
 from pypvcell.photocurrent import gen_step_qe, calc_jsc_from_eg, calc_jsc
 from pypvcell.ivsolver import calculate_j01, gen_rec_iv_by_rad_eta, solve_mj_iv
@@ -32,6 +39,25 @@ class SolarCell(object):
 
         raise NotImplementedError()
 
+class TransparentCell(SolarCell):
+
+    def __init__(self):
+
+        self.ill=None
+
+    def set_input_spectrum(self,input_spectrum):
+
+        self.ill=input_spectrum
+
+    def get_transmit_spectrum(self):
+
+        return self.ill
+
+    def get_eta(self):
+        return 0
+
+
+
 
 class SQCell(SolarCell):
     """
@@ -39,7 +65,7 @@ class SQCell(SolarCell):
 
     """
 
-    def __init__(self, eg, cell_T, n_c=3.5, n_s=1):
+    def __init__(self, eg, cell_T, rad_eta=1, n_c=3.5, n_s=1):
         """
         Initialize a SQ solar cell.
         It loads the class and sets up J01 of the cell
@@ -53,6 +79,7 @@ class SQCell(SolarCell):
         self.cell_T = cell_T
         self.n_c = n_c
         self.n_s = n_s
+        self.rad_eta=rad_eta
 
         self._construct()
 
@@ -75,7 +102,7 @@ class SQCell(SolarCell):
 
     def get_eta(self):
         volt = np.linspace(-0.5, self.eg, num=300)
-        volt, current = gen_rec_iv_by_rad_eta(self.j01, 1, 1, self.cell_T, 1e15, voltage=volt, jsc=self.jsc)
+        volt, current = gen_rec_iv_by_rad_eta(self.j01, self.rad_eta, 1, self.cell_T, 1e15, voltage=volt, jsc=self.jsc)
 
         max_p = max_power(volt, current)
 
@@ -192,6 +219,10 @@ class MJCell(SolarCell):
                 filtered_spectrum = sc.get_transmit_spectrum()
             else:
                 sc.set_input_spectrum(filtered_spectrum)
+
+    def get_transmit_spectrum(self):
+
+        return self.subcell[-1].get_transmit_spectrum()
 
     def get_iv(self, volt=None):
 

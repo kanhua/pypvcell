@@ -415,12 +415,13 @@ class Spectrum(object):
         return np.vstack((x_data, y_data))
 
 
-    def get_interp_spectrum(self, to_x_data, to_x_unit, to_y_area_unit=None, to_photon_flux=False,
-                            interp_left=None, interp_right=None):
+    def get_interp_spectrum(self, to_x_data, to_x_unit, to_y_area_unit=None, to_photon_flux=False, interp_left=None,
+                            interp_right=None, raise_error=True):
 
         """
         Get interpolated spectrum.
 
+        :param raise_error: if to_x_data is not within the range of the spectru, raise ValueError
         :param to_x_data: (ndarray) x values to be interpolated
         :param to_x_unit: (string) unit of x of the output value
         :param to_y_area_unit: (string) unit of area of y of the output value.
@@ -432,11 +433,17 @@ class Spectrum(object):
 
         orig_spectrum = self.get_spectrum(to_x_unit, to_y_area_unit, to_photon_flux=to_photon_flux)
 
+        if np.min(to_x_data)<orig_spectrum[0,0] or np.max(to_x_data) > orig_spectrum[0,-1]:
+            if raise_error==True:
+                raise ValueError("The interped value is out of bound")
+
+
         output_spectrum = np.zeros((2, to_x_data.shape[0]))
 
         output_spectrum[0, :] = to_x_data
         output_spectrum[1, :] = np.interp(to_x_data, orig_spectrum[0, :],
                                           orig_spectrum[1, :], left=interp_left, right=interp_right)
+
 
         return output_spectrum
 
@@ -541,7 +548,7 @@ class Spectrum(object):
     def _as_energy(self, wavelength, photon_flux):
         return photon_flux * (sc.h * sc.c) / wavelength
 
-    def trapz(self):
+    def rsum(self):
         """
         Integration of the spectrum, i.e., \int y(x)dx
         Internally, it simply does np.trapz(y,x)
@@ -554,6 +561,46 @@ class Spectrum(object):
 
         else:
             return np.trapz(self.core_y, self.core_x)
+
+
+    def cut(self,start,end,unit):
+        """
+        Cut a particular band of spectrum y(x), where start<x<end
+
+        :param start: the starting x
+        :param end: the end x
+        :param unit: the unit of x
+        :return: a new spectrum
+        """
+
+        bound_sp= self.get_interp_spectrum(to_x_data=np.array([start, end]), to_x_unit=unit)
+
+        center_sp=self.get_spectrum(to_x_unit=unit)
+
+        center_sp=center_sp[:,center_sp[0,:]>start]
+        center_sp = center_sp[:, center_sp[0, :] < end]
+
+        c_sp=np.hstack((bound_sp,center_sp))
+
+        # Sort the spectrum by wavelength
+        sorted_idx = np.argsort(c_sp[0,:])
+        c_sp=c_sp[:,sorted_idx]
+
+        new_spec=copy.deepcopy(self)
+
+        new_spec.set_spectrum(c_sp[0,:],c_sp[1,:],x_unit=unit,y_area_unit=self.y_area_unit,
+                              is_spec_density=self.is_spec_density,
+                              is_photon_flux=False)
+
+        return new_spec
+
+
+
+
+
+
+
+
 
 
 if __name__ == "__main__":

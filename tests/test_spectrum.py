@@ -338,6 +338,37 @@ class SpectrumTestCases(unittest.TestCase):
 
         self.assertTrue(np.isclose(int1,int2,rtol=1e-3))
 
+    def test_interp_wrong_spectrum(self):
+        init_wl = np.linspace(300, 500, num=10)
+        init_spec = np.ones(init_wl.shape)
+        test_spec_base = Spectrum(init_wl, init_spec, 'nm', is_photon_flux=False)
+
+        test_spec_base.get_interp_spectrum(np.array([300, 500]), to_x_unit='nm')
+
+        with self.assertRaises(ValueError):
+            test_spec_base.get_interp_spectrum(np.array([299,501]),to_x_unit='nm')
+
+        with self.assertRaises(ValueError):
+            test_spec_base.get_interp_spectrum(np.array([300, 501]), to_x_unit='nm')
+
+
+    def test_cut_spectrum(self):
+
+        ill=Illumination("AM1.5g")
+
+        ill_a=ill.get_spectrum(to_x_unit='eV')
+
+        ill_a=ill_a[:,ill_a[0,:]>1.1]
+        ill_a=ill_a[:,ill_a[0,:]<1.42]
+
+        ill_cut=ill.cut(1.1,1.42,unit='eV')
+
+        ill_cut_a=ill_cut.get_spectrum(to_x_unit='eV')
+
+        val1=np.trapz(ill_a[1,:],ill_a[0,:])
+        val2=np.trapz(ill_cut_a[1,:],ill_cut_a[0,:])
+
+        self.assertTrue(np.isclose(val1,val2,rtol=1e-2),msg="val 1=%s,val 2=%s"%(val1,val2))
 
 
 

@@ -6,6 +6,7 @@ Install Pypvcell via pip
 -------------------------
 
 We recommend a two step process:
+
 First, download the repository with git clone::
 
     git clone https://github.com/kanhua/pypvcell.git

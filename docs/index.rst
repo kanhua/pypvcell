@@ -1,4 +1,4 @@
-Pypvcell: An extensible programming framework for modeling solar cell
+Pypvcell: A tool box for modeling solar cells
 ========================================================================
 
 Pypvcell is collection of python functions for simulating the I-V characteristics of solar cell.
@@ -12,9 +12,7 @@ Features
 * Extensively tested and validated.
 
 
-
-
-Getting Start
+Get Started
 -----------------
 
 .. toctree::

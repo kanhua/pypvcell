@@ -116,11 +116,23 @@ def calc_jsc_from_eg(input_illumination, eg):
 
     ill_array = input_illumination.get_spectrum(to_x_unit='eV', to_y_area_unit='m**-2', to_photon_flux=True)
 
-    ill_array = input_illumination.get_interp_spectrum(np.linspace(eg, ill_array[0, :].max(), num=100),
-                                                       to_x_unit='eV',
-                                                       to_y_area_unit='m**-2',
-                                                       to_photon_flux=True)
+    ill_array = input_illumination.get_interp_spectrum(np.linspace(eg, ill_array[0, :].max(), num=100), to_x_unit='eV',
+                                                       to_y_area_unit='m**-2', to_photon_flux=True)
 
     jsc = sc.e * np.trapz(ill_array[1, :], ill_array[0, :])
 
     return jsc
+
+def eqe_to_iqe(eqe,reflectivity):
+    """
+    calculate internal quantum efficiency from external quantum efficiency
+
+    :param eqe:
+    :type Spectrum
+    :param reflectivity:
+    :type Spectrum
+    :return: IQE
+    :type Spectrum
+    """
+
+    return eqe/(1-reflectivity)

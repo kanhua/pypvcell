@@ -37,7 +37,7 @@ class Illumination(Spectrum):
 
     def total_power(self):
         # Calculate power using different methods
-        return np.trapz(self.core_y, self.core_x)
+        return self.rsum()
 
 
 class BpFilter(Spectrum):
