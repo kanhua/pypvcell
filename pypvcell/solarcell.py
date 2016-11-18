@@ -17,6 +17,20 @@ import scipy.constants as sc
 thermal_volt = sc.k / sc.e
 
 
+def guess_max_volt(rad_eta, jsc, j01, cell_T):
+    """
+    Get an estimate of the maximum voltage by given Jsc
+
+    :param rad_eta: radiative efficiency
+    :param jsc: Jsc in A/m^2
+    :param j01: J01 in A/m^2
+    :param cell_T: cell temperature in Kelvin
+    :return:
+    """
+
+    return rad_eta * np.log(jsc / j01) * thermal_volt * cell_T
+
+
 class SolarCell(object):
     def get_iv(self):
         raise NotImplementedError()
@@ -39,24 +53,19 @@ class SolarCell(object):
 
         raise NotImplementedError()
 
+
 class TransparentCell(SolarCell):
-
     def __init__(self):
+        self.ill = None
 
-        self.ill=None
-
-    def set_input_spectrum(self,input_spectrum):
-
-        self.ill=input_spectrum
+    def set_input_spectrum(self, input_spectrum):
+        self.ill = input_spectrum
 
     def get_transmit_spectrum(self):
-
         return self.ill
 
     def get_eta(self):
         return 0
-
-
 
 
 class SQCell(SolarCell):
@@ -79,13 +88,20 @@ class SQCell(SolarCell):
         self.cell_T = cell_T
         self.n_c = n_c
         self.n_s = n_s
-        self.rad_eta=rad_eta
+        self.rad_eta = rad_eta
 
         self._construct()
 
     def _construct(self):
-        self.j01 = calculate_j01(self.eg, temperature=self.cell_T,
-                                 n1=1, n_c=self.n_c, n_s=self.n_s)
+
+        method = 'num'
+        if method == 'ana':
+            self.j01 = calculate_j01(self.eg, temperature=self.cell_T,
+                                     n1=1, n_c=self.n_c, n_s=self.n_s)
+        elif method == 'num':
+            qe=gen_step_qe(self.eg,1)
+            self.j01=calculate_j01_from_qe(qe,n_c=self.n_c,n_s=self.n_s,T=self.cell_T)
+
 
     def set_input_spectrum(self, input_spectrum):
         self.ill = input_spectrum
@@ -109,8 +125,9 @@ class SQCell(SolarCell):
         return max_p / self.ill.total_power()
 
     def get_iv(self, volt=None):
-        if volt == None:
-            volt = np.linspace(-0.5, self.eg, num=300)
+        if volt is None:
+            max_volt = guess_max_volt(rad_eta=self.rad_eta, jsc=self.jsc, j01=self.j01, cell_T=self.cell_T) + 0.2
+            volt = np.linspace(-0.5, max_volt, num=1000)
 
         volt, current = gen_rec_iv_by_rad_eta(self.j01, 1, 1, self.cell_T, 1e15, voltage=volt, jsc=self.jsc)
 
@@ -144,7 +161,6 @@ class DBCell(SolarCell):
         self._check_qe()
         self._construct()
 
-
     def _construct(self):
 
         self.j01 = calculate_j01_from_qe(self.qe, n_c=self.n_c, n_s=self.n_s, threshold=self.qe_cutoff, T=self.cell_T)
@@ -155,11 +171,8 @@ class DBCell(SolarCell):
         :return:
         """
 
-        if (np.all(self.qe.core_y>=0) and np.all(self.qe.core_y<=1))==False:
+        if (np.all(self.qe.core_y >= 0) and np.all(self.qe.core_y <= 1)) == False:
             raise ValueError("The values of QE should be between 0 and 1.")
-
-
-
 
     def set_input_spectrum(self, input_spectrum):
         self.ill = input_spectrum
@@ -226,9 +239,10 @@ class MJCell(SolarCell):
 
     def get_iv(self, volt=None):
 
-        all_iv = [(sc.get_iv()) for sc in self.subcell]
+        subcell_voltage = np.linspace(-0.5, 1.9, num=300)
+        all_iv = [(sc.get_iv(volt=subcell_voltage)) for sc in self.subcell]
 
-        v, i = solve_mj_iv(all_iv, i_max=20)
+        v, i = solve_mj_iv(all_iv,i_max=20)
 
         return v, i
 

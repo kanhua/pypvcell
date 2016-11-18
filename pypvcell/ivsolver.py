@@ -209,7 +209,7 @@ def calculate_j01(eg_in_ev, temperature, n1, n_c=3.5,n_s=1):
     Term1 = 2 * sc.pi * (n_c**2+n_s**2) * sc.e / (
         np.power(sc.h, 3) * np.power(sc.c, 2))
     Term2 = sc.k * temperature * np.exp(-eg / (n1 * sc.k * temperature))
-    Term3 = (eg * eg) + (2 * eg * sc.k * temperature) + (2 * np.power(sc.k,2) * np.power(temperature,2))
+    Term3 = np.power(eg,2) + (2 * eg * sc.k * temperature) + (2 * np.power(sc.k,2) * np.power(temperature,2))
 
     j01 = Term1 * Term2 * Term3
     return j01
@@ -256,7 +256,7 @@ def solve_ms_mj_iv(v_i,ill_power):
     return np.sum(max_p_list)/ill_power
 
 
-def solve_mj_iv(v_i, i_max=None):
+def solve_mj_iv(v_i, i_max=None,discret_num=10000):
     """
 
     :param v_i: a list of (voltage,current) tuple
@@ -290,7 +290,7 @@ def solve_mj_iv(v_i, i_max=None):
             if np.min(current) > i_range_min:
                 i_range_min = np.min(current)
 
-    current_range = np.linspace(i_range_min, i_range_max, num=10000)
+    current_range = np.linspace(i_range_min, i_range_max, num=discret_num)
 
     if i_max is not None:
         if i_max > np.max(current_range):
@@ -298,7 +298,7 @@ def solve_mj_iv(v_i, i_max=None):
         elif i_max < np.min(current_range):
             raise ValueError("i_max is smaller than the maximum of input I-Vs")
         else:
-            current_range = np.linspace(i_range_min, i_max, num=10000)
+            current_range = np.linspace(i_range_min, i_max, num=discret_num)
 
     voltage_sum = 0
     for iv_tup in v_i:

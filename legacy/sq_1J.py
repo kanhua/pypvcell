@@ -10,14 +10,14 @@ etaopt_air_semi = np.loadtxt("../validation/eta_air_semi.txt", skiprows=1)
 
 eg_array = np.linspace(0.5, 2.0)
 
-eta = calc_1j_eta(eg=1.42, qe=1, r_eta=1, cell_temperature=300)
+eta = calc_1j_eta(eg=1.42, qe=1, r_eta=1, cell_temperature=293)
 
 print(eta)
 
 calc_method="eg"
 
 #conc=1500*1000/918
-conc=1500
+conc=1500*1000/918
 
 eta_array_air_air = [calc_1j_eta(eg, qe=1,n_s=1,n_c=1 ,r_eta=1, concentration=conc,
                          cell_temperature=293, spectrum="AM1.5d",j01_method=calc_method) for eg in eg_array]
@@ -38,4 +38,5 @@ plt.ylabel("efficiency")
 plt.legend()
 plt.grid()
 
+plt.savefig("/Users/kanhua/Dropbox/DDocuments/TTI work/TTI publication/2016 pypvcell white paper/sq1j.pdf")
 plt.show()
