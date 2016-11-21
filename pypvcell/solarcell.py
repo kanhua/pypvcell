@@ -1,19 +1,12 @@
-"""
-
-
-
-
-"""
-
 from pypvcell.illumination import Illumination
 from pypvcell.photocurrent import gen_step_qe, calc_jsc_from_eg, calc_jsc
-from pypvcell.ivsolver import calculate_j01, gen_rec_iv_by_rad_eta, \
-    solve_mj_iv,new_solve_mj_iv,one_diode_v_from_i
+from pypvcell.ivsolver import calculate_j01, gen_rec_iv_by_rad_eta, solve_mj_iv,new_solve_mj_iv,one_diode_v_from_i,new_solve_mj_iv_obj
 from pypvcell.fom import max_power
-from pypvcell.spectrum import Spectrum
+from pypvcell.spectrum import Spectrum,_energy_to_length
 from pypvcell.detail_balanced_MJ import calculate_j01_from_qe
 import numpy as np
 import scipy.constants as sc
+
 
 thermal_volt = sc.k / sc.e
 
@@ -51,6 +44,10 @@ class SolarCell(object):
         :return: The transmitted spectrum of this solar cell
         :rtype: Illumination
         """
+
+        raise NotImplementedError()
+
+    def get_v_from_j(selfs,current):
 
         raise NotImplementedError()
 
@@ -95,7 +92,7 @@ class SQCell(SolarCell):
 
     def _construct(self):
 
-        method = 'num'
+        method = 'ana'
         if method == 'ana':
             self.j01 = calculate_j01(self.eg, temperature=self.cell_T,
                                      n1=1, n_c=self.n_c, n_s=self.n_s)
@@ -109,13 +106,14 @@ class SQCell(SolarCell):
         self.jsc = calc_jsc_from_eg(input_spectrum, self.eg)
 
     def get_transmit_spectrum(self):
-        sp = self.ill.get_spectrum(to_x_unit='eV')
 
-        filter_y = sp[0, :] < self.eg
+        sp=self.ill.get_spectrum(to_x_unit='m')
 
-        filter = Spectrum(sp[0, :], filter_y, x_unit='eV')
+        filter_y = sp[0, :] >= _energy_to_length(self.eg,'eV','m')
 
-        return self.ill * filter
+        filter = Spectrum(sp[0, :], filter_y, x_unit='m')
+
+        return self.ill*filter
 
     def get_eta(self):
         volt = np.linspace(-0.5, self.eg, num=300)
@@ -128,9 +126,9 @@ class SQCell(SolarCell):
     def get_iv(self, volt=None):
         if volt is None:
             max_volt = guess_max_volt(rad_eta=self.rad_eta, jsc=self.jsc, j01=self.j01, cell_T=self.cell_T) + 0.2
-            volt = np.linspace(-0.5, max_volt, num=1000)
+            volt = np.linspace(-10, max_volt, num=1000)
 
-        volt, current = gen_rec_iv_by_rad_eta(self.j01, 1, 1, self.cell_T, 1e15, voltage=volt, jsc=self.jsc)
+        volt, current = gen_rec_iv_by_rad_eta(self.j01, 1, 1, self.cell_T, np.inf, voltage=volt, jsc=self.jsc)
 
         return volt, current
 
@@ -243,19 +241,28 @@ class MJCell(SolarCell):
 
         return self.subcell[-1].get_transmit_spectrum()
 
-    def get_iv(self, volt=None):
+    def get_iv(self, volt=None,verbose=0):
 
-        subcell_voltage = np.linspace(-0.5, 1.9, num=300)
+        subcell_voltage = np.linspace(-5, 1.9, num=300)
         all_iv = [(sc.get_iv(volt=subcell_voltage)) for sc in self.subcell]
 
-        v, i = new_solve_mj_iv(all_iv)
+        #v, i = new_solve_mj_iv(all_iv)
+
+        v,i=new_solve_mj_iv_obj(self.subcell,verbose=verbose)
 
         return v, i
 
-    def get_eta(self):
+    def get_eta(self,verbose=0):
 
-        v, i = self.get_iv()
+        v, i = self.get_iv(verbose=verbose)
 
         eta = max_power(v, i)
 
         return eta / self.ill.total_power()
+
+    def get_subcell_jsc(self):
+
+        jsc=np.array([sc.get_iv(0)[1] for sc in self.subcell])
+
+        return jsc
+

@@ -577,8 +577,8 @@ class Spectrum(object):
 
         center_sp=self.get_spectrum(to_x_unit=unit)
 
-        center_sp=center_sp[:,center_sp[0,:]>start]
-        center_sp = center_sp[:, center_sp[0, :] < end]
+        center_sp=center_sp[:,center_sp[0,:]>=start]
+        center_sp = center_sp[:, center_sp[0, :] <= end]
 
         c_sp=np.hstack((bound_sp,center_sp))
 
