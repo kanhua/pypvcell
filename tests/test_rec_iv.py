@@ -1,10 +1,11 @@
 __author__ = 'kanhua'
 
 import unittest
-from spectrum_base import spectrum_base
-from spectrum_base_update import Spectrum
-from photocurrent import gen_square_qe
-from ivsolver import calculate_j01_from_qe, calculate_j01, calculate_bed,gen_rec_iv
+from pypvcell.spectrum import Spectrum
+from pypvcell.photocurrent import gen_step_qe
+from pypvcell.ivsolver import calculate_j01_from_qe, \
+    calculate_j01, calculate_bed,gen_rec_iv,\
+    gen_rec_iv_by_rad_eta,one_diode_v_from_i
 import numpy as np
 import matplotlib.pyplot as plt
 import scipy.constants as sc
@@ -19,7 +20,7 @@ class MyTestCase(unittest.TestCase):
 
         band_edge = 0.8
 
-        unity_eqe = gen_square_qe(band_edge, 1)
+        unity_eqe = gen_step_qe(band_edge, 1)
 
         a = calculate_j01_from_qe(unity_eqe)
 
@@ -48,7 +49,7 @@ class MyTestCase(unittest.TestCase):
         """
 
         test_eg=1.1
-        qe = gen_square_qe(test_eg, 1, wl_bound=(0.01, 5))
+        qe = gen_step_qe(test_eg, 1, wl_bound=(0.01, 5))
 
         j0a = calculate_j01_from_qe(qe)
         j0b = calculate_j01(test_eg, 300, 1)
@@ -70,6 +71,36 @@ class MyTestCase(unittest.TestCase):
         assert np.all(np.isclose(ia,ib,rtol=rtol))
         print("passed the I-V test, the error is within %s"%rtol)
 
+    def test_i_from_v(self):
+
+        j01=calculate_j01(1.42,300,1)
+
+        # large negative voltage values introduces larger numerical error
+        volt=np.linspace(-0.5,1.2,num=100)
+
+        v,j=gen_rec_iv_by_rad_eta(j01,rad_eta=0.8,n1=1,temperature=300,rshunt=np.inf,voltage=volt)
+
+        iv_v=one_diode_v_from_i(j,j01=j01,rad_eta=0.8,n1=1,temperature=300,jsc=0)
+
+        print(np.max(np.abs(iv_v-v)))
+        self.assertTrue(np.allclose(volt,iv_v,atol=1e-9))
+        #plt.plot(iv_v-v)
+        #plt.show()
+
+
+    def test_diff(self):
+        j01=calculate_j01(1.42,300,1)
+
+        # large negative voltage values introduces larger numerical error
+        volt=np.linspace(-0.5,1,num=100)
+
+        v,j=gen_rec_iv_by_rad_eta(j01,rad_eta=0.8,n1=1,temperature=300,rshunt=np.inf,voltage=volt,jsc=100)
+
+        dp=np.gradient(v*j,v[1]-v[0])
+        print(v[np.argmin(v*j)])
+        plt.plot(v,dp,'.')
+
+        plt.show()
 
 
 
@@ -77,10 +108,9 @@ def plot_calculate_bed():
         qe_wl = np.array([1.1, 5])
         qe_qe = np.array([1, 1])
 
-        unity_eqe = spectrum_base()
-        unity_eqe.set_spectrum(qe_wl, qe_qe, x_unit='eV')
+        unity_eqe = Spectrum(qe_wl,qe_qe,x_unit='eV')
 
-        qe = gen_square_qe(1.1, 1, qe_below_edge=0)
+        qe = gen_step_qe(1.1, 1, qe_below_edge=0)
 
         x1, y1 = calculate_bed(qe)
         x2, y2 = calculate_bed(unity_eqe)

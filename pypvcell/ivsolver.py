@@ -18,9 +18,21 @@ def gen_rec_iv(j01, j02, n1, n2, temperature, rshunt, voltage, jsc=0):
 
 
 def gen_rec_iv_by_rad_eta(j01,rad_eta,n1,temperature,rshunt,voltage,jsc=0):
+
+
+    if np.isinf(rshunt):
+        shunt_term=0
+    else:
+        shunt_term=voltage/rshunt
+
     current = (j01/rad_eta * (np.exp(sc.e * voltage / (n1 * sc.k * temperature)) - 1)+
-               voltage / rshunt) - jsc
+               shunt_term) - jsc
     return (voltage, current)
+
+
+def one_diode_v_from_i(current,j01,rad_eta,n1,temperature,jsc):
+
+    return (n1*sc.k*temperature/sc.e)*np.log(rad_eta*(current+jsc)/j01+1)
 
 
 def gen_rec_iv_with_rs_dont_work(j01, j02, n1, n2, temperature, rshunt, rseries, voltage, jsc=0):
@@ -314,3 +326,72 @@ def solve_mj_iv(v_i, i_max=None,discret_num=10000):
         current_range = np.hstack(([current_range[0] * (1 - 0.0001)], current_range))
 
     return voltage_sum, current_range
+
+
+def new_solve_mj_iv(v_i,i_max=None,disc_num=1000,verbose=0):
+
+
+
+    for idx, iv_tup in enumerate(v_i):
+
+        assert isinstance(iv_tup, tuple)
+
+        voltage, current = iv_tup
+
+        assert isinstance(voltage, np.ndarray)
+        assert isinstance(current, np.ndarray)
+
+        if idx == 0:
+            i_range_max = np.max(current)
+            i_range_min = np.min(current)
+
+        else:
+            if np.max(current) < i_range_max:
+                i_range_max = np.max(current)
+            if np.min(current) > i_range_min:
+                i_range_min = np.min(current)
+
+
+    v,i=solve_iv_range(v_i,i_range_min,i_range_max,disc_num=disc_num)
+
+    p=v*(-i)
+
+    nv=v
+    ni=i
+    for idx in range(8):
+        i_index=np.argmax(p)
+
+        if verbose>0:
+            print("Jmp :%s"%ni[i_index])
+            print("Vmp :%s"%nv[i_index])
+            print("max power:%s"%p[i_index])
+        nv,ni=solve_iv_range(v_i,ni[max(i_index-5,0)],
+                           ni[min(i_index+5,len(ni)-1)],disc_num=disc_num)
+
+        p=nv*(-ni)
+
+    voltage_sum= np.concatenate((np.array([-0.5]),v,nv))
+
+    current_range = np.concatenate((np.array([i[0] * (1 - 0.0001)]), i, ni))
+
+    ag=np.argsort(voltage_sum)
+
+    return voltage_sum[ag],current_range[ag]
+
+
+
+def solve_iv_range(v_i,i_min,i_max,disc_num=1000):
+
+    current_range=np.linspace(i_min,i_max,num=disc_num)
+    voltage_sum = 0
+    for iv_tup in v_i:
+        voltage, current = iv_tup
+
+        voltage_sum = voltage_sum + get_v_from_j(voltage, current, current_range)
+
+    if np.any(np.isnan(voltage_sum)):
+        voltage_sum = voltage_sum[~np.isnan(voltage_sum)]
+        current_range = current_range[~np.isnan(voltage_sum)]
+
+    return voltage_sum, current_range
+

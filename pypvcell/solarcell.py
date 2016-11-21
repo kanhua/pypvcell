@@ -7,7 +7,8 @@
 
 from pypvcell.illumination import Illumination
 from pypvcell.photocurrent import gen_step_qe, calc_jsc_from_eg, calc_jsc
-from pypvcell.ivsolver import calculate_j01, gen_rec_iv_by_rad_eta, solve_mj_iv
+from pypvcell.ivsolver import calculate_j01, gen_rec_iv_by_rad_eta, \
+    solve_mj_iv,new_solve_mj_iv,one_diode_v_from_i
 from pypvcell.fom import max_power
 from pypvcell.spectrum import Spectrum
 from pypvcell.detail_balanced_MJ import calculate_j01_from_qe
@@ -133,6 +134,11 @@ class SQCell(SolarCell):
 
         return volt, current
 
+    def get_v_from_j(self,current):
+
+        return one_diode_v_from_i(current,self.j01,rad_eta=self.rad_eta,
+                                  n1=1,temperature=self.cell_T,jsc=self.jsc)
+
 
 class DBCell(SolarCell):
     def __init__(self, qe, rad_eta, T, n_c=3.5, n_s=1, qe_cutoff=1e-3):
@@ -242,7 +248,7 @@ class MJCell(SolarCell):
         subcell_voltage = np.linspace(-0.5, 1.9, num=300)
         all_iv = [(sc.get_iv(volt=subcell_voltage)) for sc in self.subcell]
 
-        v, i = solve_mj_iv(all_iv,i_max=20)
+        v, i = new_solve_mj_iv(all_iv)
 
         return v, i
 
