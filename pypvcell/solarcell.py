@@ -122,7 +122,7 @@ class SQCell(SolarCell):
 
         max_p = max_power(volt, current)
 
-        return max_p / self.ill.total_power()
+        return max_p / self.ill.rsum()
 
     def get_iv(self, volt=None):
         if volt is None:
@@ -212,7 +212,7 @@ class DBCell(SolarCell):
 
         max_p = max_power(volt, current)
 
-        return max_p / self.ill.total_power()
+        return max_p / self.ill.rsum()
 
 
 class MJCell(SolarCell):
@@ -260,14 +260,14 @@ class MJCell(SolarCell):
 
             v, i = self.get_iv(verbose=verbose)
 
-            eta = max_power(v, i)/self.ill.total_power()
+            eta = max_power(v, i)/self.ill.rsum()
 
         elif self.connect=='MS':
             mp=0
             for sc in self.subcell:
                 mp+=max_power(*sc.get_iv())
 
-            eta=mp/self.ill.total_power()
+            eta=mp/self.ill.rsum()
 
         return eta
 

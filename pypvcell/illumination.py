@@ -1,5 +1,6 @@
 import numpy as np
 import os
+import scipy.constants as sc
 from pypvcell.spectrum import Spectrum
 
 
@@ -24,6 +25,31 @@ def load_default_spectrum(fname1,fname2):
 this_dir = os.path.split(__file__)[0]
 spec_data = load_default_spectrum(os.path.join(this_dir, "astmg173.csv"),
                                   os.path.join(this_dir,"am15d.dat"))
+
+def load_blackbody(T=6000,normalize_to=None):
+    """
+    Load Blackbody spectrum
+
+    :param T: temperature
+    :param normalize_to: the value in W/m^2 that the output spectrum is normalized to. Set to None if no renormalization is required.
+    :return: Spectrum
+    """
+
+    wl=np.arange(20,2000,step=20)/1e9
+
+    mu=sc.c/wl
+
+    blackbody_i=2*sc.pi*sc.h*np.power(mu,3)/np.power(sc.c,2)*(1/(np.exp(sc.h*mu/sc.k/T)-1))
+
+    factor=1
+    sp=Spectrum(x_data=mu, y_data=blackbody_i, x_unit='s**-1',
+             y_unit="m**-2", is_spec_density=True, is_photon_flux=False)
+
+    if normalize_to is not None:
+        factor=normalize_to/sp.rsum()
+
+    return sp*factor
+
 
 class Illumination(Spectrum):
     def __init__(self, spectrum="AM1.5g", concentration=1):
