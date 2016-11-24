@@ -25,8 +25,9 @@ conc = 1500 * 1000 / 918
 input_ill = Illumination("AM1.5d", concentration=conc)
 
 eta_array_air_semi_class = []
+
 for eg in eg_array:
-    sq_cell = SQCell(eg=eg, cell_T=293, n_c=1, n_s=1)
+    sq_cell = SQCell(eg=eg, cell_T=293, n_c=1, n_s=1,approx=False)
     sq_cell.set_input_spectrum(input_spectrum=input_ill)
 
     eta_array_air_semi_class.append(sq_cell.get_eta())

@@ -3,23 +3,27 @@ import os
 from pypvcell.spectrum import Spectrum
 
 
-def load_default_spectrum(fname):
+def load_default_spectrum(fname1,fname2):
     cache_spectrum = {}
-    spectrumfile = np.loadtxt(os.path.join(this_dir, fname),
+    spectrumfile = np.loadtxt(fname1,
                               dtype=float, delimiter=',', skiprows=2)
 
-    cache_spectrum["wl"] = spectrumfile[:, 0]
-    cache_spectrum["AM1.5g"] = spectrumfile[:, 2]
-    cache_spectrum["AM1.5d"] = spectrumfile[:, 3]
-    cache_spectrum["AM0"] = spectrumfile[:, 1]
+    cache_spectrum["AM1.5g"] = spectrumfile[:, [0,2]]
+    cache_spectrum["AM1.5d"] = spectrumfile[:, [0,3]]
+    cache_spectrum["AM0"] = spectrumfile[:, [0,1]]
 
+    spectrumfile = np.loadtxt(fname2,
+                              dtype=float, delimiter='\t')
+
+    spectrumfile[:,1]/=1000
+    cache_spectrum["AM1.5do"]=spectrumfile
     return cache_spectrum
 
 
 # Read default spectrum
 this_dir = os.path.split(__file__)[0]
-spec_data = load_default_spectrum(os.path.join(this_dir, "astmg173.csv"))
-
+spec_data = load_default_spectrum(os.path.join(this_dir, "astmg173.csv"),
+                                  os.path.join(this_dir,"am15d.dat"))
 
 class Illumination(Spectrum):
     def __init__(self, spectrum="AM1.5g", concentration=1):
@@ -29,10 +33,10 @@ class Illumination(Spectrum):
 
         # flux, wl = self.read_from_csv(spectrum)
 
-        wl = spec_data["wl"]
+
         flux = spec_data[spectrum]
 
-        Spectrum.__init__(self, wl, flux * concentration, 'nm',
+        Spectrum.__init__(self, flux[:,0], flux[:,1] * concentration, 'nm',
                           y_unit='m**-2', is_photon_flux=False, is_spec_density=True)
 
     def total_power(self):

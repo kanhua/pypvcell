@@ -2,7 +2,7 @@ from typing import Tuple
 import numpy as np
 import scipy.constants as sc
 from pypvcell.illumination import Illumination
-from pypvcell.spectrum import Spectrum
+from pypvcell.spectrum import Spectrum,_energy_to_length
 
 
 def gen_step_qe_array(bandEdge_in_eV, qe_in_ratio, qe_below_edge=1e-3, wl_bound=(0.01, 5)):
@@ -122,9 +122,11 @@ def calc_jsc_from_eg(input_illumination, eg):
     if not isinstance(input_illumination, Spectrum):
         raise TypeError("input_illumination should be a subclass of Spectrum, preferably Illumination class")
 
-    ill_array = input_illumination.get_spectrum(to_x_unit='eV', to_y_area_unit='m**-2', to_photon_flux=True)
+    bg_m=_energy_to_length(eg,'eV','m')
 
-    ill_array = input_illumination.get_interp_spectrum(np.linspace(eg, ill_array[0, :].max(), num=100), to_x_unit='eV',
+
+    ill_array = input_illumination.get_interp_spectrum(input_illumination.core_x[input_illumination.core_x<=bg_m],
+                                                       to_x_unit='m',
                                                        to_y_area_unit='m**-2', to_photon_flux=True)
 
     jsc = sc.e * np.trapz(ill_array[1, :], ill_array[0, :])

@@ -72,7 +72,7 @@ class SQCell(SolarCell):
 
     """
 
-    def __init__(self, eg, cell_T, rad_eta=1, n_c=3.5, n_s=1):
+    def __init__(self, eg, cell_T, rad_eta=1, n_c=3.5, n_s=1,approx=False):
         """
         Initialize a SQ solar cell.
         It loads the class and sets up J01 of the cell
@@ -87,6 +87,7 @@ class SQCell(SolarCell):
         self.n_c = n_c
         self.n_s = n_s
         self.rad_eta = rad_eta
+        self.approx=approx
 
         self._construct()
 
@@ -95,7 +96,7 @@ class SQCell(SolarCell):
         method = 'ana'
         if method == 'ana':
             self.j01 = calculate_j01(self.eg, temperature=self.cell_T,
-                                     n1=1, n_c=self.n_c, n_s=self.n_s)
+                                     n1=1, n_c=self.n_c, n_s=self.n_s,approx=self.approx)
         elif method == 'num':
             qe=gen_step_qe(self.eg,1)
             self.j01=calculate_j01_from_qe(qe,n_c=self.n_c,n_s=self.n_s,T=self.cell_T)
@@ -215,7 +216,7 @@ class DBCell(SolarCell):
 
 
 class MJCell(SolarCell):
-    def __init__(self, subcell):
+    def __init__(self, subcell, connect='2T'):
         """
 
         :param subcell: A list of SolarCell instances of multijunction cell from top to bottom , e.g. [top_cell mid_cell bot_cell]
@@ -223,6 +224,7 @@ class MJCell(SolarCell):
         """
 
         self.subcell = subcell
+        self.connect=connect
 
     def set_input_spectrum(self, input_spectrum):
 
@@ -233,9 +235,9 @@ class MJCell(SolarCell):
         for i, sc in enumerate(self.subcell):
             if i == 0:
                 sc.set_input_spectrum(input_spectrum)
-                filtered_spectrum = sc.get_transmit_spectrum()
             else:
                 sc.set_input_spectrum(filtered_spectrum)
+            filtered_spectrum = sc.get_transmit_spectrum()
 
     def get_transmit_spectrum(self):
 
@@ -254,11 +256,20 @@ class MJCell(SolarCell):
 
     def get_eta(self,verbose=0):
 
-        v, i = self.get_iv(verbose=verbose)
+        if self.connect=='2T':
 
-        eta = max_power(v, i)
+            v, i = self.get_iv(verbose=verbose)
 
-        return eta / self.ill.total_power()
+            eta = max_power(v, i)/self.ill.total_power()
+
+        elif self.connect=='MS':
+            mp=0
+            for sc in self.subcell:
+                mp+=max_power(*sc.get_iv())
+
+            eta=mp/self.ill.total_power()
+
+        return eta
 
     def get_subcell_jsc(self):
 
