@@ -49,7 +49,7 @@
           <div class="body" role="main">
             
   <h1>Source code for pypvcell.spectrum</h1><div class="highlight"><pre>
-<span class="sd">&quot;&quot;&quot;</span>
+<span></span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">Introduction</span>
 <span class="sd">-------------</span>
 
@@ -466,12 +466,13 @@
         <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">vstack</span><span class="p">((</span><span class="n">x_data</span><span class="p">,</span> <span class="n">y_data</span><span class="p">))</span></div>
 
 
-<div class="viewcode-block" id="Spectrum.get_interp_spectrum"><a class="viewcode-back" href="../../spectrum_class.html#pypvcell.spectrum.Spectrum.get_interp_spectrum">[docs]</a>    <span class="k">def</span> <span class="nf">get_interp_spectrum</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">to_x_data</span><span class="p">,</span> <span class="n">to_x_unit</span><span class="p">,</span> <span class="n">to_y_area_unit</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">to_photon_flux</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
-                            <span class="n">interp_left</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">interp_right</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+<div class="viewcode-block" id="Spectrum.get_interp_spectrum"><a class="viewcode-back" href="../../spectrum_class.html#pypvcell.spectrum.Spectrum.get_interp_spectrum">[docs]</a>    <span class="k">def</span> <span class="nf">get_interp_spectrum</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">to_x_data</span><span class="p">,</span> <span class="n">to_x_unit</span><span class="p">,</span> <span class="n">to_y_area_unit</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">to_photon_flux</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">interp_left</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+                            <span class="n">interp_right</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">raise_error</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
 
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Get interpolated spectrum.</span>
 
+<span class="sd">        :param raise_error: if to_x_data is not within the range of the spectru, raise ValueError</span>
 <span class="sd">        :param to_x_data: (ndarray) x values to be interpolated</span>
 <span class="sd">        :param to_x_unit: (string) unit of x of the output value</span>
 <span class="sd">        :param to_y_area_unit: (string) unit of area of y of the output value.</span>
@@ -483,11 +484,17 @@
 
         <span class="n">orig_spectrum</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_spectrum</span><span class="p">(</span><span class="n">to_x_unit</span><span class="p">,</span> <span class="n">to_y_area_unit</span><span class="p">,</span> <span class="n">to_photon_flux</span><span class="o">=</span><span class="n">to_photon_flux</span><span class="p">)</span>
 
+        <span class="k">if</span> <span class="n">np</span><span class="o">.</span><span class="n">min</span><span class="p">(</span><span class="n">to_x_data</span><span class="p">)</span><span class="o">&lt;</span><span class="n">orig_spectrum</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">]</span> <span class="ow">or</span> <span class="n">np</span><span class="o">.</span><span class="n">max</span><span class="p">(</span><span class="n">to_x_data</span><span class="p">)</span> <span class="o">&gt;</span> <span class="n">orig_spectrum</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span><span class="o">-</span><span class="mi">1</span><span class="p">]:</span>
+            <span class="k">if</span> <span class="n">raise_error</span><span class="o">==</span><span class="kc">True</span><span class="p">:</span>
+                <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;The interped value is out of bound&quot;</span><span class="p">)</span>
+
+
         <span class="n">output_spectrum</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="mi">2</span><span class="p">,</span> <span class="n">to_x_data</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]))</span>
 
         <span class="n">output_spectrum</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="p">:]</span> <span class="o">=</span> <span class="n">to_x_data</span>
         <span class="n">output_spectrum</span><span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="p">:]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">interp</span><span class="p">(</span><span class="n">to_x_data</span><span class="p">,</span> <span class="n">orig_spectrum</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="p">:],</span>
                                           <span class="n">orig_spectrum</span><span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="p">:],</span> <span class="n">left</span><span class="o">=</span><span class="n">interp_left</span><span class="p">,</span> <span class="n">right</span><span class="o">=</span><span class="n">interp_right</span><span class="p">)</span>
+
 
         <span class="k">return</span> <span class="n">output_spectrum</span></div>
 
@@ -592,7 +599,7 @@
     <span class="k">def</span> <span class="nf">_as_energy</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">wavelength</span><span class="p">,</span> <span class="n">photon_flux</span><span class="p">):</span>
         <span class="k">return</span> <span class="n">photon_flux</span> <span class="o">*</span> <span class="p">(</span><span class="n">sc</span><span class="o">.</span><span class="n">h</span> <span class="o">*</span> <span class="n">sc</span><span class="o">.</span><span class="n">c</span><span class="p">)</span> <span class="o">/</span> <span class="n">wavelength</span>
 
-<div class="viewcode-block" id="Spectrum.trapz"><a class="viewcode-back" href="../../spectrum_class.html#pypvcell.spectrum.Spectrum.trapz">[docs]</a>    <span class="k">def</span> <span class="nf">trapz</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<div class="viewcode-block" id="Spectrum.rsum"><a class="viewcode-back" href="../../spectrum_class.html#pypvcell.spectrum.Spectrum.rsum">[docs]</a>    <span class="k">def</span> <span class="nf">rsum</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Integration of the spectrum, i.e., \int y(x)dx</span>
 <span class="sd">        Internally, it simply does np.trapz(y,x)</span>
@@ -604,7 +611,47 @@
             <span class="k">raise</span> <span class="ne">ArithmeticError</span><span class="p">(</span><span class="s2">&quot;This spectrum instance is not integrable, since self.is_spec_density is false&quot;</span><span class="p">)</span>
 
         <span class="k">else</span><span class="p">:</span>
-            <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">trapz</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">core_y</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">core_x</span><span class="p">)</span></div></div>
+            <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">trapz</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">core_y</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">core_x</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="Spectrum.cut"><a class="viewcode-back" href="../../spectrum_class.html#pypvcell.spectrum.Spectrum.cut">[docs]</a>    <span class="k">def</span> <span class="nf">cut</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">start</span><span class="p">,</span><span class="n">end</span><span class="p">,</span><span class="n">unit</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Cut a particular band of spectrum y(x), where start&lt;x&lt;end</span>
+
+<span class="sd">        :param start: the starting x</span>
+<span class="sd">        :param end: the end x</span>
+<span class="sd">        :param unit: the unit of x</span>
+<span class="sd">        :return: a new spectrum</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="n">bound_sp</span><span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_interp_spectrum</span><span class="p">(</span><span class="n">to_x_data</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="n">start</span><span class="p">,</span> <span class="n">end</span><span class="p">]),</span> <span class="n">to_x_unit</span><span class="o">=</span><span class="n">unit</span><span class="p">)</span>
+
+        <span class="n">center_sp</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">get_spectrum</span><span class="p">(</span><span class="n">to_x_unit</span><span class="o">=</span><span class="n">unit</span><span class="p">)</span>
+
+        <span class="n">center_sp</span><span class="o">=</span><span class="n">center_sp</span><span class="p">[:,</span><span class="n">center_sp</span><span class="p">[</span><span class="mi">0</span><span class="p">,:]</span><span class="o">&gt;=</span><span class="n">start</span><span class="p">]</span>
+        <span class="n">center_sp</span> <span class="o">=</span> <span class="n">center_sp</span><span class="p">[:,</span> <span class="n">center_sp</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="p">:]</span> <span class="o">&lt;=</span> <span class="n">end</span><span class="p">]</span>
+
+        <span class="n">c_sp</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">hstack</span><span class="p">((</span><span class="n">bound_sp</span><span class="p">,</span><span class="n">center_sp</span><span class="p">))</span>
+
+        <span class="c1"># Sort the spectrum by wavelength</span>
+        <span class="n">sorted_idx</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">argsort</span><span class="p">(</span><span class="n">c_sp</span><span class="p">[</span><span class="mi">0</span><span class="p">,:])</span>
+        <span class="n">c_sp</span><span class="o">=</span><span class="n">c_sp</span><span class="p">[:,</span><span class="n">sorted_idx</span><span class="p">]</span>
+
+        <span class="n">new_spec</span><span class="o">=</span><span class="n">copy</span><span class="o">.</span><span class="n">deepcopy</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
+
+        <span class="n">new_spec</span><span class="o">.</span><span class="n">set_spectrum</span><span class="p">(</span><span class="n">c_sp</span><span class="p">[</span><span class="mi">0</span><span class="p">,:],</span><span class="n">c_sp</span><span class="p">[</span><span class="mi">1</span><span class="p">,:],</span><span class="n">x_unit</span><span class="o">=</span><span class="n">unit</span><span class="p">,</span><span class="n">y_area_unit</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">y_area_unit</span><span class="p">,</span>
+                              <span class="n">is_spec_density</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">is_spec_density</span><span class="p">,</span>
+                              <span class="n">is_photon_flux</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="n">new_spec</span></div></div>
+
+
+
+
+
+
+
+
 
 
 <span class="k">if</span> <span class="n">__name__</span> <span class="o">==</span> <span class="s2">&quot;__main__&quot;</span><span class="p">:</span>

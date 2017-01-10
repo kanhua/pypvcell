@@ -25,6 +25,8 @@
     <script type="text/javascript" src="_static/doctools.js"></script>
     <script type="text/javascript" src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
     <link rel="top" title="pypvcell 0.1.0 documentation" href="index.html" />
+    <link rel="next" title="Module: photocurrent" href="photocurrent_m.html" />
+    <link rel="prev" title="Tutorial and Application Examples" href="tutorial.html" />
 
    
   <link rel="stylesheet" href="_static/custom.css" type="text/css" />
@@ -76,19 +78,19 @@ When modeling solar cells, we often have to deal with spectrum with different un
 <div class="section" id="arithmetic-operations">
 <h2>Arithmetic operations<a class="headerlink" href="#arithmetic-operations" title="Permalink to this headline">¶</a></h2>
 <p>Spectrum class supports arithmetic operations between different spectrum, for example:</p>
-<div class="highlight-default"><div class="highlight"><pre><span class="c1"># Multiplication of two spectrum</span>
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="c1"># Multiplication of two spectrum</span>
 <span class="n">s3</span><span class="o">=</span><span class="n">s1</span><span class="o">*</span><span class="n">s2</span>
 </pre></div>
 </div>
 <p>If s1 and s2 have different x, the function will interpolate s2 based on the values of x in s1.
 After that, it does the multiplication of y in s1 and s2.</p>
 <p>Spectrum calss also supports arithmetic operations with single float number, for example:</p>
-<div class="highlight-default"><div class="highlight"><pre><span class="c1"># Multiply a spectrum by a single number</span>
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="c1"># Multiply a spectrum by a single number</span>
 <span class="n">s2</span><span class="o">=</span><span class="n">s1</span><span class="o">*</span><span class="mf">0.5</span>
 </pre></div>
 </div>
 <p>or</p>
-<div class="highlight-default"><div class="highlight"><pre><span class="n">s2</span><span class="o">=</span><span class="mf">0.5</span><span class="o">*</span><span class="n">s1</span>
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="n">s2</span><span class="o">=</span><span class="mf">0.5</span><span class="o">*</span><span class="n">s1</span>
 </pre></div>
 </div>
 <p>This operation multiply all the y values in s1 by 0.5 and return the result to s2.</p>
@@ -161,14 +163,37 @@ Therefore this function only implments the bi-direction unit conversions that in
 </dd></dl>
 
 <dl class="method">
+<dt id="pypvcell.spectrum.Spectrum.cut">
+<code class="descname">cut</code><span class="sig-paren">(</span><em>start</em>, <em>end</em>, <em>unit</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pypvcell/spectrum.html#Spectrum.cut"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pypvcell.spectrum.Spectrum.cut" title="Permalink to this definition">¶</a></dt>
+<dd><p>Cut a particular band of spectrum y(x), where start&lt;x&lt;end</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>start</strong> &#8211; the starting x</li>
+<li><strong>end</strong> &#8211; the end x</li>
+<li><strong>unit</strong> &#8211; the unit of x</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last">a new spectrum</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
 <dt id="pypvcell.spectrum.Spectrum.get_interp_spectrum">
-<code class="descname">get_interp_spectrum</code><span class="sig-paren">(</span><em>to_x_data</em>, <em>to_x_unit</em>, <em>to_y_area_unit=None</em>, <em>to_photon_flux=False</em>, <em>interp_left=None</em>, <em>interp_right=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pypvcell/spectrum.html#Spectrum.get_interp_spectrum"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pypvcell.spectrum.Spectrum.get_interp_spectrum" title="Permalink to this definition">¶</a></dt>
+<code class="descname">get_interp_spectrum</code><span class="sig-paren">(</span><em>to_x_data</em>, <em>to_x_unit</em>, <em>to_y_area_unit=None</em>, <em>to_photon_flux=False</em>, <em>interp_left=None</em>, <em>interp_right=None</em>, <em>raise_error=True</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pypvcell/spectrum.html#Spectrum.get_interp_spectrum"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pypvcell.spectrum.Spectrum.get_interp_spectrum" title="Permalink to this definition">¶</a></dt>
 <dd><p>Get interpolated spectrum.</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
 <tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>raise_error</strong> &#8211; if to_x_data is not within the range of the spectru, raise ValueError</li>
 <li><strong>to_x_data</strong> &#8211; (ndarray) x values to be interpolated</li>
 <li><strong>to_x_unit</strong> &#8211; (string) unit of x of the output value</li>
 <li><strong>to_y_area_unit</strong> &#8211; (string) unit of area of y of the output value.</li>
@@ -208,6 +233,21 @@ Therefore this function only implments the bi-direction unit conversions that in
 </dd></dl>
 
 <dl class="method">
+<dt id="pypvcell.spectrum.Spectrum.rsum">
+<code class="descname">rsum</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/pypvcell/spectrum.html#Spectrum.rsum"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pypvcell.spectrum.Spectrum.rsum" title="Permalink to this definition">¶</a></dt>
+<dd><p>Integration of the spectrum, i.e., int y(x)dx
+Internally, it simply does np.trapz(y,x)</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">The integrated value.</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
 <dt id="pypvcell.spectrum.Spectrum.set_spectrum">
 <code class="descname">set_spectrum</code><span class="sig-paren">(</span><em>x_data</em>, <em>y_data</em>, <em>x_unit</em>, <em>y_area_unit</em>, <em>is_photon_flux</em>, <em>is_spec_density</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pypvcell/spectrum.html#Spectrum.set_spectrum"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pypvcell.spectrum.Spectrum.set_spectrum" title="Permalink to this definition">¶</a></dt>
 <dd><p>This is essentially a constructor method that sets up the attributes of the object.
@@ -228,21 +268,6 @@ It converts everything to standard MKS unit. x_data: &#8216;m&#8217;, y_data: &#
 </tr>
 <tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last">None</p>
 </td>
-</tr>
-</tbody>
-</table>
-</dd></dl>
-
-<dl class="method">
-<dt id="pypvcell.spectrum.Spectrum.trapz">
-<code class="descname">trapz</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/pypvcell/spectrum.html#Spectrum.trapz"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pypvcell.spectrum.Spectrum.trapz" title="Permalink to this definition">¶</a></dt>
-<dd><p>Integration of the spectrum, i.e., int y(x)dx
-Internally, it simply does np.trapz(y,x)</p>
-<table class="docutils field-list" frame="void" rules="none">
-<col class="field-name" />
-<col class="field-body" />
-<tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">The integrated value.</td>
 </tr>
 </tbody>
 </table>
@@ -274,6 +299,8 @@ Internally, it simply does np.trapz(y,x)</p>
 <h3>Related Topics</h3>
 <ul>
   <li><a href="index.html">Documentation overview</a><ul>
+      <li>Previous: <a href="tutorial.html" title="previous chapter">Tutorial and Application Examples</a></li>
+      <li>Next: <a href="photocurrent_m.html" title="next chapter">Module: photocurrent</a></li>
   </ul></li>
 </ul>
 </div>

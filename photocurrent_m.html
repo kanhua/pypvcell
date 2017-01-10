@@ -123,6 +123,25 @@ For example, if the unit of <code class="docutils literal"><span class="pre">abs
 </dd></dl>
 
 <dl class="function">
+<dt id="pypvcell.photocurrent.eqe_to_iqe">
+<code class="descclassname">pypvcell.photocurrent.</code><code class="descname">eqe_to_iqe</code><span class="sig-paren">(</span><em>eqe</em>, <em>reflectivity</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pypvcell/photocurrent.html#eqe_to_iqe"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pypvcell.photocurrent.eqe_to_iqe" title="Permalink to this definition">¶</a></dt>
+<dd><p>calculate internal quantum efficiency from external quantum efficiency</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>eqe</strong> &#8211; </td>
+</tr>
+</tbody>
+</table>
+<p>:type Spectrum
+:param reflectivity:
+:type Spectrum
+:return: IQE
+:type Spectrum</p>
+</dd></dl>
+
+<dl class="function">
 <dt id="pypvcell.photocurrent.gen_step_qe">
 <code class="descclassname">pypvcell.photocurrent.</code><code class="descname">gen_step_qe</code><span class="sig-paren">(</span><em>bandEdge_in_eV</em>, <em>qe_in_ratio</em>, <em>qe_below_edge=1e-06</em>, <em>wl_bound=(0.0001</em>, <em>5)</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pypvcell/photocurrent.html#gen_step_qe"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pypvcell.photocurrent.gen_step_qe" title="Permalink to this definition">¶</a></dt>
 <dd><p>Generate a staircase QE array. Same as gen_square_qe_array() except that it generates a Spectrum class object.
