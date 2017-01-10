@@ -55,49 +55,6 @@ def one_diode_v_from_i(current,j01,rad_eta,n1,temperature,jsc):
     return (n1*sc.k*temperature/sc.e)*np.log(log_component),n_current,index
 
 
-def gen_rec_iv_with_rs_dont_work(j01, j02, n1, n2, temperature, rshunt, rseries, voltage, jsc=0):
-    result = list()
-
-    for v in voltage:
-        init_guess = gen_rec_iv(j01, j02, n1, n2, temperature, rshunt, v, jsc)[1]
-
-        def target_fun(current, voltage=0):
-            sol = current - (j01 * (np.exp(sc.e * (v + rseries * current) / (n1 * sc.k * temperature)) - 1)
-                             + j02 * (np.exp(sc.e * v / (n2 * sc.k * temperature)) - 1) +
-                             v / rshunt) - jsc
-            return sol
-
-        tmp = newton_krylov(target_fun, init_guess)
-        result.append(tmp)
-
-    return (voltage, np.array(result))
-
-
-def gen_rec_iv_with_rs_dont_work2(j01, j02, n1, n2, temperature, rshunt, rseries, voltage, jsc=0):
-    """
-    calculate the J-V with series resistance using naive iteration approach
-    :param j01:
-    :param j02:
-    :param n1:
-    :param n2:
-    :param temperature:
-    :param rshunt:
-    :param rseries:
-    :param voltage:
-    :param jsc:
-    :return:
-    """
-
-    current = (j01 * (np.exp(sc.e * voltage / (n1 * sc.k * temperature)) - 1) +
-               voltage / rshunt) - jsc
-
-    for i in range(0, 100, 1):
-        next_current = j01 * (np.exp(sc.e * (voltage - rseries * current) / (n1 * sc.k * temperature)) - 1) + jsc
-        residue = current - next_current
-        current = copy.copy(next_current)
-
-    return (voltage, current, residue)
-
 
 def gen_rec_iv_with_rs_by_reverse(j01, j02, n1, n2, temperature, rshunt, rseries, voltage, jsc=0):
     voltage, current = gen_rec_iv(j01, j02, n1, n2, temperature, rshunt, voltage, jsc)

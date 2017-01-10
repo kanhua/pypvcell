@@ -35,10 +35,13 @@ def load_blackbody(T=6000,normalize_to=None):
     :return: Spectrum
     """
 
+    # Initialze the wavelength in nm-> m
     wl=np.arange(20,2000,step=20)/1e9
 
+    # Convert it to frequency
     mu=sc.c/wl
 
+    # Intensity of Blackbody spectrum in (W/m^2)
     blackbody_i=2*sc.pi*sc.h*np.power(mu,3)/np.power(sc.c,2)*(1/(np.exp(sc.h*mu/sc.k/T)-1))
 
     factor=1
