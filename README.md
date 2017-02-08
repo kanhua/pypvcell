@@ -10,7 +10,7 @@ Still in progress. Draft version is [here](https://kanhua.github.io/pypvcell/).
 
 ## Examples
 
-To see Pypvcell in actions, visit [demo](./demo/). This examples for provided as Jupyter notebooks.
+To see Pypvcell in actions, visit [demo](./demos/). This examples for provided as Jupyter notebooks.
 
 
 ## Installation
