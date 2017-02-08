@@ -8,6 +8,11 @@ This site is still being developing and testing. If you are interested in this p
 Still in progress. Draft version is [here](https://kanhua.github.io/pypvcell/).
 
 
+## Examples
+
+To see Pypvcell in actions, visit [demo](./demo/). This examples for provided as Jupyter notebooks.
+
+
 ## Installation
 
 We recommend install this project under virtualenv so that it will not interfere your current working environment.
