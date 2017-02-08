@@ -47,9 +47,20 @@ class SolarCell(object):
 
         raise NotImplementedError()
 
-    def get_v_from_j(selfs,current):
+    def get_v_from_j(self,current):
 
         raise NotImplementedError()
+
+    def set_description(self,desp):
+
+        self.desp=desp
+
+    def __str__(self):
+
+        if self.desp==None:
+            return "solar cell"
+        else:
+            return self.desp
 
 
 class TransparentCell(SolarCell):
@@ -89,6 +100,7 @@ class SQCell(SolarCell):
         self.rad_eta = rad_eta
         self.approx=approx
 
+        self.desp='SQCell'
         self._construct()
 
     def _construct(self):
