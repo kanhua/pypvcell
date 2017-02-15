@@ -1,7 +1,7 @@
 __author__ = 'kanhua'
 
 import unittest
-from pypvcell.photocurrent import conv_abs_to_qe, calc_jsc, gen_step_qe, calc_jsc_from_eg
+from pypvcell.photocurrent import conv_abs_to_qe, calc_jsc, gen_step_qe, calc_jsc_from_eg,lambert_abs
 from pypvcell.illumination import Illumination
 from pypvcell.spectrum import Spectrum
 import numpy as np
@@ -58,6 +58,24 @@ class MyTestCase(unittest.TestCase):
         print("Jsc calculated setting Eg and integrate the spectrum: %s" % jsc2)
 
         assert np.isclose(jsc, jsc2, rtol=5.e-3)
+
+    def test_lambert_abs(self):
+
+        abs_file='./si_alpha.csv'
+        abs_array=np.loadtxt(abs_file,delimiter=',')
+
+        abs = Spectrum(abs_array[:, 0], np.ones(abs_array.shape[0])*0.1, x_unit='m')
+
+        abs_set=[abs,abs*2]
+        t_set=[1,2]
+
+        T=lambert_abs(abs_set,t_set)
+
+        for i in range(10):
+            self.assertEqual(T[np.random.randint(abs_array.shape[0])],np.exp(-0.5))
+
+
+
 
 
 if __name__ == '__main__':

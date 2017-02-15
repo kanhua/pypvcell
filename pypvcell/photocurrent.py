@@ -1,4 +1,4 @@
-from typing import Tuple
+from typing import Tuple, List
 import numpy as np
 import scipy.constants as sc
 from pypvcell.illumination import Illumination
@@ -47,6 +47,28 @@ def gen_step_qe(bandEdge_in_eV, qe_in_ratio, qe_below_edge=1e-6, wl_bound=(0.000
     output_spec = Spectrum(x_data=qe_array[:, 0], y_data=qe_array[:, 1], x_unit="eV")
 
     return output_spec
+
+
+def lambert_abs(absorption: List[Spectrum],layer_thicknesses: List[float]):
+    """
+    Calculate transmission of stacked layers using Beer-Lambert's law
+
+    :param absorption: an array absorption class, the unit of absorption should be 1/m
+    :param layer_thicknesses: an array of layer thickness
+    :return: transmission
+    """
+
+    assert len(absorption)==len(layer_thicknesses)
+
+    standard_x,y=absorption[0].get_spectrum('m')
+
+    term=np.zeros_like(y)
+    for idx in range(len(absorption)):
+        x,y=absorption[idx].get_interp_spectrum(standard_x,to_x_unit='m')
+        term+=y*layer_thicknesses[idx]
+
+    t=np.exp(-term)
+    return t
 
 
 def conv_abs_to_qe(absorption, layer_thickness):
