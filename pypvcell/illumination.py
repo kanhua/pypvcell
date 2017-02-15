@@ -2,6 +2,7 @@ import numpy as np
 import os
 import scipy.constants as sc
 from pypvcell.spectrum import Spectrum
+import warnings
 
 
 def load_default_spectrum(fname1,fname2):
@@ -54,6 +55,26 @@ def load_blackbody(T=6000,normalize_to=None):
     return sp*factor
 
 
+def load_astm(spec_type="AM1.5g"):
+    """
+    Load ASTMG173-03 spectrum
+
+    :param spec_type: the type of spectrum: "AM1.5g", "AM0" and "AM1.5d"
+    :return: designated ASTM ``Spectrum``
+    """
+
+    if spec_type in spec_data.keys():
+        flux = spec_data[spec_type]
+        sp=Spectrum(flux[:,0],flux[:,1],x_unit='nm',y_unit='m**-2',
+             is_photon_flux=False,is_spec_density=True)
+
+    else:
+        s="spec_type should be string of one of these:%s"%spec_data.keys()
+        raise ValueError(s)
+
+    return sp
+
+
 class Illumination(Spectrum):
     def __init__(self, spectrum="AM1.5g", concentration=1):
         """
@@ -62,6 +83,7 @@ class Illumination(Spectrum):
 
         # flux, wl = self.read_from_csv(spectrum)
 
+        warnings.warn("Illumination class will be deprecated in future verion.",DeprecationWarning)
 
         flux = spec_data[spectrum]
 
