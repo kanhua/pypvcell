@@ -1,6 +1,7 @@
 import os,numpy
 from numpy import exp, array, flipud as reverse,abs,sqrt,log,sinh,cosh,isfinite,trapz
 from scipy.constants import k, pi, hbar,e
+from pypvcell.photocurrent import lambert_abs
 
 kb=k
 q=e
@@ -171,7 +172,6 @@ def calculate_junction_sr(junc, energies, bs, bsInitial, V, printParameters=Fals
         d_bottom, d_top = dp, dn
 
     Jgen, Jn, Jp, Jrec, bsInitial, energies, jgen, jn, jp = calc_jnp(V, Vbi, alphaBottom, alphaI, alphaTop, bsInitial,
-                                                                     bs_incident_on_bottom, bs_incident_on_depleted,
                                                                      bs_incident_on_top, d_bottom, d_top, energies, T,
                                                                      l_bottom, l_top, ni, pn_or_np, s_bottom, s_top,
                                                                      w_bottom, w_top, x_bottom, x_top, xi)
@@ -191,9 +191,8 @@ def calculate_junction_sr(junc, energies, bs, bsInitial, V, printParameters=Fals
     }
 
 
-def calc_jnp(V, Vbi, alphaBottom, alphaI, alphaTop, bsInitial, bs_incident_on_bottom, bs_incident_on_depleted,
-             bs_incident_on_top, d_bottom, d_top, energies, T, l_bottom, l_top, ni, pn_or_np, s_bottom, s_top, w_bottom,
-             w_top, x_bottom, x_top, xi):
+def calc_jnp(V, Vbi, alphaBottom, alphaI, alphaTop, bsInitial, bs_incident_on_top, d_bottom, d_top, energies, T,
+             l_bottom, l_top, ni, pn_or_np, s_bottom, s_top, w_bottom, w_top, x_bottom, x_top, xi):
 
     """
     Calulate electron and hole current densities using analytical equations in Jenny's book
@@ -204,8 +203,6 @@ def calc_jnp(V, Vbi, alphaBottom, alphaI, alphaTop, bsInitial, bs_incident_on_bo
     :param alphaI: absorption coefficient of the intrinsic layer
     :param alphaTop: absorption coefficient of the top layer
     :param bsInitial: set to None if it is identical to bs_incident_on_top
-    :param bs_incident_on_bottom:
-    :param bs_incident_on_depleted:
     :param bs_incident_on_top: incident photon plux density. This can be unity because it will be normalized when calculating QE
     :param d_bottom: diffusion coefficient of bottom layer
     :param d_top: diffusion coefficient of top layer
@@ -225,6 +222,9 @@ def calc_jnp(V, Vbi, alphaBottom, alphaI, alphaTop, bsInitial, bs_incident_on_bo
     :return:
     """
     kbT=kb*T
+
+    bs_incident_on_depleted=bs_incident_on_top*exp(-alphaTop*(x_top-w_top))
+    bs_incident_on_bottom=bs_incident_on_top*exp(-alphaTop*x_top-alphaI*xi-alphaBottom*w_bottom)
 
     harg_bottom = (x_bottom - w_bottom) / l_bottom
     cosh_harg_bottom = cosh(harg_bottom)

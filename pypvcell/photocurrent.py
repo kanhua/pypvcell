@@ -116,11 +116,19 @@ def calc_jsc(input_illumination, qe):
 
     # initialise a QE interp object
 
-    ix=input_illumination.core_x
-    qx=qe.core_x
+    ix,_=input_illumination.get_spectrum(to_x_unit='m')
+    qx,_=qe.get_spectrum(to_x_unit='m')
 
+    lower_bound=max([ix[0],qx[0]])
+    upper_bound=min([ix[-1],qx[-1]])
+
+    # Rearrange the new x-axis. This procedure ensures that the new wavelength range is the intersection of
+    # illumination spectrum and qe
     new_x=np.concatenate((ix,qx))
     new_x=np.sort(new_x)
+    new_x=new_x[(new_x > lower_bound) & (new_x<upper_bound)]
+    new_x=np.concatenate(([lower_bound], new_x, [upper_bound]))
+
 
     ill_array=input_illumination.get_interp_spectrum(new_x,to_x_unit='m',to_y_area_unit='m**-2',to_photon_flux=True,
                                                      interp_left=0,interp_right=0,raise_error=False)
