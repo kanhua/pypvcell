@@ -29,7 +29,7 @@ setup(
     author_email='kanhua.lee@gmail.com',
 
     # Choose your license
-    license='MIT',
+    license='Apache-2.0',
 
     # See https://pypi.python.org/pypi?%3Aaction=list_classifiers
     classifiers=[
