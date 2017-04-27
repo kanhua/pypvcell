@@ -2,14 +2,14 @@ import unittest
 import numpy as np
 import matplotlib.pyplot as plt
 
-from pypvcell.illumination import Illumination
+from pypvcell.illumination import load_astm
 from pypvcell.solarcell import SQCell, MJCell, DBCell
 from pypvcell.photocurrent import gen_step_qe
 
 
 class MyTestCase(unittest.TestCase):
     def setUp(self):
-        self.input_ill = Illumination("AM1.5g")
+        self.input_ill = load_astm("AM1.5g")
 
     def test_sqcell_transmission(self):
 
