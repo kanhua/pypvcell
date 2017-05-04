@@ -1,4 +1,15 @@
 """
+This module collects the functions that solves I-V characteristics, such as:
+
+1. Generate the IV characteristics from known J01,J01 , n1, n2
+#TODO add functions here
+2. Add series resistance into a known I-V characterisitcs
+
+
+
+"""
+
+"""
    Copyright 2017 Kan-Hua Lee, Toyota Technological Institute
 
    Licensed under the Apache License, Version 2.0 (the "License");
@@ -212,8 +223,8 @@ def calculate_j01(eg_in_ev, temperature, n1, n_c=3.5,n_s=1,approx=False):
     :param n1: ideality factor
     :param n_c: refractive index of the cell
     :param n_s: refractive index of the surroundings
-    :param approx: Set true for dropping some terms as an approximation, namely Eq.(7)
-    :return:
+    :param approx: Set true for dropping some terms as an approximation, namely Eq.(7) in [1]    
+    :return: the value of J01
     """
 
     eg = eg_in_ev * sc.e

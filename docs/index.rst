@@ -37,19 +37,19 @@ Pypvcell APIs
     spectrum_class
     photocurrent_m
     fom_m
+    transfer_matrix_optics
 
 
 Liscence:
 --------------------------
-MIT
+`Apache 2.0 <https://www.apache.org/licenses/LICENSE-2.0>`_
 
 
 Acknowledgement
 --------------------------
 
-The development of this software is partly suppored by Japan New Energy and Industrial Technology Development Organization (NEDO).
-Pypvcell is inspired by Solcore by Markus Furher et al.
-
+The development of this software is partly supported by Japan New Energy and Industrial Technology Development Organization (NEDO).
+Pypvcell is inspired by `Solcore3 <http://doi.org/10.1063/1.4822193>`_ by Imperial College London[1].
 
 
 Indices and tables

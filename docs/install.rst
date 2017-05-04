@@ -1,6 +1,23 @@
 Installing Pypvcell
 ====================
 
+Package requirements
+--------------------------
+
+- Pypvcell supports 3.x.
+- Numpy, Scipy, pint, Matplotlib
+
+
+If you are new to python
+-------------------------
+
+You can obtain a copy of python language along with the some scientific compuation packages by downloading it from Anaconda.https://www.continuum.io/downloads
+
+
+
+
+
+
 
 Install Pypvcell via pip
 -------------------------

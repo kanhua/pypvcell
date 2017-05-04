@@ -20,29 +20,30 @@ from pypvcell.spectrum import Spectrum
 import warnings
 
 
-def load_default_spectrum(fname1,fname2):
+def load_default_spectrum(fname1, fname2):
     cache_spectrum = {}
     spectrumfile = np.loadtxt(fname1,
                               dtype=float, delimiter=',', skiprows=2)
 
-    cache_spectrum["AM1.5g"] = spectrumfile[:, [0,2]]
-    cache_spectrum["AM1.5d"] = spectrumfile[:, [0,3]]
-    cache_spectrum["AM0"] = spectrumfile[:, [0,1]]
+    cache_spectrum["AM1.5g"] = spectrumfile[:, [0, 2]]
+    cache_spectrum["AM1.5d"] = spectrumfile[:, [0, 3]]
+    cache_spectrum["AM0"] = spectrumfile[:, [0, 1]]
 
     spectrumfile = np.loadtxt(fname2,
                               dtype=float, delimiter='\t')
 
-    spectrumfile[:,1]/=1000
-    cache_spectrum["AM1.5do"]=spectrumfile
+    spectrumfile[:, 1] /= 1000
+    cache_spectrum["AM1.5do"] = spectrumfile
     return cache_spectrum
 
 
 # Read default spectrum
 this_dir = os.path.split(__file__)[0]
 spec_data = load_default_spectrum(os.path.join(this_dir, "astmg173.csv"),
-                                  os.path.join(this_dir,"am15d.dat"))
+                                  os.path.join(this_dir, "am15d.dat"))
 
-def load_blackbody(T=6000,normalize_to=None):
+
+def load_blackbody(T=6000, normalize_to=None):
     """
     Load Blackbody spectrum
 
@@ -52,22 +53,22 @@ def load_blackbody(T=6000,normalize_to=None):
     """
 
     # Initialze the wavelength in nm-> m
-    wl=np.arange(20,2000,step=20)/1e9
+    wl = np.arange(20, 2000, step=20) / 1e9
 
     # Convert it to frequency
-    mu=sc.c/wl
+    mu = sc.c / wl
 
     # Intensity of Blackbody spectrum in (W/m^2)
-    blackbody_i=2*sc.pi*sc.h*np.power(mu,3)/np.power(sc.c,2)*(1/(np.exp(sc.h*mu/sc.k/T)-1))
+    blackbody_i = 2 * sc.pi * sc.h * np.power(mu, 3) / np.power(sc.c, 2) * (1 / (np.exp(sc.h * mu / sc.k / T) - 1))
 
-    factor=1
-    sp=Spectrum(x_data=mu, y_data=blackbody_i, x_unit='s**-1',
-             y_unit="m**-2", is_spec_density=True, is_photon_flux=False)
+    factor = 1
+    sp = Spectrum(x_data=mu, y_data=blackbody_i, x_unit='s**-1',
+                  y_unit="m**-2", is_spec_density=True, is_photon_flux=False)
 
     if normalize_to is not None:
-        factor=normalize_to/sp.rsum()
+        factor = normalize_to / sp.rsum()
 
-    return sp*factor
+    return sp * factor
 
 
 def load_astm(spec_type="AM1.5g"):
@@ -80,11 +81,11 @@ def load_astm(spec_type="AM1.5g"):
 
     if spec_type in spec_data.keys():
         flux = spec_data[spec_type]
-        sp=Spectrum(flux[:,0],flux[:,1],x_unit='nm',y_unit='m**-2',
-             is_photon_flux=False,is_spec_density=True)
+        sp = Spectrum(flux[:, 0], flux[:, 1], x_unit='nm', y_unit='m**-2',
+                      is_photon_flux=False, is_spec_density=True)
 
     else:
-        s="spec_type should be string of one of these:%s"%spec_data.keys()
+        s = "spec_type should be string of one of these:%s" % spec_data.keys()
         raise ValueError(s)
 
     return sp
@@ -98,11 +99,11 @@ class Illumination(Spectrum):
 
         # flux, wl = self.read_from_csv(spectrum)
 
-        warnings.warn("Illumination class will be deprecated in future verion.",DeprecationWarning)
+        warnings.warn("Illumination class will be deprecated in future version.", DeprecationWarning)
 
         flux = spec_data[spectrum]
 
-        Spectrum.__init__(self, flux[:,0], flux[:,1] * concentration, 'nm',
+        Spectrum.__init__(self, flux[:, 0], flux[:, 1] * concentration, 'nm',
                           y_unit='m**-2', is_photon_flux=False, is_spec_density=True)
 
     def total_power(self):
@@ -148,7 +149,6 @@ class material_filter(Spectrum):
         attenuation = np.exp(-attenuation)
 
         Spectrum.__init__(self, abs_spec[0, :], attenuation, 'm')
-
 
 
 if __name__ == "__main__":

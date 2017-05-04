@@ -1,4 +1,9 @@
 """
+This modules puts together the functions for calculating the figures of merits of solar cells
+
+"""
+
+"""
    Copyright 2017 Kan-Hua Lee, Toyota Technological Institute
 
    Licensed under the Apache License, Version 2.0 (the "License");
