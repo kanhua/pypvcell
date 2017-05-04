@@ -49,7 +49,22 @@
           <div class="body" role="main">
             
   <h1>Source code for pypvcell.photocurrent</h1><div class="highlight"><pre>
-<span></span><span class="kn">from</span> <span class="nn">typing</span> <span class="k">import</span> <span class="n">Tuple</span>
+<span></span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">   Copyright 2017 Kan-Hua Lee, Toyota Technological Institute</span>
+
+<span class="sd">   Licensed under the Apache License, Version 2.0 (the &quot;License&quot;);</span>
+<span class="sd">   you may not use this file except in compliance with the License.</span>
+<span class="sd">   You may obtain a copy of the License at</span>
+
+<span class="sd">       http://www.apache.org/licenses/LICENSE-2.0</span>
+
+<span class="sd">   Unless required by applicable law or agreed to in writing, software</span>
+<span class="sd">   distributed under the License is distributed on an &quot;AS IS&quot; BASIS,</span>
+<span class="sd">   WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.</span>
+<span class="sd">   See the License for the specific language governing permissions and</span>
+<span class="sd">   limitations under the License.</span>
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="kn">from</span> <span class="nn">typing</span> <span class="k">import</span> <span class="n">Tuple</span><span class="p">,</span> <span class="n">List</span>
 <span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
 <span class="kn">import</span> <span class="nn">scipy.constants</span> <span class="k">as</span> <span class="nn">sc</span>
 <span class="kn">from</span> <span class="nn">pypvcell.illumination</span> <span class="k">import</span> <span class="n">Illumination</span>
@@ -100,6 +115,28 @@
     <span class="k">return</span> <span class="n">output_spec</span></div>
 
 
+<div class="viewcode-block" id="lambert_abs"><a class="viewcode-back" href="../../photocurrent_m.html#pypvcell.photocurrent.lambert_abs">[docs]</a><span class="k">def</span> <span class="nf">lambert_abs</span><span class="p">(</span><span class="n">absorption</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="n">Spectrum</span><span class="p">],</span><span class="n">layer_thicknesses</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="nb">float</span><span class="p">]):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Calculate transmission of stacked layers using Beer-Lambert&#39;s law</span>
+
+<span class="sd">    :param absorption: an array absorption class, the unit of absorption should be 1/m</span>
+<span class="sd">    :param layer_thicknesses: an array of layer thickness</span>
+<span class="sd">    :return: transmission</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">assert</span> <span class="nb">len</span><span class="p">(</span><span class="n">absorption</span><span class="p">)</span><span class="o">==</span><span class="nb">len</span><span class="p">(</span><span class="n">layer_thicknesses</span><span class="p">)</span>
+
+    <span class="n">standard_x</span><span class="p">,</span><span class="n">y</span><span class="o">=</span><span class="n">absorption</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">get_spectrum</span><span class="p">(</span><span class="s1">&#39;m&#39;</span><span class="p">)</span>
+
+    <span class="n">term</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">zeros_like</span><span class="p">(</span><span class="n">y</span><span class="p">)</span>
+    <span class="k">for</span> <span class="n">idx</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">absorption</span><span class="p">)):</span>
+        <span class="n">x</span><span class="p">,</span><span class="n">y</span><span class="o">=</span><span class="n">absorption</span><span class="p">[</span><span class="n">idx</span><span class="p">]</span><span class="o">.</span><span class="n">get_interp_spectrum</span><span class="p">(</span><span class="n">standard_x</span><span class="p">,</span><span class="n">to_x_unit</span><span class="o">=</span><span class="s1">&#39;m&#39;</span><span class="p">)</span>
+        <span class="n">term</span><span class="o">+=</span><span class="n">y</span><span class="o">*</span><span class="n">layer_thicknesses</span><span class="p">[</span><span class="n">idx</span><span class="p">]</span>
+
+    <span class="n">t</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">exp</span><span class="p">(</span><span class="o">-</span><span class="n">term</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">t</span></div>
+
+
 <div class="viewcode-block" id="conv_abs_to_qe"><a class="viewcode-back" href="../../photocurrent_m.html#pypvcell.photocurrent.conv_abs_to_qe">[docs]</a><span class="k">def</span> <span class="nf">conv_abs_to_qe</span><span class="p">(</span><span class="n">absorption</span><span class="p">,</span> <span class="n">layer_thickness</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Calculate the QE (absorptivity) from absorption coefficient and layer_thickness</span>
@@ -145,11 +182,19 @@
 
     <span class="c1"># initialise a QE interp object</span>
 
-    <span class="n">ix</span><span class="o">=</span><span class="n">input_illumination</span><span class="o">.</span><span class="n">core_x</span>
-    <span class="n">qx</span><span class="o">=</span><span class="n">qe</span><span class="o">.</span><span class="n">core_x</span>
+    <span class="n">ix</span><span class="p">,</span><span class="n">_</span><span class="o">=</span><span class="n">input_illumination</span><span class="o">.</span><span class="n">get_spectrum</span><span class="p">(</span><span class="n">to_x_unit</span><span class="o">=</span><span class="s1">&#39;m&#39;</span><span class="p">)</span>
+    <span class="n">qx</span><span class="p">,</span><span class="n">_</span><span class="o">=</span><span class="n">qe</span><span class="o">.</span><span class="n">get_spectrum</span><span class="p">(</span><span class="n">to_x_unit</span><span class="o">=</span><span class="s1">&#39;m&#39;</span><span class="p">)</span>
 
+    <span class="n">lower_bound</span><span class="o">=</span><span class="nb">max</span><span class="p">([</span><span class="n">ix</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span><span class="n">qx</span><span class="p">[</span><span class="mi">0</span><span class="p">]])</span>
+    <span class="n">upper_bound</span><span class="o">=</span><span class="nb">min</span><span class="p">([</span><span class="n">ix</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">],</span><span class="n">qx</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]])</span>
+
+    <span class="c1"># Rearrange the new x-axis. This procedure ensures that the new wavelength range is the intersection of</span>
+    <span class="c1"># illumination spectrum and qe</span>
     <span class="n">new_x</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">concatenate</span><span class="p">((</span><span class="n">ix</span><span class="p">,</span><span class="n">qx</span><span class="p">))</span>
     <span class="n">new_x</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">sort</span><span class="p">(</span><span class="n">new_x</span><span class="p">)</span>
+    <span class="n">new_x</span><span class="o">=</span><span class="n">new_x</span><span class="p">[(</span><span class="n">new_x</span> <span class="o">&gt;</span> <span class="n">lower_bound</span><span class="p">)</span> <span class="o">&amp;</span> <span class="p">(</span><span class="n">new_x</span><span class="o">&lt;</span><span class="n">upper_bound</span><span class="p">)]</span>
+    <span class="n">new_x</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">concatenate</span><span class="p">(([</span><span class="n">lower_bound</span><span class="p">],</span> <span class="n">new_x</span><span class="p">,</span> <span class="p">[</span><span class="n">upper_bound</span><span class="p">]))</span>
+
 
     <span class="n">ill_array</span><span class="o">=</span><span class="n">input_illumination</span><span class="o">.</span><span class="n">get_interp_spectrum</span><span class="p">(</span><span class="n">new_x</span><span class="p">,</span><span class="n">to_x_unit</span><span class="o">=</span><span class="s1">&#39;m&#39;</span><span class="p">,</span><span class="n">to_y_area_unit</span><span class="o">=</span><span class="s1">&#39;m**-2&#39;</span><span class="p">,</span><span class="n">to_photon_flux</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
                                                      <span class="n">interp_left</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span><span class="n">interp_right</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span><span class="n">raise_error</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>

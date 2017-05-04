@@ -51,9 +51,20 @@
             
   <div class="section" id="module-photocurrent">
 <h1>Module: photocurrent<a class="headerlink" href="#module-photocurrent" title="Permalink to this headline">¶</a></h1>
-<p>This module provide some useful functions for perfoming calculation related to photocurrent of solar cells.</p>
+<p>This module provide some useful functions related to photocurrent of solar cells.</p>
 <div class="section" id="module-pypvcell.photocurrent">
 <span id="methods-in-this-module"></span><h2>Methods in this module<a class="headerlink" href="#module-pypvcell.photocurrent" title="Permalink to this headline">¶</a></h2>
+<p>Copyright 2017 Kan-Hua Lee, Toyota Technological Institute</p>
+<p>Licensed under the Apache License, Version 2.0 (the &#8220;License&#8221;);
+you may not use this file except in compliance with the License.
+You may obtain a copy of the License at</p>
+<blockquote>
+<div><a class="reference external" href="http://www.apache.org/licenses/LICENSE-2.0">http://www.apache.org/licenses/LICENSE-2.0</a></div></blockquote>
+<p>Unless required by applicable law or agreed to in writing, software
+distributed under the License is distributed on an &#8220;AS IS&#8221; BASIS,
+WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+See the License for the specific language governing permissions and
+limitations under the License.</p>
 <dl class="function">
 <dt id="pypvcell.photocurrent.calc_jsc">
 <code class="descclassname">pypvcell.photocurrent.</code><code class="descname">calc_jsc</code><span class="sig-paren">(</span><em>input_illumination</em>, <em>qe</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pypvcell/photocurrent.html#calc_jsc"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pypvcell.photocurrent.calc_jsc" title="Permalink to this definition">¶</a></dt>
@@ -191,6 +202,27 @@ EQE(E)= z (z~0) if E&lt;Eg</p>
 </td>
 </tr>
 <tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><p class="first last">np.ndarray</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="pypvcell.photocurrent.lambert_abs">
+<code class="descclassname">pypvcell.photocurrent.</code><code class="descname">lambert_abs</code><span class="sig-paren">(</span><em>absorption: typing.List[pypvcell.spectrum.Spectrum], layer_thicknesses: typing.List[float]</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pypvcell/photocurrent.html#lambert_abs"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pypvcell.photocurrent.lambert_abs" title="Permalink to this definition">¶</a></dt>
+<dd><p>Calculate transmission of stacked layers using Beer-Lambert&#8217;s law</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>absorption</strong> &#8211; an array absorption class, the unit of absorption should be 1/m</li>
+<li><strong>layer_thicknesses</strong> &#8211; an array of layer thickness</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last">transmission</p>
 </td>
 </tr>
 </tbody>
