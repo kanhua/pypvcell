@@ -103,7 +103,7 @@ class TMLayers(object):
         """
         Initialize the multi-layer system
         
-        :param layers: list. The name of the layers. The layer name should be in the folder ``matdata/``. The first 
+        :param layers: list. The name of the layers. The layer name should be in the folder ``matdata/``.
         :param thicknesses: The thickness of the layers.
         :param wl_range: ndarray. The reference wavelength range.
         """

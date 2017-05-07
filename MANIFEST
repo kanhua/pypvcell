@@ -4,3 +4,4 @@ illumination.py
 photocurrent.py
 setup.py
 units_system.py
+ivsolver.py

@@ -57,7 +57,7 @@ master_doc = 'index'
 
 # General information about the project.
 project = 'pypvcell'
-copyright = '2016, Kan-Hua Lee'
+copyright = '2017, Kan-Hua Lee'
 author = 'Kan-Hua Lee'
 
 # The version info for the project you're documenting, acts as replacement for

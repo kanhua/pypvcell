@@ -15,10 +15,10 @@
 """
 from pypvcell.illumination import Illumination
 from pypvcell.photocurrent import gen_step_qe, calc_jsc_from_eg, calc_jsc
-from pypvcell.ivsolver import calculate_j01, gen_rec_iv_by_rad_eta, solve_mj_iv,new_solve_mj_iv,one_diode_v_from_i,new_solve_mj_iv_obj
-from pypvcell.fom import max_power
-from pypvcell.spectrum import Spectrum,_energy_to_length
-from pypvcell.detail_balanced_MJ import calculate_j01_from_qe
+from .ivsolver import calculate_j01, gen_rec_iv_by_rad_eta, solve_mj_iv,new_solve_mj_iv,one_diode_v_from_i,solve_mj_iv_obj_with_optimization
+from .fom import max_power
+from .spectrum import Spectrum,_energy_to_length
+from .detail_balanced_MJ import calculate_j01_from_qe
 import numpy as np
 import scipy.constants as sc
 
@@ -90,6 +90,7 @@ class TransparentCell(SolarCell):
 
     def get_eta(self):
         return 0
+
 
 
 class SQCell(SolarCell):
@@ -277,7 +278,7 @@ class MJCell(SolarCell):
 
         #v, i = new_solve_mj_iv(all_iv)
 
-        v,i=new_solve_mj_iv_obj(self.subcell,verbose=verbose)
+        v,i=solve_mj_iv_obj_with_optimization(self.subcell, verbose=verbose)
 
         return v, i
 

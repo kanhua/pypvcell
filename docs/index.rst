@@ -37,6 +37,7 @@ Pypvcell APIs
     spectrum_class
     photocurrent_m
     fom_m
+    ivsolver
     transfer_matrix_optics
 
 

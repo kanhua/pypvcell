@@ -1,14 +1,15 @@
 """
-This module collects the functions that solves I-V characteristics, such as:
+This module collects the functions that solves I-V characteristics, including:
 
-1. Generate the IV characteristics from known J01,J01 , n1, n2
-#TODO add functions here
-2. Add series resistance into a known I-V characterisitcs
-
+1. Generate the IV characteristics from known J01, J01 , n1, n2
+2. Get J01 and J02 values from band gap or known EQEs using a detailed balance model
+3. Add series resistance into a known I-V characterisitcs
+4. Solve the I-V characteristics of multi-junction cell from the known I-Vs of each subcell
 
 
 """
 
+## Copyright
 """
    Copyright 2017 Kan-Hua Lee, Toyota Technological Institute
 
@@ -30,11 +31,12 @@ import numpy as np
 from scipy.interpolate import interp1d
 from scipy.optimize import newton_krylov
 import scipy.constants as sc
-# from spectrum_base import spectrum_base
-from pypvcell.spectrum import Spectrum
+from .spectrum import Spectrum
 import copy
-from pypvcell.fom import max_power
-#from pypvcell.solarcell import SolarCell
+from .fom import max_power
+
+
+# from .solarcell import SolarCell
 
 
 def gen_rec_iv(j01, j02, n1, n2, temperature, rshunt, voltage, jsc=0):
@@ -44,19 +46,18 @@ def gen_rec_iv(j01, j02, n1, n2, temperature, rshunt, voltage, jsc=0):
     return (voltage, current)
 
 
-def gen_rec_iv_by_rad_eta(j01,rad_eta,n1,temperature,rshunt,voltage,jsc=0):
-
+def gen_rec_iv_by_rad_eta(j01, rad_eta, n1, temperature, rshunt, voltage, jsc=0):
     if np.isinf(rshunt):
-        shunt_term=0
+        shunt_term = 0
     else:
-        shunt_term=voltage/rshunt
+        shunt_term = voltage / rshunt
 
-    current = (j01/rad_eta * (np.exp(sc.e * voltage / (n1 * sc.k * temperature)) - 1)+
+    current = (j01 / rad_eta * (np.exp(sc.e * voltage / (n1 * sc.k * temperature)) - 1) +
                shunt_term) - jsc
     return (voltage, current)
 
 
-def one_diode_v_from_i(current,j01,rad_eta,n1,temperature,jsc):
+def one_diode_v_from_i(current, j01, rad_eta, n1, temperature, jsc):
     """
     Calculate the voltage from demand current.
     This implementation drops the element that does not have log value, i.e. any log(x) that x<0
@@ -70,17 +71,16 @@ def one_diode_v_from_i(current,j01,rad_eta,n1,temperature,jsc):
     :return: voltage, current, indexes that the values were kepted
     """
 
-    if jsc<0:
+    if jsc < 0:
         raise ValueError("Jsc should be a positve value")
 
-    log_component=rad_eta*(current+jsc)/j01+1
+    log_component = rad_eta * (current + jsc) / j01 + 1
 
-    index=log_component>0
-    n_current=current[index]
-    log_component=log_component[index]
+    index = log_component > 0
+    n_current = current[index]
+    log_component = log_component[index]
 
-    return (n1*sc.k*temperature/sc.e)*np.log(log_component),n_current,index
-
+    return (n1 * sc.k * temperature / sc.e) * np.log(log_component), n_current, index
 
 
 def gen_rec_iv_with_rs_by_reverse(j01, j02, n1, n2, temperature, rshunt, rseries, voltage, jsc=0):
@@ -97,7 +97,7 @@ def gen_rec_iv_with_rs_by_reverse(j01, j02, n1, n2, temperature, rshunt, rseries
     return (new_voltage, -current)
 
 
-def find_root_newton(f, fp, x_init,verbose=True):
+def find_root_newton(f, fp, x_init, verbose=True):
     max_iter = 10000
     tolerance = 1e-4
     step_lambda = 0.1
@@ -119,8 +119,7 @@ def find_root_newton(f, fp, x_init,verbose=True):
     return next_x
 
 
-def gen_rec_iv_with_rs_by_newton(j01, j02, n1, n2, temperature, rshunt, rseries, voltage, jsc=0,verbose=True):
-
+def gen_rec_iv_with_rs_by_newton(j01, j02, n1, n2, temperature, rshunt, rseries, voltage, jsc=0, verbose=True):
     voltage, cur = gen_rec_iv(j01, j02, n1, n2, temperature, rshunt, voltage, jsc)
 
     solved_current = list()
@@ -146,18 +145,23 @@ def gen_rec_iv_with_rs_by_newton(j01, j02, n1, n2, temperature, rshunt, rseries,
             init_x = solved_current[i - 1]
         else:
             init_x = cur[i]
-        solved_current.append(find_root_newton(f, fp, init_x,verbose=verbose))
+        solved_current.append(find_root_newton(f, fp, init_x, verbose=verbose))
 
     return voltage, np.array(solved_current)
 
 
-j01_lead_term=np.power(sc.e, 4) * 2 * sc.pi / (np.power(sc.c, 2) * np.power(sc.h, 3))
+j01_lead_term = np.power(sc.e, 4) * 2 * sc.pi / (np.power(sc.c, 2) * np.power(sc.h, 3))
 
 
 def calculate_j01_from_qe(qe, n_c=3.5, n_s=1, threshold=1e-3, step_in_ev=1e-5, lead_term=None, T=300):
-    """
-    Calculate j01 from absorptivity (QE).
-    :param T:
+    r"""
+    Calculate j01 from known absorptivity or QE using the following expression:
+    
+    .. math::
+        J_{01}=\frac{2\pi q (n_c^2+n_s^2)}{\mbox{h}^3 \mbox{c}^2}\int_{0}^{\infty} \frac{a(E)E^2 dE}{\exp\left(\frac{E}{kT}\right)-1}
+        
+    
+    :param T: temperature in Kelvin
     :param n_c: the refractive index of the material
     :param n_s: the refractive index of surroundings
     :param qe: QE or absorptivity. A spectrum_base class
@@ -165,6 +169,7 @@ def calculate_j01_from_qe(qe, n_c=3.5, n_s=1, threshold=1e-3, step_in_ev=1e-5, l
     :param step_in_ev: meshgrid size when doing numerical integration trapz()
     :return: j01
     """
+
     assert isinstance(qe, Spectrum)
 
     # lead_term = np.power(sc.e,4) * 2 * (n_c ** 2) / (np.power(sc.h, 3) * np.power(sc.c, 2) * 2 * np.power(sc.pi,2))
@@ -172,8 +177,8 @@ def calculate_j01_from_qe(qe, n_c=3.5, n_s=1, threshold=1e-3, step_in_ev=1e-5, l
     if lead_term is None:
         # the additional sc.e^3 comes from the unit of E. We use the unit of eV to do the integration
         # of Planck's spectrum. Note that the term E^2*dE gives three q in total.
-        #lead_term = np.power(sc.e, 4) * 2 * sc.pi * (n_c ** 2+n_s**2) / (np.power(sc.c, 2) * np.power(sc.h, 3))
-        lead_term=j01_lead_term*(n_c ** 2+n_s**2)
+        # lead_term = np.power(sc.e, 4) * 2 * sc.pi * (n_c ** 2+n_s**2) / (np.power(sc.c, 2) * np.power(sc.h, 3))
+        lead_term = j01_lead_term * (n_c ** 2 + n_s ** 2)
 
     qe_a = qe.get_spectrum(to_x_unit='eV')
 
@@ -189,7 +194,6 @@ def calculate_j01_from_qe(qe, n_c=3.5, n_s=1, threshold=1e-3, step_in_ev=1e-5, l
 
 
 def calculate_bed(qe, T=300):
-    
     assert isinstance(qe, Spectrum)
 
     qe_a = qe.get_spectrum(to_x_unit='eV')
@@ -210,31 +214,38 @@ def get_v_from_j(voltage, current, target_current):
     return interp(target_current)
 
 
-def calculate_j01(eg_in_ev, temperature, n1, n_c=3.5,n_s=1,approx=False):
-    """
-    Calculate J01 for analytical expression
+def calculate_j01(eg_in_ev, temperature, n1, n_c=3.5, n_s=1, approx=False):
+    r"""
+    Calculate the saturation radiative recombination current J01 from known band gap using the following expression:
+    
+    .. math::
+        J_{01}=\frac{2\pi q (n_c^2+n_s^2)}{\mbox{h}^3 \mbox{c}^2}\int_{0}^{E_g} \frac{E^2 dE}{\exp\left(\frac{E}{kT}\right)-1}
+    
+    
+    If the parameter ``approx`` is set True, it uses an approximation of the above equation to calculate J01:
+    
+    
+    .. math::
+        J_{01}=\frac{2\pi k T q(n_c^2+n_s^2)}{\mbox{h}^3\mbox{c}^2}\exp(\frac{-E_g}{nkT})\left(E_g^2+2E_gkT+2k^2T^2\right)
+    
 
-    [1] Létay, G., & Bett, A. (2001). EtaOpt–a program for calculating limiting efficiency
-    and optimum bandgap structure for multi-bandgap solar cells and TPV cells.
-    Presented at the The 17th EC-PVSEC.
-
-    :param eg_in_ev:
-    :param temperature:
+    :param eg_in_ev: band gap in eV
+    :param temperature: temperature in K
     :param n1: ideality factor
     :param n_c: refractive index of the cell
     :param n_s: refractive index of the surroundings
-    :param approx: Set true for dropping some terms as an approximation, namely Eq.(7) in [1]    
+    :param approx: Set ``true`` to use approximation    
     :return: the value of J01
     """
 
     eg = eg_in_ev * sc.e
-    Term1 = 2 * sc.pi * (n_c**2+n_s**2) * sc.e / (
+    Term1 = 2 * sc.pi * (n_c ** 2 + n_s ** 2) * sc.e / (
         np.power(sc.h, 3) * np.power(sc.c, 2))
     Term2 = sc.k * temperature * np.exp(-eg / (n1 * sc.k * temperature))
-    if approx==False:
-        Term3 = np.power(eg,2) + (2 * eg * sc.k * temperature) + (2 * np.power(sc.k,2) * np.power(temperature,2))
+    if approx == False:
+        Term3 = np.power(eg, 2) + (2 * eg * sc.k * temperature) + (2 * np.power(sc.k, 2) * np.power(temperature, 2))
     else:
-        Term3= np.power(eg,2)
+        Term3 = np.power(eg, 2)
 
     j01 = Term1 * Term2 * Term3
     return j01
@@ -264,24 +275,25 @@ def calculate_j02_from_rad_eff(j01, radiative_efficiency, voltage, temperature, 
     return j02
 
 
-def solve_ms_mj_iv(v_i,ill_power):
+def solve_ms_mj_iv(v_i, ill_power):
     """
-    Calculate the efficiency of mechanical stack solar cell
+    Calculate the efficiency of mechanical stack solar cell.
+    It adds up the maximum power of each subcell and divde them by the illumination power.
+    
 
-    :param v_i: a list of (voltage,current) tuple. Voltage and current are 1D np arrays. The current density is in W/m^2
+    :param v_i: a list of (voltage,current) tuple. Voltage and current are 1D numpy arrays. The current density is in W/m^2
     :param ill_power: the illumnation power in W/m^2
     :return: efficiency
     """
 
-    max_p_list=[]
+    max_p_list = []
     for v, i in v_i:
+        max_p_list.append(max_power(v, i))
 
-        max_p_list.append(max_power(v,i))
-
-    return np.sum(max_p_list)/ill_power
+    return np.sum(max_p_list) / ill_power
 
 
-def solve_mj_iv(v_i, i_max=None,discret_num=10000):
+def solve_mj_iv(v_i, i_max=None, discret_num=10000):
     """
 
     :param v_i: a list of (voltage,current) tuple
@@ -341,8 +353,7 @@ def solve_mj_iv(v_i, i_max=None,discret_num=10000):
     return voltage_sum, current_range
 
 
-def new_solve_mj_iv(v_i,i_max=None,disc_num=1000,verbose=0):
-
+def new_solve_mj_iv(v_i, i_max=None, disc_num=1000, verbose=0):
     for idx, iv_tup in enumerate(v_i):
 
         assert isinstance(iv_tup, tuple)
@@ -362,47 +373,51 @@ def new_solve_mj_iv(v_i,i_max=None,disc_num=1000,verbose=0):
             if np.min(current) > i_range_min:
                 i_range_min = np.min(current)
 
+    v, i = solve_iv_range(v_i, i_range_min, i_range_max, disc_num=disc_num)
 
-    v,i=solve_iv_range(v_i,i_range_min,i_range_max,disc_num=disc_num)
+    p = v * (-i)
 
-    p=v*(-i)
-
-    nv=v
-    ni=i
+    nv = v
+    ni = i
     for idx in range(8):
-        i_index=np.argmax(p)
+        i_index = np.argmax(p)
 
-        if verbose>0:
-            print("Jmp :%s"%ni[i_index])
-            print("Vmp :%s"%nv[i_index])
-            print("max power:%s"%p[i_index])
-        nv,ni=solve_iv_range(v_i,ni[max(i_index-5,0)],
-                           ni[min(i_index+5,len(ni)-1)],disc_num=disc_num)
+        if verbose > 0:
+            print("Jmp :%s" % ni[i_index])
+            print("Vmp :%s" % nv[i_index])
+            print("max power:%s" % p[i_index])
+        nv, ni = solve_iv_range(v_i, ni[max(i_index - 5, 0)],
+                                ni[min(i_index + 5, len(ni) - 1)], disc_num=disc_num)
 
-        p=nv*(-ni)
+        p = nv * (-ni)
 
-    voltage_sum= np.concatenate((np.array([-0.5]),v,nv))
+    voltage_sum = np.concatenate((np.array([-0.5]), v, nv))
 
     current_range = np.concatenate((np.array([i[0] * (1 - 0.0001)]), i, ni))
 
-    ag=np.argsort(voltage_sum)
+    ag = np.argsort(voltage_sum)
 
-    return voltage_sum[ag],current_range[ag]
+    return voltage_sum[ag], current_range[ag]
 
 
-def new_solve_mj_iv_obj(subcells,i_max=None,disc_num=1000,verbose=0):
+def solve_mj_iv_obj_with_optimization(subcells, i_max=None, disc_num=1000, verbose=0):
     """
-    Solve the I-V of MJ cell from given subcells
+    Solve the I-V of MJ cell from given subcells, namely
+    
+    .. math::
+        V_{tot}(I_m)=\sum_{i=1}^N V_i(I_{m})
+        
+    This function automatically choose the appropriate values of current
 
-    :param subcells:
-    :param i_max:
-    :param disc_num:
-    :param verbose:
-    :return:
+    :param subcells: a list of SolarCell objects
+    :param i_max: the maximum
+    :param disc_num: number of discretization
+    :param verbose: ``True`` to display the intermediate results
+    :return: solved (voltage, current) tuple
     """
 
     # Determine the range of current
-    for idx,sc in enumerate(subcells):
+    for idx, sc in enumerate(subcells):
 
         voltage, current = sc.get_iv()
 
@@ -416,51 +431,60 @@ def new_solve_mj_iv_obj(subcells,i_max=None,disc_num=1000,verbose=0):
             if np.min(current) > i_range_min:
                 i_range_min = np.min(current)
 
-
     # Solve the first iteration
-    v,i=solve_iv_range_obj(subcells,i_range_min,i_range_max,disc_num=disc_num)
+    v, i = solve_iv_range_obj(subcells, i_range_min, i_range_max, disc_num=disc_num)
 
-    p=v*(-i)
-    if np.max(p)<0:
+    p = v * (-i)
+    if np.max(p) < 0:
         raise ValueError("Negative maximum power value")
 
-
     # Solve the next few interations
-    nv=v
-    ni=i
+    nv = v
+    ni = i
 
-    voltage_sum=v
-    current_range=i
+    voltage_sum = v
+    current_range = i
     for idx in range(8):
-        i_index=np.argmax(p)
+        i_index = np.argmax(p)
 
-        if verbose>0:
-            print("Jmp :%s"%ni[i_index])
-            print("Vmp :%s"%nv[i_index])
-            print("max power:%s"%p[i_index])
-        nv,ni=solve_iv_range_obj(subcells,ni[max(i_index-20,0)],
-                             ni[min(i_index+20,len(ni)-1)],disc_num=disc_num)
+        if verbose > 0:
+            print("Jmp :%s" % ni[i_index])
+            print("Vmp :%s" % nv[i_index])
+            print("max power:%s" % p[i_index])
+        nv, ni = solve_iv_range_obj(subcells, ni[max(i_index - 20, 0)],
+                                    ni[min(i_index + 20, len(ni) - 1)], disc_num=disc_num)
 
-        voltage_sum=np.concatenate((voltage_sum,nv))
-        current_range=np.concatenate((current_range,ni))
+        voltage_sum = np.concatenate((voltage_sum, nv))
+        current_range = np.concatenate((current_range, ni))
 
-        p=nv*(-ni)
-
+        p = nv * (-ni)
 
     # Extrapolate the short circuit current.
-    voltage_sum= np.concatenate((np.array([-0.5]),voltage_sum))
+    voltage_sum = np.concatenate((np.array([-0.5]), voltage_sum))
 
     current_range = np.concatenate((np.array([i[0] * (1 - 0.0001)]), current_range))
 
     # Sort the final result
-    ag=np.argsort(voltage_sum)
+    ag = np.argsort(voltage_sum)
 
-    return voltage_sum[ag],current_range[ag]
+    return voltage_sum[ag], current_range[ag]
 
 
-def solve_iv_range(v_i,i_min,i_max,disc_num=1000):
+def solve_iv_range(v_i, i_min, i_max, disc_num=1000):
+    """
+    Calculate the voltages of a series-connected solar cells I-Vs for each current point Im:
 
-    current_range=np.linspace(i_min,i_max,num=disc_num)
+    .. math::
+        V_{tot}(I_m)=\sum_{i=1}^N V_i(I_{m})
+            
+    :param v_i: a list of (voltage, current) tuple of subcells, 
+    :param i_min: The minimum of the range of the current 
+    :param i_max: The maximum of the range of the current
+    :param disc_num: The number of points of current to be discretized
+    :return: the solved (voltage, current) tuple
+    """
+
+    current_range = np.linspace(i_min, i_max, num=disc_num)
     voltage_sum = 0
     for iv_tup in v_i:
         voltage, current = iv_tup
@@ -473,37 +497,40 @@ def solve_iv_range(v_i,i_min,i_max,disc_num=1000):
 
     return voltage_sum, current_range
 
-def solve_iv_range_obj(subcells,i_min,i_max,disc_num=1000):
 
+def solve_iv_range_obj(subcells: List, i_min, i_max, disc_num=1000):
     """
     Calculate the voltages of a MJ cell from a given range of J and subcells.
-    This function only does one-run without doing interations.
+    It finds a new V(J) such that V(J)=sum(V_i(J_i)), where V_i(J_i) is
+    the J-V characteristics of the subcell i.
+    This function only does one-run without iterating. The algorithm is the same as
+    ``solve_iv_range()`` but this function takes ``SolarCell`` objects as input rather
+    than a list of (V,J) tuples.
 
-    :param subcells:
-    :param i_min:
-    :param i_max:
-    :param disc_num:
-    :return:
+    :param subcells: A list of SolarCell objects
+    :param i_min: The minimum of the range of the current 
+    :param i_max: The maximum of the range of the current
+    :param disc_num: number of descretions between i_min and i_max
+    :return: A tuple of solved (voltage,current)
     """
 
+    # TODO: disc_num is not used in this function!
 
     # discretize positive and negative current separately
-    n_i_range=np.linspace(i_min,0,num=500)
-    p_i_range=np.linspace(0,i_max,num=500)
+    n_i_range = np.linspace(i_min, 0, num=500)
+    p_i_range = np.linspace(0, i_max, num=500)
 
     # rearrange the discretized points
-    current_range=np.sort(np.unique(np.concatenate((n_i_range,p_i_range))))
+    current_range = np.sort(np.unique(np.concatenate((n_i_range, p_i_range))))
 
     # set up an empty array for the range
     voltage_sum = np.zeros_like(current_range)
 
-
     for sc in subcells:
+        volt, current, index = sc.get_v_from_j(current_range)
 
-        volt,current,index=sc.get_v_from_j(current_range)
-
-        voltage_sum=voltage_sum[index]
-        current_range=current_range[index]
+        voltage_sum = voltage_sum[index]
+        current_range = current_range[index]
 
         voltage_sum = voltage_sum + volt
 
