@@ -1,0 +1,649 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>pypvcell.ivsolver &#8212; pypvcell 0.1.0 documentation</title>
+    
+    <link rel="stylesheet" href="../../_static/alabaster.css" type="text/css" />
+    <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../../',
+        VERSION:     '0.1.0',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true,
+        SOURCELINK_SUFFIX: '.txt'
+      };
+    </script>
+    <script type="text/javascript" src="../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../_static/doctools.js"></script>
+    <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.0/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" />
+
+   
+  <link rel="stylesheet" href="../../_static/custom.css" type="text/css" />
+  
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
+
+<script type="text/javascript">
+    var _gaq = _gaq || [];
+    _gaq.push(['_setAccount', 'XXX account number XXX']);
+    _gaq.push(['_trackPageview']);
+</script>
+
+  </head>
+  <body role="document">
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <h1>Source code for pypvcell.ivsolver</h1><div class="highlight"><pre>
+<span></span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">This module collects the functions that solves I-V characteristics, including:</span>
+
+<span class="sd">1. Generate the IV characteristics from known J01, J01 , n1, n2</span>
+<span class="sd">2. Get J01 and J02 values from band gap or known EQEs using a detailed balance model</span>
+<span class="sd">3. Add series resistance into a known I-V characterisitcs</span>
+<span class="sd">4. Solve the I-V characteristics of multi-junction cell from the known I-Vs of each subcell</span>
+
+
+<span class="sd">&quot;&quot;&quot;</span>
+
+<span class="c1">## Copyright</span>
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">   Copyright 2017 Kan-Hua Lee, Toyota Technological Institute</span>
+
+<span class="sd">   Licensed under the Apache License, Version 2.0 (the &quot;License&quot;);</span>
+<span class="sd">   you may not use this file except in compliance with the License.</span>
+<span class="sd">   You may obtain a copy of the License at</span>
+
+<span class="sd">       http://www.apache.org/licenses/LICENSE-2.0</span>
+
+<span class="sd">   Unless required by applicable law or agreed to in writing, software</span>
+<span class="sd">   distributed under the License is distributed on an &quot;AS IS&quot; BASIS,</span>
+<span class="sd">   WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.</span>
+<span class="sd">   See the License for the specific language governing permissions and</span>
+<span class="sd">   limitations under the License.</span>
+<span class="sd">&quot;&quot;&quot;</span>
+
+<span class="kn">from</span> <span class="nn">typing</span> <span class="k">import</span> <span class="n">List</span><span class="p">,</span> <span class="n">Tuple</span>
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span class="kn">from</span> <span class="nn">scipy.interpolate</span> <span class="k">import</span> <span class="n">interp1d</span>
+<span class="kn">from</span> <span class="nn">scipy.optimize</span> <span class="k">import</span> <span class="n">newton_krylov</span>
+<span class="kn">import</span> <span class="nn">scipy.constants</span> <span class="k">as</span> <span class="nn">sc</span>
+<span class="kn">from</span> <span class="nn">.spectrum</span> <span class="k">import</span> <span class="n">Spectrum</span>
+<span class="kn">import</span> <span class="nn">copy</span>
+<span class="kn">from</span> <span class="nn">.fom</span> <span class="k">import</span> <span class="n">max_power</span>
+
+
+<span class="c1"># from .solarcell import SolarCell</span>
+
+
+<span class="k">def</span> <span class="nf">gen_rec_iv</span><span class="p">(</span><span class="n">j01</span><span class="p">,</span> <span class="n">j02</span><span class="p">,</span> <span class="n">n1</span><span class="p">,</span> <span class="n">n2</span><span class="p">,</span> <span class="n">temperature</span><span class="p">,</span> <span class="n">rshunt</span><span class="p">,</span> <span class="n">voltage</span><span class="p">,</span> <span class="n">jsc</span><span class="o">=</span><span class="mi">0</span><span class="p">):</span>
+    <span class="n">current</span> <span class="o">=</span> <span class="p">(</span><span class="n">j01</span> <span class="o">*</span> <span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">exp</span><span class="p">(</span><span class="n">sc</span><span class="o">.</span><span class="n">e</span> <span class="o">*</span> <span class="n">voltage</span> <span class="o">/</span> <span class="p">(</span><span class="n">n1</span> <span class="o">*</span> <span class="n">sc</span><span class="o">.</span><span class="n">k</span> <span class="o">*</span> <span class="n">temperature</span><span class="p">))</span> <span class="o">-</span> <span class="mi">1</span><span class="p">)</span>
+               <span class="o">+</span> <span class="n">j02</span> <span class="o">*</span> <span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">exp</span><span class="p">(</span><span class="n">sc</span><span class="o">.</span><span class="n">e</span> <span class="o">*</span> <span class="n">voltage</span> <span class="o">/</span> <span class="p">(</span><span class="n">n2</span> <span class="o">*</span> <span class="n">sc</span><span class="o">.</span><span class="n">k</span> <span class="o">*</span> <span class="n">temperature</span><span class="p">))</span> <span class="o">-</span> <span class="mi">1</span><span class="p">)</span> <span class="o">+</span>
+               <span class="n">voltage</span> <span class="o">/</span> <span class="n">rshunt</span><span class="p">)</span> <span class="o">-</span> <span class="n">jsc</span>
+    <span class="k">return</span> <span class="p">(</span><span class="n">voltage</span><span class="p">,</span> <span class="n">current</span><span class="p">)</span>
+
+
+<span class="k">def</span> <span class="nf">gen_rec_iv_by_rad_eta</span><span class="p">(</span><span class="n">j01</span><span class="p">,</span> <span class="n">rad_eta</span><span class="p">,</span> <span class="n">n1</span><span class="p">,</span> <span class="n">temperature</span><span class="p">,</span> <span class="n">rshunt</span><span class="p">,</span> <span class="n">voltage</span><span class="p">,</span> <span class="n">jsc</span><span class="o">=</span><span class="mi">0</span><span class="p">):</span>
+    <span class="k">if</span> <span class="n">np</span><span class="o">.</span><span class="n">isinf</span><span class="p">(</span><span class="n">rshunt</span><span class="p">):</span>
+        <span class="n">shunt_term</span> <span class="o">=</span> <span class="mi">0</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">shunt_term</span> <span class="o">=</span> <span class="n">voltage</span> <span class="o">/</span> <span class="n">rshunt</span>
+
+    <span class="n">current</span> <span class="o">=</span> <span class="p">(</span><span class="n">j01</span> <span class="o">/</span> <span class="n">rad_eta</span> <span class="o">*</span> <span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">exp</span><span class="p">(</span><span class="n">sc</span><span class="o">.</span><span class="n">e</span> <span class="o">*</span> <span class="n">voltage</span> <span class="o">/</span> <span class="p">(</span><span class="n">n1</span> <span class="o">*</span> <span class="n">sc</span><span class="o">.</span><span class="n">k</span> <span class="o">*</span> <span class="n">temperature</span><span class="p">))</span> <span class="o">-</span> <span class="mi">1</span><span class="p">)</span> <span class="o">+</span>
+               <span class="n">shunt_term</span><span class="p">)</span> <span class="o">-</span> <span class="n">jsc</span>
+    <span class="k">return</span> <span class="p">(</span><span class="n">voltage</span><span class="p">,</span> <span class="n">current</span><span class="p">)</span>
+
+
+<div class="viewcode-block" id="one_diode_v_from_i"><a class="viewcode-back" href="../../ivsolver.html#pypvcell.ivsolver.one_diode_v_from_i">[docs]</a><span class="k">def</span> <span class="nf">one_diode_v_from_i</span><span class="p">(</span><span class="n">current</span><span class="p">,</span> <span class="n">j01</span><span class="p">,</span> <span class="n">rad_eta</span><span class="p">,</span> <span class="n">n1</span><span class="p">,</span> <span class="n">temperature</span><span class="p">,</span> <span class="n">jsc</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Calculate the voltage from demand current.</span>
+<span class="sd">    This implementation drops the element that does not have log value, i.e. any log(x) that x&lt;0</span>
+
+<span class="sd">    :param current: demand current, array_like</span>
+<span class="sd">    :param j01: saturation current density</span>
+<span class="sd">    :param rad_eta: radiative efficiency</span>
+<span class="sd">    :param n1: diode factor</span>
+<span class="sd">    :param temperature: temperature in K</span>
+<span class="sd">    :param jsc: Jsc. It has to be a positive value.</span>
+<span class="sd">    :return: voltage, current, indexes that the values were kepted</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">if</span> <span class="n">jsc</span> <span class="o">&lt;</span> <span class="mi">0</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Jsc should be a positve value&quot;</span><span class="p">)</span>
+
+    <span class="n">log_component</span> <span class="o">=</span> <span class="n">rad_eta</span> <span class="o">*</span> <span class="p">(</span><span class="n">current</span> <span class="o">+</span> <span class="n">jsc</span><span class="p">)</span> <span class="o">/</span> <span class="n">j01</span> <span class="o">+</span> <span class="mi">1</span>
+
+    <span class="n">index</span> <span class="o">=</span> <span class="n">log_component</span> <span class="o">&gt;</span> <span class="mi">0</span>
+    <span class="n">n_current</span> <span class="o">=</span> <span class="n">current</span><span class="p">[</span><span class="n">index</span><span class="p">]</span>
+    <span class="n">log_component</span> <span class="o">=</span> <span class="n">log_component</span><span class="p">[</span><span class="n">index</span><span class="p">]</span>
+
+    <span class="k">return</span> <span class="p">(</span><span class="n">n1</span> <span class="o">*</span> <span class="n">sc</span><span class="o">.</span><span class="n">k</span> <span class="o">*</span> <span class="n">temperature</span> <span class="o">/</span> <span class="n">sc</span><span class="o">.</span><span class="n">e</span><span class="p">)</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="n">log_component</span><span class="p">),</span> <span class="n">n_current</span><span class="p">,</span> <span class="n">index</span></div>
+
+
+<span class="k">def</span> <span class="nf">gen_rec_iv_with_rs_by_reverse</span><span class="p">(</span><span class="n">j01</span><span class="p">,</span> <span class="n">j02</span><span class="p">,</span> <span class="n">n1</span><span class="p">,</span> <span class="n">n2</span><span class="p">,</span> <span class="n">temperature</span><span class="p">,</span> <span class="n">rshunt</span><span class="p">,</span> <span class="n">rseries</span><span class="p">,</span> <span class="n">voltage</span><span class="p">,</span> <span class="n">jsc</span><span class="o">=</span><span class="mi">0</span><span class="p">):</span>
+    <span class="n">voltage</span><span class="p">,</span> <span class="n">current</span> <span class="o">=</span> <span class="n">gen_rec_iv</span><span class="p">(</span><span class="n">j01</span><span class="p">,</span> <span class="n">j02</span><span class="p">,</span> <span class="n">n1</span><span class="p">,</span> <span class="n">n2</span><span class="p">,</span> <span class="n">temperature</span><span class="p">,</span> <span class="n">rshunt</span><span class="p">,</span> <span class="n">voltage</span><span class="p">,</span> <span class="n">jsc</span><span class="p">)</span>
+
+    <span class="n">current</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linspace</span><span class="p">(</span><span class="o">-</span><span class="n">jsc</span> <span class="o">*</span> <span class="mf">1.1</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="n">num</span><span class="o">=</span><span class="mi">100</span><span class="p">)</span>
+
+    <span class="n">new_voltage</span> <span class="o">=</span> <span class="n">current</span> <span class="o">*</span> <span class="n">rseries</span> <span class="o">+</span> <span class="n">n1</span> <span class="o">*</span> <span class="n">sc</span><span class="o">.</span><span class="n">k</span> <span class="o">*</span> <span class="n">temperature</span> <span class="o">/</span> <span class="n">sc</span><span class="o">.</span><span class="n">e</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">log</span><span class="p">((</span><span class="n">jsc</span> <span class="o">+</span> <span class="n">current</span><span class="p">)</span> <span class="o">/</span> <span class="n">j01</span><span class="p">)</span>
+
+    <span class="nb">print</span><span class="p">(</span><span class="n">new_voltage</span><span class="p">)</span>
+    <span class="c1"># get voc</span>
+    <span class="n">voc</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">interp</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">current</span><span class="p">,</span> <span class="n">new_voltage</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="p">(</span><span class="n">new_voltage</span><span class="p">,</span> <span class="o">-</span><span class="n">current</span><span class="p">)</span>
+
+
+<span class="k">def</span> <span class="nf">find_root_newton</span><span class="p">(</span><span class="n">f</span><span class="p">,</span> <span class="n">fp</span><span class="p">,</span> <span class="n">x_init</span><span class="p">,</span> <span class="n">verbose</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
+    <span class="n">max_iter</span> <span class="o">=</span> <span class="mi">10000</span>
+    <span class="n">tolerance</span> <span class="o">=</span> <span class="mi">1</span><span class="n">e</span><span class="o">-</span><span class="mi">4</span>
+    <span class="n">step_lambda</span> <span class="o">=</span> <span class="mf">0.1</span>
+
+    <span class="n">current_x</span> <span class="o">=</span> <span class="n">x_init</span>
+    <span class="n">convergence</span> <span class="o">=</span> <span class="mi">1</span>
+    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">max_iter</span><span class="p">):</span>
+        <span class="n">next_x</span> <span class="o">=</span> <span class="n">current_x</span> <span class="o">-</span> <span class="n">step_lambda</span> <span class="o">*</span> <span class="n">f</span><span class="p">(</span><span class="n">current_x</span><span class="p">)</span> <span class="o">/</span> <span class="n">fp</span><span class="p">(</span><span class="n">current_x</span><span class="p">)</span>
+        <span class="n">convergence</span> <span class="o">=</span> <span class="nb">abs</span><span class="p">(</span><span class="n">next_x</span> <span class="o">-</span> <span class="n">current_x</span><span class="p">)</span> <span class="o">/</span> <span class="n">current_x</span>
+        <span class="c1"># if convergence&lt;tolerance:</span>
+        <span class="k">if</span> <span class="n">np</span><span class="o">.</span><span class="n">isclose</span><span class="p">(</span><span class="n">current_x</span><span class="p">,</span> <span class="n">next_x</span><span class="p">,</span> <span class="n">atol</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">rtol</span><span class="o">=</span><span class="n">tolerance</span><span class="p">):</span>
+            <span class="k">if</span> <span class="n">verbose</span><span class="p">:</span>
+                <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;reach tolerance: </span><span class="si">%s</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="n">convergence</span><span class="p">)</span>
+            <span class="k">return</span> <span class="n">next_x</span>
+        <span class="n">current_x</span> <span class="o">=</span> <span class="n">next_x</span>
+
+    <span class="k">if</span> <span class="n">verbose</span><span class="p">:</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;reach maximum iteration: </span><span class="si">%s</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="n">convergence</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">next_x</span>
+
+
+<span class="k">def</span> <span class="nf">gen_rec_iv_with_rs_by_newton</span><span class="p">(</span><span class="n">j01</span><span class="p">,</span> <span class="n">j02</span><span class="p">,</span> <span class="n">n1</span><span class="p">,</span> <span class="n">n2</span><span class="p">,</span> <span class="n">temperature</span><span class="p">,</span> <span class="n">rshunt</span><span class="p">,</span> <span class="n">rseries</span><span class="p">,</span> <span class="n">voltage</span><span class="p">,</span> <span class="n">jsc</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">verbose</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
+    <span class="n">voltage</span><span class="p">,</span> <span class="n">cur</span> <span class="o">=</span> <span class="n">gen_rec_iv</span><span class="p">(</span><span class="n">j01</span><span class="p">,</span> <span class="n">j02</span><span class="p">,</span> <span class="n">n1</span><span class="p">,</span> <span class="n">n2</span><span class="p">,</span> <span class="n">temperature</span><span class="p">,</span> <span class="n">rshunt</span><span class="p">,</span> <span class="n">voltage</span><span class="p">,</span> <span class="n">jsc</span><span class="p">)</span>
+
+    <span class="n">solved_current</span> <span class="o">=</span> <span class="nb">list</span><span class="p">()</span>
+    <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">v</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">voltage</span><span class="p">):</span>
+        <span class="c1"># since j02 could be an array, so we need to treat these cases</span>
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">j02</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">)</span> <span class="ow">and</span> <span class="n">j02</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">==</span> <span class="n">voltage</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]:</span>
+            <span class="n">t_j02</span> <span class="o">=</span> <span class="n">j02</span><span class="p">[</span><span class="n">i</span><span class="p">]</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">t_j02</span> <span class="o">=</span> <span class="n">j02</span>
+
+        <span class="k">def</span> <span class="nf">f</span><span class="p">(</span><span class="n">current</span><span class="p">):</span>
+            <span class="n">result</span> <span class="o">=</span> <span class="n">current</span> <span class="o">-</span> <span class="p">(</span><span class="n">j01</span> <span class="o">*</span> <span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">exp</span><span class="p">(</span><span class="n">sc</span><span class="o">.</span><span class="n">e</span> <span class="o">*</span> <span class="p">(</span><span class="n">v</span> <span class="o">-</span> <span class="n">rseries</span> <span class="o">*</span> <span class="n">current</span><span class="p">)</span> <span class="o">/</span> <span class="p">(</span><span class="n">n1</span> <span class="o">*</span> <span class="n">sc</span><span class="o">.</span><span class="n">k</span> <span class="o">*</span> <span class="n">temperature</span><span class="p">))</span> <span class="o">-</span> <span class="mi">1</span><span class="p">)</span>
+                                <span class="o">+</span> <span class="n">t_j02</span> <span class="o">*</span> <span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">exp</span><span class="p">(</span><span class="n">sc</span><span class="o">.</span><span class="n">e</span> <span class="o">*</span> <span class="p">(</span><span class="n">v</span> <span class="o">-</span> <span class="n">rseries</span> <span class="o">*</span> <span class="n">current</span><span class="p">)</span> <span class="o">/</span> <span class="p">(</span><span class="n">n2</span> <span class="o">*</span> <span class="n">sc</span><span class="o">.</span><span class="n">k</span> <span class="o">*</span> <span class="n">temperature</span><span class="p">))</span> <span class="o">-</span> <span class="mi">1</span><span class="p">)</span> <span class="o">+</span>
+                                <span class="n">v</span> <span class="o">/</span> <span class="n">rshunt</span><span class="p">)</span> <span class="o">+</span> <span class="n">jsc</span>
+            <span class="k">return</span> <span class="n">result</span>
+
+        <span class="k">def</span> <span class="nf">fp</span><span class="p">(</span><span class="n">current</span><span class="p">):</span>
+            <span class="n">result</span> <span class="o">=</span> <span class="mi">1</span> <span class="o">-</span> <span class="p">(</span><span class="o">-</span><span class="n">rseries</span> <span class="o">*</span> <span class="n">j01</span> <span class="o">*</span> <span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">exp</span><span class="p">(</span><span class="n">sc</span><span class="o">.</span><span class="n">e</span> <span class="o">*</span> <span class="p">(</span><span class="n">v</span> <span class="o">-</span> <span class="n">rseries</span> <span class="o">*</span> <span class="n">current</span><span class="p">)</span> <span class="o">/</span> <span class="p">(</span><span class="n">n1</span> <span class="o">*</span> <span class="n">sc</span><span class="o">.</span><span class="n">k</span> <span class="o">*</span> <span class="n">temperature</span><span class="p">))</span> <span class="o">-</span> <span class="mi">1</span><span class="p">)</span>
+                          <span class="o">-</span> <span class="n">rseries</span> <span class="o">*</span> <span class="n">t_j02</span> <span class="o">*</span> <span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">exp</span><span class="p">(</span><span class="n">sc</span><span class="o">.</span><span class="n">e</span> <span class="o">*</span> <span class="p">(</span><span class="n">v</span> <span class="o">-</span> <span class="n">rseries</span> <span class="o">*</span> <span class="n">current</span><span class="p">)</span> <span class="o">/</span> <span class="p">(</span><span class="n">n2</span> <span class="o">*</span> <span class="n">sc</span><span class="o">.</span><span class="n">k</span> <span class="o">*</span> <span class="n">temperature</span><span class="p">))</span> <span class="o">-</span> <span class="mi">1</span><span class="p">))</span>
+            <span class="k">return</span> <span class="n">result</span>
+
+        <span class="k">if</span> <span class="n">solved_current</span><span class="p">:</span>
+            <span class="n">init_x</span> <span class="o">=</span> <span class="n">solved_current</span><span class="p">[</span><span class="n">i</span> <span class="o">-</span> <span class="mi">1</span><span class="p">]</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">init_x</span> <span class="o">=</span> <span class="n">cur</span><span class="p">[</span><span class="n">i</span><span class="p">]</span>
+        <span class="n">solved_current</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">find_root_newton</span><span class="p">(</span><span class="n">f</span><span class="p">,</span> <span class="n">fp</span><span class="p">,</span> <span class="n">init_x</span><span class="p">,</span> <span class="n">verbose</span><span class="o">=</span><span class="n">verbose</span><span class="p">))</span>
+
+    <span class="k">return</span> <span class="n">voltage</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">solved_current</span><span class="p">)</span>
+
+
+<span class="n">j01_lead_term</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">power</span><span class="p">(</span><span class="n">sc</span><span class="o">.</span><span class="n">e</span><span class="p">,</span> <span class="mi">4</span><span class="p">)</span> <span class="o">*</span> <span class="mi">2</span> <span class="o">*</span> <span class="n">sc</span><span class="o">.</span><span class="n">pi</span> <span class="o">/</span> <span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">power</span><span class="p">(</span><span class="n">sc</span><span class="o">.</span><span class="n">c</span><span class="p">,</span> <span class="mi">2</span><span class="p">)</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">power</span><span class="p">(</span><span class="n">sc</span><span class="o">.</span><span class="n">h</span><span class="p">,</span> <span class="mi">3</span><span class="p">))</span>
+
+
+<div class="viewcode-block" id="calculate_j01_from_qe"><a class="viewcode-back" href="../../ivsolver.html#pypvcell.ivsolver.calculate_j01_from_qe">[docs]</a><span class="k">def</span> <span class="nf">calculate_j01_from_qe</span><span class="p">(</span><span class="n">qe</span><span class="p">,</span> <span class="n">n_c</span><span class="o">=</span><span class="mf">3.5</span><span class="p">,</span> <span class="n">n_s</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">threshold</span><span class="o">=</span><span class="mi">1</span><span class="n">e</span><span class="o">-</span><span class="mi">3</span><span class="p">,</span> <span class="n">step_in_ev</span><span class="o">=</span><span class="mi">1</span><span class="n">e</span><span class="o">-</span><span class="mi">5</span><span class="p">,</span> <span class="n">lead_term</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">T</span><span class="o">=</span><span class="mi">300</span><span class="p">):</span>
+    <span class="sd">r&quot;&quot;&quot;</span>
+<span class="sd">    Calculate j01 from known absorptivity or QE using the following expression:</span>
+<span class="sd">    </span>
+<span class="sd">    .. math::</span>
+<span class="sd">        J_{01}=\frac{2\pi q (n_c^2+n_s^2)}{\mbox{h}^3 \mbox{c}^2}\int_{0}^{\infty} \frac{a(E)E^2 dE}{\exp\left(\frac{E}{kT}\right)-1}</span>
+<span class="sd">        </span>
+<span class="sd">    </span>
+<span class="sd">    :param T: temperature in Kelvin</span>
+<span class="sd">    :param n_c: the refractive index of the material</span>
+<span class="sd">    :param n_s: the refractive index of surroundings</span>
+<span class="sd">    :param qe: QE or absorptivity. A spectrum_base class</span>
+<span class="sd">    :param threshold: ignore the QE whose values are under the threshold</span>
+<span class="sd">    :param step_in_ev: meshgrid size when doing numerical integration trapz()</span>
+<span class="sd">    :return: j01</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">assert</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">qe</span><span class="p">,</span> <span class="n">Spectrum</span><span class="p">)</span>
+
+    <span class="c1"># lead_term = np.power(sc.e,4) * 2 * (n_c ** 2) / (np.power(sc.h, 3) * np.power(sc.c, 2) * 2 * np.power(sc.pi,2))</span>
+
+    <span class="k">if</span> <span class="n">lead_term</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="c1"># the additional sc.e^3 comes from the unit of E. We use the unit of eV to do the integration</span>
+        <span class="c1"># of Planck&#39;s spectrum. Note that the term E^2*dE gives three q in total.</span>
+        <span class="c1"># lead_term = np.power(sc.e, 4) * 2 * sc.pi * (n_c ** 2+n_s**2) / (np.power(sc.c, 2) * np.power(sc.h, 3))</span>
+        <span class="n">lead_term</span> <span class="o">=</span> <span class="n">j01_lead_term</span> <span class="o">*</span> <span class="p">(</span><span class="n">n_c</span> <span class="o">**</span> <span class="mi">2</span> <span class="o">+</span> <span class="n">n_s</span> <span class="o">**</span> <span class="mi">2</span><span class="p">)</span>
+
+    <span class="n">qe_a</span> <span class="o">=</span> <span class="n">qe</span><span class="o">.</span><span class="n">get_spectrum</span><span class="p">(</span><span class="n">to_x_unit</span><span class="o">=</span><span class="s1">&#39;eV&#39;</span><span class="p">)</span>
+
+    <span class="n">qe_a</span> <span class="o">=</span> <span class="n">qe</span><span class="o">.</span><span class="n">get_interp_spectrum</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">min</span><span class="p">(</span><span class="n">qe_a</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="p">:]),</span> <span class="n">np</span><span class="o">.</span><span class="n">max</span><span class="p">(</span><span class="n">qe_a</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="p">:]),</span> <span class="n">step</span><span class="o">=</span><span class="n">step_in_ev</span><span class="p">),</span> <span class="s1">&#39;eV&#39;</span><span class="p">)</span>
+
+    <span class="n">qe_a</span> <span class="o">=</span> <span class="n">qe_a</span><span class="p">[:,</span> <span class="n">qe_a</span><span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="p">:]</span> <span class="o">&gt;</span> <span class="n">threshold</span><span class="p">]</span>
+
+    <span class="n">v_t</span> <span class="o">=</span> <span class="n">sc</span><span class="o">.</span><span class="n">k</span> <span class="o">*</span> <span class="n">T</span> <span class="o">/</span> <span class="n">sc</span><span class="o">.</span><span class="n">e</span>
+
+    <span class="n">j01</span> <span class="o">=</span> <span class="n">lead_term</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">trapz</span><span class="p">(</span><span class="n">qe_a</span><span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="p">:]</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">power</span><span class="p">(</span><span class="n">qe_a</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="p">:],</span> <span class="mi">2</span><span class="p">)</span> <span class="o">/</span> <span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">exp</span><span class="p">(</span><span class="n">qe_a</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="p">:]</span> <span class="o">/</span> <span class="n">v_t</span><span class="p">)</span> <span class="o">-</span> <span class="mi">1</span><span class="p">),</span> <span class="n">qe_a</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="p">:])</span>
+
+    <span class="k">return</span> <span class="n">j01</span></div>
+
+
+<span class="k">def</span> <span class="nf">calculate_bed</span><span class="p">(</span><span class="n">qe</span><span class="p">,</span> <span class="n">T</span><span class="o">=</span><span class="mi">300</span><span class="p">):</span>
+    <span class="k">assert</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">qe</span><span class="p">,</span> <span class="n">Spectrum</span><span class="p">)</span>
+
+    <span class="n">qe_a</span> <span class="o">=</span> <span class="n">qe</span><span class="o">.</span><span class="n">get_spectrum</span><span class="p">(</span><span class="n">to_x_unit</span><span class="o">=</span><span class="s1">&#39;eV&#39;</span><span class="p">)</span>
+
+    <span class="n">qe_a</span> <span class="o">=</span> <span class="n">qe</span><span class="o">.</span><span class="n">get_interp_spectrum</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">min</span><span class="p">(</span><span class="n">qe_a</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="p">:]),</span> <span class="n">np</span><span class="o">.</span><span class="n">max</span><span class="p">(</span><span class="n">qe_a</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="p">:]),</span> <span class="n">step</span><span class="o">=</span><span class="mi">1</span><span class="n">e</span><span class="o">-</span><span class="mi">6</span><span class="p">),</span> <span class="s1">&#39;eV&#39;</span><span class="p">)</span>
+
+    <span class="n">v_t</span> <span class="o">=</span> <span class="n">sc</span><span class="o">.</span><span class="n">k</span> <span class="o">*</span> <span class="n">T</span> <span class="o">/</span> <span class="n">sc</span><span class="o">.</span><span class="n">e</span>
+
+    <span class="n">y</span> <span class="o">=</span> <span class="n">qe_a</span><span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="p">:]</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">power</span><span class="p">(</span><span class="n">qe_a</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="p">:],</span> <span class="mi">2</span><span class="p">)</span> <span class="o">/</span> <span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">exp</span><span class="p">(</span><span class="n">qe_a</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="p">:]</span> <span class="o">/</span> <span class="n">v_t</span><span class="p">)</span> <span class="o">-</span> <span class="mi">1</span><span class="p">)</span>
+
+    <span class="n">x</span> <span class="o">=</span> <span class="n">qe_a</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="p">:]</span>
+
+    <span class="k">return</span> <span class="n">x</span><span class="p">,</span> <span class="n">y</span>
+
+
+<span class="k">def</span> <span class="nf">get_v_from_j</span><span class="p">(</span><span class="n">voltage</span><span class="p">,</span> <span class="n">current</span><span class="p">,</span> <span class="n">target_current</span><span class="p">):</span>
+    <span class="n">interp</span> <span class="o">=</span> <span class="n">interp1d</span><span class="p">(</span><span class="n">x</span><span class="o">=</span><span class="n">current</span><span class="p">,</span> <span class="n">y</span><span class="o">=</span><span class="n">voltage</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">interp</span><span class="p">(</span><span class="n">target_current</span><span class="p">)</span>
+
+
+<div class="viewcode-block" id="calculate_j01"><a class="viewcode-back" href="../../ivsolver.html#pypvcell.ivsolver.calculate_j01">[docs]</a><span class="k">def</span> <span class="nf">calculate_j01</span><span class="p">(</span><span class="n">eg_in_ev</span><span class="p">,</span> <span class="n">temperature</span><span class="p">,</span> <span class="n">n1</span><span class="p">,</span> <span class="n">n_c</span><span class="o">=</span><span class="mf">3.5</span><span class="p">,</span> <span class="n">n_s</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">approx</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+    <span class="sd">r&quot;&quot;&quot;</span>
+<span class="sd">    Calculate the saturation radiative recombination current J01 from known band gap using the following expression:</span>
+<span class="sd">    </span>
+<span class="sd">    .. math::</span>
+<span class="sd">        J_{01}=\frac{2\pi q (n_c^2+n_s^2)}{\mbox{h}^3 \mbox{c}^2}\int_{0}^{E_g} \frac{E^2 dE}{\exp\left(\frac{E}{kT}\right)-1}</span>
+<span class="sd">    </span>
+<span class="sd">    </span>
+<span class="sd">    If the parameter ``approx`` is set True, it uses an approximation of the above equation to calculate J01:</span>
+<span class="sd">    </span>
+<span class="sd">    </span>
+<span class="sd">    .. math::</span>
+<span class="sd">        J_{01}=\frac{2\pi k T q(n_c^2+n_s^2)}{\mbox{h}^3\mbox{c}^2}\exp(\frac{-E_g}{nkT})\left(E_g^2+2E_gkT+2k^2T^2\right)</span>
+<span class="sd">    </span>
+
+<span class="sd">    :param eg_in_ev: band gap in eV</span>
+<span class="sd">    :param temperature: temperature in K</span>
+<span class="sd">    :param n1: ideality factor</span>
+<span class="sd">    :param n_c: refractive index of the cell</span>
+<span class="sd">    :param n_s: refractive index of the surroundings</span>
+<span class="sd">    :param approx: Set ``true`` to use approximation    </span>
+<span class="sd">    :return: the value of J01</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">eg</span> <span class="o">=</span> <span class="n">eg_in_ev</span> <span class="o">*</span> <span class="n">sc</span><span class="o">.</span><span class="n">e</span>
+    <span class="n">Term1</span> <span class="o">=</span> <span class="mi">2</span> <span class="o">*</span> <span class="n">sc</span><span class="o">.</span><span class="n">pi</span> <span class="o">*</span> <span class="p">(</span><span class="n">n_c</span> <span class="o">**</span> <span class="mi">2</span> <span class="o">+</span> <span class="n">n_s</span> <span class="o">**</span> <span class="mi">2</span><span class="p">)</span> <span class="o">*</span> <span class="n">sc</span><span class="o">.</span><span class="n">e</span> <span class="o">/</span> <span class="p">(</span>
+        <span class="n">np</span><span class="o">.</span><span class="n">power</span><span class="p">(</span><span class="n">sc</span><span class="o">.</span><span class="n">h</span><span class="p">,</span> <span class="mi">3</span><span class="p">)</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">power</span><span class="p">(</span><span class="n">sc</span><span class="o">.</span><span class="n">c</span><span class="p">,</span> <span class="mi">2</span><span class="p">))</span>
+    <span class="n">Term2</span> <span class="o">=</span> <span class="n">sc</span><span class="o">.</span><span class="n">k</span> <span class="o">*</span> <span class="n">temperature</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">exp</span><span class="p">(</span><span class="o">-</span><span class="n">eg</span> <span class="o">/</span> <span class="p">(</span><span class="n">n1</span> <span class="o">*</span> <span class="n">sc</span><span class="o">.</span><span class="n">k</span> <span class="o">*</span> <span class="n">temperature</span><span class="p">))</span>
+    <span class="k">if</span> <span class="n">approx</span> <span class="o">==</span> <span class="kc">False</span><span class="p">:</span>
+        <span class="n">Term3</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">power</span><span class="p">(</span><span class="n">eg</span><span class="p">,</span> <span class="mi">2</span><span class="p">)</span> <span class="o">+</span> <span class="p">(</span><span class="mi">2</span> <span class="o">*</span> <span class="n">eg</span> <span class="o">*</span> <span class="n">sc</span><span class="o">.</span><span class="n">k</span> <span class="o">*</span> <span class="n">temperature</span><span class="p">)</span> <span class="o">+</span> <span class="p">(</span><span class="mi">2</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">power</span><span class="p">(</span><span class="n">sc</span><span class="o">.</span><span class="n">k</span><span class="p">,</span> <span class="mi">2</span><span class="p">)</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">power</span><span class="p">(</span><span class="n">temperature</span><span class="p">,</span> <span class="mi">2</span><span class="p">))</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">Term3</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">power</span><span class="p">(</span><span class="n">eg</span><span class="p">,</span> <span class="mi">2</span><span class="p">)</span>
+
+    <span class="n">j01</span> <span class="o">=</span> <span class="n">Term1</span> <span class="o">*</span> <span class="n">Term2</span> <span class="o">*</span> <span class="n">Term3</span>
+    <span class="k">return</span> <span class="n">j01</span></div>
+
+
+<span class="k">def</span> <span class="nf">calculate_j02_from_voc</span><span class="p">(</span><span class="n">j01</span><span class="p">,</span> <span class="n">jsc</span><span class="p">,</span> <span class="n">voc</span><span class="p">,</span> <span class="n">t</span><span class="p">,</span> <span class="n">n2</span><span class="p">):</span>
+    <span class="c1"># extracts j02 from an iv curve</span>
+    <span class="c1"># verified as identical to idl</span>
+    <span class="n">term1</span> <span class="o">=</span> <span class="n">jsc</span> <span class="o">-</span> <span class="p">(</span><span class="n">j01</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">exp</span><span class="p">(</span><span class="n">sc</span><span class="o">.</span><span class="n">e</span> <span class="o">*</span> <span class="n">voc</span> <span class="o">/</span> <span class="p">(</span><span class="n">sc</span><span class="o">.</span><span class="n">k</span> <span class="o">*</span> <span class="n">t</span><span class="p">)))</span>
+    <span class="c1"># print term1</span>
+    <span class="n">term2</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">exp</span><span class="p">(</span><span class="n">sc</span><span class="o">.</span><span class="n">e</span> <span class="o">*</span> <span class="n">voc</span> <span class="o">/</span> <span class="p">(</span><span class="n">n2</span> <span class="o">*</span> <span class="n">sc</span><span class="o">.</span><span class="n">k</span> <span class="o">*</span> <span class="n">t</span><span class="p">))</span>
+    <span class="c1"># print term2</span>
+
+    <span class="n">j02</span> <span class="o">=</span> <span class="n">term1</span> <span class="o">/</span> <span class="n">term2</span>
+    <span class="k">return</span> <span class="n">j02</span>
+
+
+<span class="k">def</span> <span class="nf">calculate_j02_from_rad_eff</span><span class="p">(</span><span class="n">j01</span><span class="p">,</span> <span class="n">radiative_efficiency</span><span class="p">,</span> <span class="n">voltage</span><span class="p">,</span> <span class="n">temperature</span><span class="p">,</span> <span class="n">n2</span><span class="p">):</span>
+    <span class="c1"># verified as identical to idl, within numerical inaccuracy</span>
+    <span class="c1"># no longer at voc - this is now dependent on bias voltage.</span>
+
+    <span class="n">term1</span> <span class="o">=</span> <span class="n">j01</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">exp</span><span class="p">(</span><span class="n">sc</span><span class="o">.</span><span class="n">e</span> <span class="o">*</span> <span class="n">voltage</span> <span class="o">/</span> <span class="p">(</span><span class="n">n2</span> <span class="o">*</span> <span class="n">sc</span><span class="o">.</span><span class="n">k</span> <span class="o">*</span> <span class="n">temperature</span><span class="p">))</span>
+    <span class="n">term2</span> <span class="o">=</span> <span class="o">-</span><span class="mi">1</span> <span class="o">+</span> <span class="p">(</span><span class="mi">1</span> <span class="o">/</span> <span class="n">radiative_efficiency</span><span class="p">)</span>
+
+    <span class="n">j02</span> <span class="o">=</span> <span class="n">term1</span> <span class="o">*</span> <span class="n">term2</span>
+
+    <span class="k">return</span> <span class="n">j02</span>
+
+
+<div class="viewcode-block" id="solve_ms_mj_iv"><a class="viewcode-back" href="../../ivsolver.html#pypvcell.ivsolver.solve_ms_mj_iv">[docs]</a><span class="k">def</span> <span class="nf">solve_ms_mj_iv</span><span class="p">(</span><span class="n">v_i</span><span class="p">,</span> <span class="n">ill_power</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Calculate the efficiency of mechanical stack solar cell.</span>
+<span class="sd">    It adds up the maximum power of each subcell and divde them by the illumination power.</span>
+<span class="sd">    </span>
+
+<span class="sd">    :param v_i: a list of (voltage,current) tuple. Voltage and current are 1D numpy arrays. The current density is in W/m^2</span>
+<span class="sd">    :param ill_power: the illumnation power in W/m^2</span>
+<span class="sd">    :return: efficiency</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">max_p_list</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="k">for</span> <span class="n">v</span><span class="p">,</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">v_i</span><span class="p">:</span>
+        <span class="n">max_p_list</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">max_power</span><span class="p">(</span><span class="n">v</span><span class="p">,</span> <span class="n">i</span><span class="p">))</span>
+
+    <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">max_p_list</span><span class="p">)</span> <span class="o">/</span> <span class="n">ill_power</span></div>
+
+
+<div class="viewcode-block" id="solve_mj_iv"><a class="viewcode-back" href="../../ivsolver.html#pypvcell.ivsolver.solve_mj_iv">[docs]</a><span class="k">def</span> <span class="nf">solve_mj_iv</span><span class="p">(</span><span class="n">v_i</span><span class="p">,</span> <span class="n">i_max</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">discret_num</span><span class="o">=</span><span class="mi">10000</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+
+<span class="sd">    :param v_i: a list of (voltage,current) tuple</span>
+<span class="sd">    :type v_i: List[Tuple[np.ndarray,np.ndarray]]</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="c1"># Select the minimum of range maximums</span>
+
+    <span class="c1"># Select the maximum of range minimums</span>
+
+
+    <span class="c1"># check the input</span>
+    <span class="n">i_range_max</span> <span class="o">=</span> <span class="mi">0</span>
+    <span class="n">i_range_min</span> <span class="o">=</span> <span class="mi">0</span>
+    <span class="k">for</span> <span class="n">idx</span><span class="p">,</span> <span class="n">iv_tup</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">v_i</span><span class="p">):</span>
+
+        <span class="k">assert</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">iv_tup</span><span class="p">,</span> <span class="nb">tuple</span><span class="p">)</span>
+
+        <span class="n">voltage</span><span class="p">,</span> <span class="n">current</span> <span class="o">=</span> <span class="n">iv_tup</span>
+
+        <span class="k">assert</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">voltage</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">)</span>
+        <span class="k">assert</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">current</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="n">idx</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="n">i_range_max</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">max</span><span class="p">(</span><span class="n">current</span><span class="p">)</span>
+            <span class="n">i_range_min</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">min</span><span class="p">(</span><span class="n">current</span><span class="p">)</span>
+
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">np</span><span class="o">.</span><span class="n">max</span><span class="p">(</span><span class="n">current</span><span class="p">)</span> <span class="o">&lt;</span> <span class="n">i_range_max</span><span class="p">:</span>
+                <span class="n">i_range_max</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">max</span><span class="p">(</span><span class="n">current</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">np</span><span class="o">.</span><span class="n">min</span><span class="p">(</span><span class="n">current</span><span class="p">)</span> <span class="o">&gt;</span> <span class="n">i_range_min</span><span class="p">:</span>
+                <span class="n">i_range_min</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">min</span><span class="p">(</span><span class="n">current</span><span class="p">)</span>
+
+    <span class="n">current_range</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linspace</span><span class="p">(</span><span class="n">i_range_min</span><span class="p">,</span> <span class="n">i_range_max</span><span class="p">,</span> <span class="n">num</span><span class="o">=</span><span class="n">discret_num</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="n">i_max</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">i_max</span> <span class="o">&gt;</span> <span class="n">np</span><span class="o">.</span><span class="n">max</span><span class="p">(</span><span class="n">current_range</span><span class="p">):</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;i_max is larger than the maximum of input I-Vs&quot;</span><span class="p">)</span>
+        <span class="k">elif</span> <span class="n">i_max</span> <span class="o">&lt;</span> <span class="n">np</span><span class="o">.</span><span class="n">min</span><span class="p">(</span><span class="n">current_range</span><span class="p">):</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;i_max is smaller than the maximum of input I-Vs&quot;</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">current_range</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linspace</span><span class="p">(</span><span class="n">i_range_min</span><span class="p">,</span> <span class="n">i_max</span><span class="p">,</span> <span class="n">num</span><span class="o">=</span><span class="n">discret_num</span><span class="p">)</span>
+
+    <span class="n">voltage_sum</span> <span class="o">=</span> <span class="mi">0</span>
+    <span class="k">for</span> <span class="n">iv_tup</span> <span class="ow">in</span> <span class="n">v_i</span><span class="p">:</span>
+        <span class="n">voltage</span><span class="p">,</span> <span class="n">current</span> <span class="o">=</span> <span class="n">iv_tup</span>
+
+        <span class="n">voltage_sum</span> <span class="o">=</span> <span class="n">voltage_sum</span> <span class="o">+</span> <span class="n">get_v_from_j</span><span class="p">(</span><span class="n">voltage</span><span class="p">,</span> <span class="n">current</span><span class="p">,</span> <span class="n">current_range</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="n">np</span><span class="o">.</span><span class="n">any</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">isnan</span><span class="p">(</span><span class="n">voltage_sum</span><span class="p">)):</span>
+        <span class="n">voltage_sum</span> <span class="o">=</span> <span class="n">voltage_sum</span><span class="p">[</span><span class="o">~</span><span class="n">np</span><span class="o">.</span><span class="n">isnan</span><span class="p">(</span><span class="n">voltage_sum</span><span class="p">)]</span>
+        <span class="n">current_range</span> <span class="o">=</span> <span class="n">current_range</span><span class="p">[</span><span class="o">~</span><span class="n">np</span><span class="o">.</span><span class="n">isnan</span><span class="p">(</span><span class="n">voltage_sum</span><span class="p">)]</span>
+
+        <span class="n">voltage_sum</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">hstack</span><span class="p">(([</span><span class="o">-</span><span class="mf">0.5</span><span class="p">,</span> <span class="n">voltage_sum</span><span class="p">]))</span>
+        <span class="n">current_range</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">hstack</span><span class="p">(([</span><span class="n">current_range</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">*</span> <span class="p">(</span><span class="mi">1</span> <span class="o">-</span> <span class="mf">0.0001</span><span class="p">)],</span> <span class="n">current_range</span><span class="p">))</span>
+
+    <span class="k">return</span> <span class="n">voltage_sum</span><span class="p">,</span> <span class="n">current_range</span></div>
+
+
+<span class="k">def</span> <span class="nf">new_solve_mj_iv</span><span class="p">(</span><span class="n">v_i</span><span class="p">,</span> <span class="n">i_max</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">disc_num</span><span class="o">=</span><span class="mi">1000</span><span class="p">,</span> <span class="n">verbose</span><span class="o">=</span><span class="mi">0</span><span class="p">):</span>
+    <span class="k">for</span> <span class="n">idx</span><span class="p">,</span> <span class="n">iv_tup</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">v_i</span><span class="p">):</span>
+
+        <span class="k">assert</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">iv_tup</span><span class="p">,</span> <span class="nb">tuple</span><span class="p">)</span>
+
+        <span class="n">voltage</span><span class="p">,</span> <span class="n">current</span> <span class="o">=</span> <span class="n">iv_tup</span>
+
+        <span class="k">assert</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">voltage</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">)</span>
+        <span class="k">assert</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">current</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="n">idx</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="n">i_range_max</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">max</span><span class="p">(</span><span class="n">current</span><span class="p">)</span>
+            <span class="n">i_range_min</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">min</span><span class="p">(</span><span class="n">current</span><span class="p">)</span>
+
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">np</span><span class="o">.</span><span class="n">max</span><span class="p">(</span><span class="n">current</span><span class="p">)</span> <span class="o">&lt;</span> <span class="n">i_range_max</span><span class="p">:</span>
+                <span class="n">i_range_max</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">max</span><span class="p">(</span><span class="n">current</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">np</span><span class="o">.</span><span class="n">min</span><span class="p">(</span><span class="n">current</span><span class="p">)</span> <span class="o">&gt;</span> <span class="n">i_range_min</span><span class="p">:</span>
+                <span class="n">i_range_min</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">min</span><span class="p">(</span><span class="n">current</span><span class="p">)</span>
+
+    <span class="n">v</span><span class="p">,</span> <span class="n">i</span> <span class="o">=</span> <span class="n">solve_iv_range</span><span class="p">(</span><span class="n">v_i</span><span class="p">,</span> <span class="n">i_range_min</span><span class="p">,</span> <span class="n">i_range_max</span><span class="p">,</span> <span class="n">disc_num</span><span class="o">=</span><span class="n">disc_num</span><span class="p">)</span>
+
+    <span class="n">p</span> <span class="o">=</span> <span class="n">v</span> <span class="o">*</span> <span class="p">(</span><span class="o">-</span><span class="n">i</span><span class="p">)</span>
+
+    <span class="n">nv</span> <span class="o">=</span> <span class="n">v</span>
+    <span class="n">ni</span> <span class="o">=</span> <span class="n">i</span>
+    <span class="k">for</span> <span class="n">idx</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">8</span><span class="p">):</span>
+        <span class="n">i_index</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">argmax</span><span class="p">(</span><span class="n">p</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="n">verbose</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Jmp :</span><span class="si">%s</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="n">ni</span><span class="p">[</span><span class="n">i_index</span><span class="p">])</span>
+            <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Vmp :</span><span class="si">%s</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="n">nv</span><span class="p">[</span><span class="n">i_index</span><span class="p">])</span>
+            <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;max power:</span><span class="si">%s</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="n">p</span><span class="p">[</span><span class="n">i_index</span><span class="p">])</span>
+        <span class="n">nv</span><span class="p">,</span> <span class="n">ni</span> <span class="o">=</span> <span class="n">solve_iv_range</span><span class="p">(</span><span class="n">v_i</span><span class="p">,</span> <span class="n">ni</span><span class="p">[</span><span class="nb">max</span><span class="p">(</span><span class="n">i_index</span> <span class="o">-</span> <span class="mi">5</span><span class="p">,</span> <span class="mi">0</span><span class="p">)],</span>
+                                <span class="n">ni</span><span class="p">[</span><span class="nb">min</span><span class="p">(</span><span class="n">i_index</span> <span class="o">+</span> <span class="mi">5</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">ni</span><span class="p">)</span> <span class="o">-</span> <span class="mi">1</span><span class="p">)],</span> <span class="n">disc_num</span><span class="o">=</span><span class="n">disc_num</span><span class="p">)</span>
+
+        <span class="n">p</span> <span class="o">=</span> <span class="n">nv</span> <span class="o">*</span> <span class="p">(</span><span class="o">-</span><span class="n">ni</span><span class="p">)</span>
+
+    <span class="n">voltage_sum</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">concatenate</span><span class="p">((</span><span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="o">-</span><span class="mf">0.5</span><span class="p">]),</span> <span class="n">v</span><span class="p">,</span> <span class="n">nv</span><span class="p">))</span>
+
+    <span class="n">current_range</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">concatenate</span><span class="p">((</span><span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="n">i</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">*</span> <span class="p">(</span><span class="mi">1</span> <span class="o">-</span> <span class="mf">0.0001</span><span class="p">)]),</span> <span class="n">i</span><span class="p">,</span> <span class="n">ni</span><span class="p">))</span>
+
+    <span class="n">ag</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">argsort</span><span class="p">(</span><span class="n">voltage_sum</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">voltage_sum</span><span class="p">[</span><span class="n">ag</span><span class="p">],</span> <span class="n">current_range</span><span class="p">[</span><span class="n">ag</span><span class="p">]</span>
+
+
+<div class="viewcode-block" id="solve_mj_iv_obj_with_optimization"><a class="viewcode-back" href="../../ivsolver.html#pypvcell.ivsolver.solve_mj_iv_obj_with_optimization">[docs]</a><span class="k">def</span> <span class="nf">solve_mj_iv_obj_with_optimization</span><span class="p">(</span><span class="n">subcells</span><span class="p">,</span> <span class="n">i_max</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">disc_num</span><span class="o">=</span><span class="mi">1000</span><span class="p">,</span> <span class="n">verbose</span><span class="o">=</span><span class="mi">0</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Solve the I-V of MJ cell from given subcells, namely</span>
+<span class="sd">    </span>
+<span class="sd">    .. math::</span>
+<span class="sd">        V_{tot}(I_m)=\sum_{i=1}^N V_i(I_{m})</span>
+<span class="sd">        </span>
+<span class="sd">    This function automatically choose the appropriate values of current</span>
+
+<span class="sd">    :param subcells: a list of SolarCell objects</span>
+<span class="sd">    :param i_max: the maximum</span>
+<span class="sd">    :param disc_num: number of discretization</span>
+<span class="sd">    :param verbose: ``True`` to display the intermediate results</span>
+<span class="sd">    :return: solved (voltage, current) tuple</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="c1"># Determine the range of current</span>
+    <span class="k">for</span> <span class="n">idx</span><span class="p">,</span> <span class="n">sc</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">subcells</span><span class="p">):</span>
+
+        <span class="n">voltage</span><span class="p">,</span> <span class="n">current</span> <span class="o">=</span> <span class="n">sc</span><span class="o">.</span><span class="n">get_iv</span><span class="p">()</span>
+
+        <span class="k">if</span> <span class="n">idx</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="n">i_range_max</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">max</span><span class="p">(</span><span class="n">current</span><span class="p">)</span>
+            <span class="n">i_range_min</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">min</span><span class="p">(</span><span class="n">current</span><span class="p">)</span>
+
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">np</span><span class="o">.</span><span class="n">max</span><span class="p">(</span><span class="n">current</span><span class="p">)</span> <span class="o">&lt;</span> <span class="n">i_range_max</span><span class="p">:</span>
+                <span class="n">i_range_max</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">max</span><span class="p">(</span><span class="n">current</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">np</span><span class="o">.</span><span class="n">min</span><span class="p">(</span><span class="n">current</span><span class="p">)</span> <span class="o">&gt;</span> <span class="n">i_range_min</span><span class="p">:</span>
+                <span class="n">i_range_min</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">min</span><span class="p">(</span><span class="n">current</span><span class="p">)</span>
+
+    <span class="c1"># Solve the first iteration</span>
+    <span class="n">v</span><span class="p">,</span> <span class="n">i</span> <span class="o">=</span> <span class="n">solve_iv_range_obj</span><span class="p">(</span><span class="n">subcells</span><span class="p">,</span> <span class="n">i_range_min</span><span class="p">,</span> <span class="n">i_range_max</span><span class="p">,</span> <span class="n">disc_num</span><span class="o">=</span><span class="n">disc_num</span><span class="p">)</span>
+
+    <span class="n">p</span> <span class="o">=</span> <span class="n">v</span> <span class="o">*</span> <span class="p">(</span><span class="o">-</span><span class="n">i</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">np</span><span class="o">.</span><span class="n">max</span><span class="p">(</span><span class="n">p</span><span class="p">)</span> <span class="o">&lt;</span> <span class="mi">0</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Negative maximum power value&quot;</span><span class="p">)</span>
+
+    <span class="c1"># Solve the next few interations</span>
+    <span class="n">nv</span> <span class="o">=</span> <span class="n">v</span>
+    <span class="n">ni</span> <span class="o">=</span> <span class="n">i</span>
+
+    <span class="n">voltage_sum</span> <span class="o">=</span> <span class="n">v</span>
+    <span class="n">current_range</span> <span class="o">=</span> <span class="n">i</span>
+    <span class="k">for</span> <span class="n">idx</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">8</span><span class="p">):</span>
+        <span class="n">i_index</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">argmax</span><span class="p">(</span><span class="n">p</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="n">verbose</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Jmp :</span><span class="si">%s</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="n">ni</span><span class="p">[</span><span class="n">i_index</span><span class="p">])</span>
+            <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Vmp :</span><span class="si">%s</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="n">nv</span><span class="p">[</span><span class="n">i_index</span><span class="p">])</span>
+            <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;max power:</span><span class="si">%s</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="n">p</span><span class="p">[</span><span class="n">i_index</span><span class="p">])</span>
+        <span class="n">nv</span><span class="p">,</span> <span class="n">ni</span> <span class="o">=</span> <span class="n">solve_iv_range_obj</span><span class="p">(</span><span class="n">subcells</span><span class="p">,</span> <span class="n">ni</span><span class="p">[</span><span class="nb">max</span><span class="p">(</span><span class="n">i_index</span> <span class="o">-</span> <span class="mi">20</span><span class="p">,</span> <span class="mi">0</span><span class="p">)],</span>
+                                    <span class="n">ni</span><span class="p">[</span><span class="nb">min</span><span class="p">(</span><span class="n">i_index</span> <span class="o">+</span> <span class="mi">20</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">ni</span><span class="p">)</span> <span class="o">-</span> <span class="mi">1</span><span class="p">)],</span> <span class="n">disc_num</span><span class="o">=</span><span class="n">disc_num</span><span class="p">)</span>
+
+        <span class="n">voltage_sum</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">concatenate</span><span class="p">((</span><span class="n">voltage_sum</span><span class="p">,</span> <span class="n">nv</span><span class="p">))</span>
+        <span class="n">current_range</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">concatenate</span><span class="p">((</span><span class="n">current_range</span><span class="p">,</span> <span class="n">ni</span><span class="p">))</span>
+
+        <span class="n">p</span> <span class="o">=</span> <span class="n">nv</span> <span class="o">*</span> <span class="p">(</span><span class="o">-</span><span class="n">ni</span><span class="p">)</span>
+
+    <span class="c1"># Extrapolate the short circuit current.</span>
+    <span class="n">voltage_sum</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">concatenate</span><span class="p">((</span><span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="o">-</span><span class="mf">0.5</span><span class="p">]),</span> <span class="n">voltage_sum</span><span class="p">))</span>
+
+    <span class="n">current_range</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">concatenate</span><span class="p">((</span><span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="n">i</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">*</span> <span class="p">(</span><span class="mi">1</span> <span class="o">-</span> <span class="mf">0.0001</span><span class="p">)]),</span> <span class="n">current_range</span><span class="p">))</span>
+
+    <span class="c1"># Sort the final result</span>
+    <span class="n">ag</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">argsort</span><span class="p">(</span><span class="n">voltage_sum</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">voltage_sum</span><span class="p">[</span><span class="n">ag</span><span class="p">],</span> <span class="n">current_range</span><span class="p">[</span><span class="n">ag</span><span class="p">]</span></div>
+
+
+<div class="viewcode-block" id="solve_iv_range"><a class="viewcode-back" href="../../ivsolver.html#pypvcell.ivsolver.solve_iv_range">[docs]</a><span class="k">def</span> <span class="nf">solve_iv_range</span><span class="p">(</span><span class="n">v_i</span><span class="p">,</span> <span class="n">i_min</span><span class="p">,</span> <span class="n">i_max</span><span class="p">,</span> <span class="n">disc_num</span><span class="o">=</span><span class="mi">1000</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Calculate the voltages of a series-connected solar cells I-Vs for each current point Im:</span>
+
+<span class="sd">    .. math::</span>
+<span class="sd">        V_{tot}(I_m)=\sum_{i=1}^N V_i(I_{m})</span>
+<span class="sd">            </span>
+<span class="sd">    :param v_i: a list of (voltage, current) tuple of subcells, </span>
+<span class="sd">    :param i_min: The minimum of the range of the current </span>
+<span class="sd">    :param i_max: The maximum of the range of the current</span>
+<span class="sd">    :param disc_num: The number of points of current to be discretized</span>
+<span class="sd">    :return: the solved (voltage, current) tuple</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">current_range</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linspace</span><span class="p">(</span><span class="n">i_min</span><span class="p">,</span> <span class="n">i_max</span><span class="p">,</span> <span class="n">num</span><span class="o">=</span><span class="n">disc_num</span><span class="p">)</span>
+    <span class="n">voltage_sum</span> <span class="o">=</span> <span class="mi">0</span>
+    <span class="k">for</span> <span class="n">iv_tup</span> <span class="ow">in</span> <span class="n">v_i</span><span class="p">:</span>
+        <span class="n">voltage</span><span class="p">,</span> <span class="n">current</span> <span class="o">=</span> <span class="n">iv_tup</span>
+
+        <span class="n">voltage_sum</span> <span class="o">=</span> <span class="n">voltage_sum</span> <span class="o">+</span> <span class="n">get_v_from_j</span><span class="p">(</span><span class="n">voltage</span><span class="p">,</span> <span class="n">current</span><span class="p">,</span> <span class="n">current_range</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="n">np</span><span class="o">.</span><span class="n">any</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">isnan</span><span class="p">(</span><span class="n">voltage_sum</span><span class="p">)):</span>
+        <span class="n">voltage_sum</span> <span class="o">=</span> <span class="n">voltage_sum</span><span class="p">[</span><span class="o">~</span><span class="n">np</span><span class="o">.</span><span class="n">isnan</span><span class="p">(</span><span class="n">voltage_sum</span><span class="p">)]</span>
+        <span class="n">current_range</span> <span class="o">=</span> <span class="n">current_range</span><span class="p">[</span><span class="o">~</span><span class="n">np</span><span class="o">.</span><span class="n">isnan</span><span class="p">(</span><span class="n">voltage_sum</span><span class="p">)]</span>
+
+    <span class="k">return</span> <span class="n">voltage_sum</span><span class="p">,</span> <span class="n">current_range</span></div>
+
+
+<div class="viewcode-block" id="solve_iv_range_obj"><a class="viewcode-back" href="../../ivsolver.html#pypvcell.ivsolver.solve_iv_range_obj">[docs]</a><span class="k">def</span> <span class="nf">solve_iv_range_obj</span><span class="p">(</span><span class="n">subcells</span><span class="p">:</span> <span class="n">List</span><span class="p">,</span> <span class="n">i_min</span><span class="p">,</span> <span class="n">i_max</span><span class="p">,</span> <span class="n">disc_num</span><span class="o">=</span><span class="mi">1000</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Calculate the voltages of a MJ cell from a given range of J and subcells.</span>
+<span class="sd">    It finds a new V(J) such that V(J)=sum(V_i(J_i)), where V_i(J_i) is</span>
+<span class="sd">    the J-V characteristics of the subcell i.</span>
+<span class="sd">    This function only does one-run without iterating. The algorithm is the same as</span>
+<span class="sd">    ``solve_iv_range()`` but this function takes ``SolarCell`` objects as input rather</span>
+<span class="sd">    than a list of (V,J) tuples.</span>
+
+<span class="sd">    :param subcells: A list of SolarCell objects</span>
+<span class="sd">    :param i_min: The minimum of the range of the current </span>
+<span class="sd">    :param i_max: The maximum of the range of the current</span>
+<span class="sd">    :param disc_num: number of descretions between i_min and i_max</span>
+<span class="sd">    :return: A tuple of solved (voltage,current)</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="c1"># TODO: disc_num is not used in this function!</span>
+
+    <span class="c1"># discretize positive and negative current separately</span>
+    <span class="n">n_i_range</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linspace</span><span class="p">(</span><span class="n">i_min</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="n">num</span><span class="o">=</span><span class="mi">500</span><span class="p">)</span>
+    <span class="n">p_i_range</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linspace</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">i_max</span><span class="p">,</span> <span class="n">num</span><span class="o">=</span><span class="mi">500</span><span class="p">)</span>
+
+    <span class="c1"># rearrange the discretized points</span>
+    <span class="n">current_range</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sort</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">unique</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">concatenate</span><span class="p">((</span><span class="n">n_i_range</span><span class="p">,</span> <span class="n">p_i_range</span><span class="p">))))</span>
+
+    <span class="c1"># set up an empty array for the range</span>
+    <span class="n">voltage_sum</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros_like</span><span class="p">(</span><span class="n">current_range</span><span class="p">)</span>
+
+    <span class="k">for</span> <span class="n">sc</span> <span class="ow">in</span> <span class="n">subcells</span><span class="p">:</span>
+        <span class="n">volt</span><span class="p">,</span> <span class="n">current</span><span class="p">,</span> <span class="n">index</span> <span class="o">=</span> <span class="n">sc</span><span class="o">.</span><span class="n">get_v_from_j</span><span class="p">(</span><span class="n">current_range</span><span class="p">)</span>
+
+        <span class="n">voltage_sum</span> <span class="o">=</span> <span class="n">voltage_sum</span><span class="p">[</span><span class="n">index</span><span class="p">]</span>
+        <span class="n">current_range</span> <span class="o">=</span> <span class="n">current_range</span><span class="p">[</span><span class="n">index</span><span class="p">]</span>
+
+        <span class="n">voltage_sum</span> <span class="o">=</span> <span class="n">voltage_sum</span> <span class="o">+</span> <span class="n">volt</span>
+
+    <span class="c1"># Drop any Nan values</span>
+    <span class="k">if</span> <span class="n">np</span><span class="o">.</span><span class="n">any</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">isnan</span><span class="p">(</span><span class="n">voltage_sum</span><span class="p">)):</span>
+        <span class="n">voltage_sum</span> <span class="o">=</span> <span class="n">voltage_sum</span><span class="p">[</span><span class="o">~</span><span class="n">np</span><span class="o">.</span><span class="n">isnan</span><span class="p">(</span><span class="n">voltage_sum</span><span class="p">)]</span>
+        <span class="n">current_range</span> <span class="o">=</span> <span class="n">current_range</span><span class="p">[</span><span class="o">~</span><span class="n">np</span><span class="o">.</span><span class="n">isnan</span><span class="p">(</span><span class="n">voltage_sum</span><span class="p">)]</span>
+
+    <span class="k">return</span> <span class="n">voltage_sum</span><span class="p">,</span> <span class="n">current_range</span></div>
+</pre></div>
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper"><div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="../../index.html">Documentation overview</a><ul>
+  <li><a href="../index.html">Module code</a><ul>
+  </ul></li>
+  </ul></li>
+</ul>
+</div>
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <form class="search" action="../../search.html" method="get">
+      <div><input type="text" name="q" /></div>
+      <div><input type="submit" value="Go" /></div>
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+
+    <div class="footer">
+      &copy;2017, Kan-Hua Lee.
+      
+      |
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 1.5.5</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.10</a>
+      
+    </div>
+
+    
+
+    
+<script>
+    (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+                (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+            m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+    })(window,document,'script','https://www.google-analytics.com/analytics.js','ga');
+
+    ga('create', 'UA-86849941-1', 'auto');
+    ga('send', 'pageview');
+
+</script>
+
+  </body>
+</html>

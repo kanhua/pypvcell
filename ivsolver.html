@@ -1,0 +1,325 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>I-V Solver &#8212; pypvcell 0.1.0 documentation</title>
+    
+    <link rel="stylesheet" href="_static/alabaster.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    './',
+        VERSION:     '0.1.0',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true,
+        SOURCELINK_SUFFIX: '.txt'
+      };
+    </script>
+    <script type="text/javascript" src="_static/jquery.js"></script>
+    <script type="text/javascript" src="_static/underscore.js"></script>
+    <script type="text/javascript" src="_static/doctools.js"></script>
+    <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.0/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="Transfer Matrix Optics" href="transfer_matrix_optics.html" />
+    <link rel="prev" title="Module: fom" href="fom_m.html" />
+
+   
+  <link rel="stylesheet" href="_static/custom.css" type="text/css" />
+  
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
+
+<script type="text/javascript">
+    var _gaq = _gaq || [];
+    _gaq.push(['_setAccount', 'XXX account number XXX']);
+    _gaq.push(['_trackPageview']);
+</script>
+
+  </head>
+  <body role="document">
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <div class="section" id="module-pypvcell.ivsolver">
+<span id="i-v-solver"></span><h1>I-V Solver<a class="headerlink" href="#module-pypvcell.ivsolver" title="Permalink to this headline">¶</a></h1>
+<p>This module collects the functions that solves I-V characteristics, including:</p>
+<ol class="arabic simple">
+<li>Generate the IV characteristics from known J01, J01 , n1, n2</li>
+<li>Get J01 and J02 values from band gap or known EQEs using a detailed balance model</li>
+<li>Add series resistance into a known I-V characterisitcs</li>
+<li>Solve the I-V characteristics of multi-junction cell from the known I-Vs of each subcell</li>
+</ol>
+<dl class="function">
+<dt id="pypvcell.ivsolver.calculate_j01">
+<code class="descclassname">pypvcell.ivsolver.</code><code class="descname">calculate_j01</code><span class="sig-paren">(</span><em>eg_in_ev</em>, <em>temperature</em>, <em>n1</em>, <em>n_c=3.5</em>, <em>n_s=1</em>, <em>approx=False</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pypvcell/ivsolver.html#calculate_j01"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pypvcell.ivsolver.calculate_j01" title="Permalink to this definition">¶</a></dt>
+<dd><p>Calculate the saturation radiative recombination current J01 from known band gap using the following expression:</p>
+<div class="math">
+\[J_{01}=\frac{2\pi q (n_c^2+n_s^2)}{\mbox{h}^3 \mbox{c}^2}\int_{0}^{E_g} \frac{E^2 dE}{\exp\left(\frac{E}{kT}\right)-1}\]</div>
+<p>If the parameter <code class="docutils literal"><span class="pre">approx</span></code> is set True, it uses an approximation of the above equation to calculate J01:</p>
+<div class="math">
+\[J_{01}=\frac{2\pi k T q(n_c^2+n_s^2)}{\mbox{h}^3\mbox{c}^2}\exp(\frac{-E_g}{nkT})\left(E_g^2+2E_gkT+2k^2T^2\right)\]</div>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>eg_in_ev</strong> &#8211; band gap in eV</li>
+<li><strong>temperature</strong> &#8211; temperature in K</li>
+<li><strong>n1</strong> &#8211; ideality factor</li>
+<li><strong>n_c</strong> &#8211; refractive index of the cell</li>
+<li><strong>n_s</strong> &#8211; refractive index of the surroundings</li>
+<li><strong>approx</strong> &#8211; Set <code class="docutils literal"><span class="pre">true</span></code> to use approximation</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last">the value of J01</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="pypvcell.ivsolver.calculate_j01_from_qe">
+<code class="descclassname">pypvcell.ivsolver.</code><code class="descname">calculate_j01_from_qe</code><span class="sig-paren">(</span><em>qe</em>, <em>n_c=3.5</em>, <em>n_s=1</em>, <em>threshold=0.001</em>, <em>step_in_ev=1e-05</em>, <em>lead_term=None</em>, <em>T=300</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pypvcell/ivsolver.html#calculate_j01_from_qe"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pypvcell.ivsolver.calculate_j01_from_qe" title="Permalink to this definition">¶</a></dt>
+<dd><p>Calculate j01 from known absorptivity or QE using the following expression:</p>
+<div class="math">
+\[J_{01}=\frac{2\pi q (n_c^2+n_s^2)}{\mbox{h}^3 \mbox{c}^2}\int_{0}^{\infty} \frac{a(E)E^2 dE}{\exp\left(\frac{E}{kT}\right)-1}\]</div>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>T</strong> &#8211; temperature in Kelvin</li>
+<li><strong>n_c</strong> &#8211; the refractive index of the material</li>
+<li><strong>n_s</strong> &#8211; the refractive index of surroundings</li>
+<li><strong>qe</strong> &#8211; QE or absorptivity. A spectrum_base class</li>
+<li><strong>threshold</strong> &#8211; ignore the QE whose values are under the threshold</li>
+<li><strong>step_in_ev</strong> &#8211; meshgrid size when doing numerical integration trapz()</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last">j01</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="pypvcell.ivsolver.one_diode_v_from_i">
+<code class="descclassname">pypvcell.ivsolver.</code><code class="descname">one_diode_v_from_i</code><span class="sig-paren">(</span><em>current</em>, <em>j01</em>, <em>rad_eta</em>, <em>n1</em>, <em>temperature</em>, <em>jsc</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pypvcell/ivsolver.html#one_diode_v_from_i"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pypvcell.ivsolver.one_diode_v_from_i" title="Permalink to this definition">¶</a></dt>
+<dd><p>Calculate the voltage from demand current.
+This implementation drops the element that does not have log value, i.e. any log(x) that x&lt;0</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>current</strong> &#8211; demand current, array_like</li>
+<li><strong>j01</strong> &#8211; saturation current density</li>
+<li><strong>rad_eta</strong> &#8211; radiative efficiency</li>
+<li><strong>n1</strong> &#8211; diode factor</li>
+<li><strong>temperature</strong> &#8211; temperature in K</li>
+<li><strong>jsc</strong> &#8211; Jsc. It has to be a positive value.</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last">voltage, current, indexes that the values were kepted</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="pypvcell.ivsolver.solve_iv_range">
+<code class="descclassname">pypvcell.ivsolver.</code><code class="descname">solve_iv_range</code><span class="sig-paren">(</span><em>v_i</em>, <em>i_min</em>, <em>i_max</em>, <em>disc_num=1000</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pypvcell/ivsolver.html#solve_iv_range"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pypvcell.ivsolver.solve_iv_range" title="Permalink to this definition">¶</a></dt>
+<dd><p>Calculate the voltages of a series-connected solar cells I-Vs for each current point Im:</p>
+<div class="math">
+\[V_{tot}(I_m)=\sum_{i=1}^N V_i(I_{m})\]</div>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>v_i</strong> &#8211; a list of (voltage, current) tuple of subcells,</li>
+<li><strong>i_min</strong> &#8211; The minimum of the range of the current</li>
+<li><strong>i_max</strong> &#8211; The maximum of the range of the current</li>
+<li><strong>disc_num</strong> &#8211; The number of points of current to be discretized</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last">the solved (voltage, current) tuple</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="pypvcell.ivsolver.solve_iv_range_obj">
+<code class="descclassname">pypvcell.ivsolver.</code><code class="descname">solve_iv_range_obj</code><span class="sig-paren">(</span><em>subcells: typing.List[T], i_min, i_max, disc_num=1000</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pypvcell/ivsolver.html#solve_iv_range_obj"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pypvcell.ivsolver.solve_iv_range_obj" title="Permalink to this definition">¶</a></dt>
+<dd><p>Calculate the voltages of a MJ cell from a given range of J and subcells.
+It finds a new V(J) such that V(J)=sum(V_i(J_i)), where V_i(J_i) is
+the J-V characteristics of the subcell i.
+This function only does one-run without iterating. The algorithm is the same as
+<code class="docutils literal"><span class="pre">solve_iv_range()</span></code> but this function takes <code class="docutils literal"><span class="pre">SolarCell</span></code> objects as input rather
+than a list of (V,J) tuples.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>subcells</strong> &#8211; A list of SolarCell objects</li>
+<li><strong>i_min</strong> &#8211; The minimum of the range of the current</li>
+<li><strong>i_max</strong> &#8211; The maximum of the range of the current</li>
+<li><strong>disc_num</strong> &#8211; number of descretions between i_min and i_max</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last">A tuple of solved (voltage,current)</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="pypvcell.ivsolver.solve_mj_iv">
+<code class="descclassname">pypvcell.ivsolver.</code><code class="descname">solve_mj_iv</code><span class="sig-paren">(</span><em>v_i</em>, <em>i_max=None</em>, <em>discret_num=10000</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pypvcell/ivsolver.html#solve_mj_iv"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pypvcell.ivsolver.solve_mj_iv" title="Permalink to this definition">¶</a></dt>
+<dd><table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>v_i</strong> (<em>List</em><em>[</em><em>Tuple</em><em>[</em><em>np.ndarray</em><em>,</em><em>np.ndarray</em><em>]</em><em></em><em>]</em><em></em>) &#8211; a list of (voltage,current) tuple</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="pypvcell.ivsolver.solve_mj_iv_obj_with_optimization">
+<code class="descclassname">pypvcell.ivsolver.</code><code class="descname">solve_mj_iv_obj_with_optimization</code><span class="sig-paren">(</span><em>subcells</em>, <em>i_max=None</em>, <em>disc_num=1000</em>, <em>verbose=0</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pypvcell/ivsolver.html#solve_mj_iv_obj_with_optimization"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pypvcell.ivsolver.solve_mj_iv_obj_with_optimization" title="Permalink to this definition">¶</a></dt>
+<dd><p>Solve the I-V of MJ cell from given subcells, namely</p>
+<div class="math">
+\[V_{tot}(I_m)=\sum_{i=1}^N V_i(I_{m})\]</div>
+<p>This function automatically choose the appropriate values of current</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>subcells</strong> &#8211; a list of SolarCell objects</li>
+<li><strong>i_max</strong> &#8211; the maximum</li>
+<li><strong>disc_num</strong> &#8211; number of discretization</li>
+<li><strong>verbose</strong> &#8211; <code class="docutils literal"><span class="pre">True</span></code> to display the intermediate results</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last">solved (voltage, current) tuple</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="pypvcell.ivsolver.solve_ms_mj_iv">
+<code class="descclassname">pypvcell.ivsolver.</code><code class="descname">solve_ms_mj_iv</code><span class="sig-paren">(</span><em>v_i</em>, <em>ill_power</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pypvcell/ivsolver.html#solve_ms_mj_iv"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pypvcell.ivsolver.solve_ms_mj_iv" title="Permalink to this definition">¶</a></dt>
+<dd><p>Calculate the efficiency of mechanical stack solar cell.
+It adds up the maximum power of each subcell and divde them by the illumination power.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>v_i</strong> &#8211; a list of (voltage,current) tuple. Voltage and current are 1D numpy arrays. The current density is in W/m^2</li>
+<li><strong>ill_power</strong> &#8211; the illumnation power in W/m^2</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last">efficiency</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper"><div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="index.html">Documentation overview</a><ul>
+      <li>Previous: <a href="fom_m.html" title="previous chapter">Module: fom</a></li>
+      <li>Next: <a href="transfer_matrix_optics.html" title="next chapter">Transfer Matrix Optics</a></li>
+  </ul></li>
+</ul>
+</div>
+  <div role="note" aria-label="source link">
+    <h3>This Page</h3>
+    <ul class="this-page-menu">
+      <li><a href="_sources/ivsolver.rst.txt"
+            rel="nofollow">Show Source</a></li>
+    </ul>
+   </div>
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <form class="search" action="search.html" method="get">
+      <div><input type="text" name="q" /></div>
+      <div><input type="submit" value="Go" /></div>
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+
+    <div class="footer">
+      &copy;2017, Kan-Hua Lee.
+      
+      |
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 1.5.5</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.10</a>
+      
+      |
+      <a href="_sources/ivsolver.rst.txt"
+          rel="nofollow">Page source</a>
+    </div>
+
+    
+
+    
+<script>
+    (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+                (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+            m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+    })(window,document,'script','https://www.google-analytics.com/analytics.js','ga');
+
+    ga('create', 'UA-86849941-1', 'auto');
+    ga('send', 'pageview');
+
+</script>
+
+  </body>
+</html>
