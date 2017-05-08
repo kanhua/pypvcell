@@ -42,8 +42,8 @@ Pypvcell APIs
 
 Highly experimental modules (not documented yet) in ``lab`` folder:
 
-- SMARTS interface
-- Analytical PIN solver
+- `SMARTS interface <https://github.com/kanhua/pypvcell/tree/master/lab/SMARTS>`_
+- `Analytical PIN solver <https://github.com/kanhua/pypvcell/blob/master/lab/analytical_pin.py>`_
 
 
 Liscence:
@@ -55,7 +55,7 @@ Acknowledgement
 --------------------------
 
 The development of this software is partly supported by Japan New Energy and Industrial Technology Development Organization (NEDO).
-Pypvcell is inspired by `Solcore3 <http://doi.org/10.1063/1.4822193>`_ by Imperial College London[1].
+Pypvcell is inspired by `Solcore3 <http://doi.org/10.1063/1.4822193>`_ by Imperial College London.
 
 
 Indices and tables
