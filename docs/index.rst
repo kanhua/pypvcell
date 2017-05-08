@@ -40,6 +40,11 @@ Pypvcell APIs
     ivsolver
     transfer_matrix_optics
 
+Highly experimental modules (not documented yet) in ``lab`` folder:
+
+- SMARTS interface
+- Analytical PIN solver
+
 
 Liscence:
 --------------------------

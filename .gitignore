@@ -9,3 +9,4 @@ __pycache__
 *.png
 _build/
 pypvcell.egg-info/
+smarts_contents/

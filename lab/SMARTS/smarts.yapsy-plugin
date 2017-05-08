@@ -1,0 +1,9 @@
+[Core]
+Name = smarts
+Module = smarts
+
+[Documentation]
+Author = Markus Führer
+Version = 0.1
+Website = http://lotsofplugins.com
+Description = My first plugin
