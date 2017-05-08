@@ -62,13 +62,20 @@ def one_diode_v_from_i(current, j01, rad_eta, n1, temperature, jsc):
     Calculate the voltage from demand current.
     This implementation drops the element that does not have log value, i.e. any log(x) that x<0
 
-    :param current: demand current, array_like
+    :param current: demand current
+    :type current: numpy.ndarray
     :param j01: saturation current density
+    :type j01: float
     :param rad_eta: radiative efficiency
+    :type rad_eta: float
     :param n1: diode factor
+    :type n1: float
     :param temperature: temperature in K
+    :type temperature: float
     :param jsc: Jsc. It has to be a positive value.
-    :return: voltage, current, indexes that the values were kepted
+    :type jsc: float
+    :return: voltage, current, indexes that the values were kept
+    :rtype: tuple(numpy.ndarray, numpy.ndarray, numpy.ndarray)
     """
 
     if jsc < 0:
@@ -153,7 +160,7 @@ def gen_rec_iv_with_rs_by_newton(j01, j02, n1, n2, temperature, rshunt, rseries,
 j01_lead_term = np.power(sc.e, 4) * 2 * sc.pi / (np.power(sc.c, 2) * np.power(sc.h, 3))
 
 
-def calculate_j01_from_qe(qe, n_c=3.5, n_s=1, threshold=1e-3, step_in_ev=1e-5, lead_term=None, T=300):
+def calculate_j01_from_qe(qe:Spectrum, n_c=3.5, n_s=1, threshold=1e-3, step_in_ev=1e-5, lead_term=None, T=300):
     r"""
     Calculate j01 from known absorptivity or QE using the following expression:
     
@@ -162,12 +169,19 @@ def calculate_j01_from_qe(qe, n_c=3.5, n_s=1, threshold=1e-3, step_in_ev=1e-5, l
         
     
     :param T: temperature in Kelvin
+    :type T: float
     :param n_c: the refractive index of the material
+    :type n_c: float
     :param n_s: the refractive index of surroundings
-    :param qe: QE or absorptivity. A spectrum_base class
+    :type n_s: float
+    :param qe: QE or absorptivity.
+    :type qe: Spectrum
     :param threshold: ignore the QE whose values are under the threshold
+    :type threshold: float
     :param step_in_ev: meshgrid size when doing numerical integration trapz()
+    :type step_in_ev: float 
     :return: j01
+    :rtype: float
     """
 
     assert isinstance(qe, Spectrum)
@@ -230,12 +244,19 @@ def calculate_j01(eg_in_ev, temperature, n1, n_c=3.5, n_s=1, approx=False):
     
 
     :param eg_in_ev: band gap in eV
+    :type eg_in_ev: float
     :param temperature: temperature in K
+    :type temperature: float
     :param n1: ideality factor
+    :type n1: float
     :param n_c: refractive index of the cell
+    :type n_c: float
     :param n_s: refractive index of the surroundings
+    :type n_s: float
     :param approx: Set ``true`` to use approximation    
+    :type approx: bool
     :return: the value of J01
+    :rtype: float
     """
 
     eg = eg_in_ev * sc.e
@@ -281,9 +302,12 @@ def solve_ms_mj_iv(v_i, ill_power):
     It adds up the maximum power of each subcell and divde them by the illumination power.
     
 
-    :param v_i: a list of (voltage,current) tuple. Voltage and current are 1D numpy arrays. The current density is in W/m^2
+    :param v_i: Voltage and current are 1D numpy arrays. The current density is in W/m^2
+    :type v_i: tuple(numpy.ndarray, numpy.ndarray)
     :param ill_power: the illumnation power in W/m^2
+    :type v_i: float
     :return: efficiency
+    :rtype: float
     """
 
     max_p_list = []
@@ -294,12 +318,6 @@ def solve_ms_mj_iv(v_i, ill_power):
 
 
 def solve_mj_iv(v_i, i_max=None, discret_num=10000):
-    """
-
-    :param v_i: a list of (voltage,current) tuple
-    :type v_i: List[Tuple[np.ndarray,np.ndarray]]
-    """
-
     # Select the minimum of range maximums
 
     # Select the maximum of range minimums
@@ -412,8 +430,11 @@ def solve_mj_iv_obj_with_optimization(subcells, i_max=None, disc_num=1000, verbo
     :param subcells: a list of SolarCell objects
     :param i_max: the maximum
     :param disc_num: number of discretization
-    :param verbose: ``True`` to display the intermediate results
-    :return: solved (voltage, current) tuple
+    :type disc_num: int
+    :param verbose: display the intermediate results
+    :type verbose: int
+    :return: solved (voltage, current)
+    :rtype: tuple(numpy.ndarray, numpy.ndarray) 
     """
 
     # Determine the range of current
@@ -477,11 +498,16 @@ def solve_iv_range(v_i, i_min, i_max, disc_num=1000):
     .. math::
         V_{tot}(I_m)=\sum_{i=1}^N V_i(I_{m})
             
-    :param v_i: a list of (voltage, current) tuple of subcells, 
-    :param i_min: The minimum of the range of the current 
+    :param v_i: a list of (voltage, current) tuple of subcells
+    :type v_i: list[tuple(numpy.ndarray,numpy.ndarray)]
+    :param i_min: The minimum of the range of the current
+    :type i_min: float
     :param i_max: The maximum of the range of the current
+    :type i_max: float
     :param disc_num: The number of points of current to be discretized
-    :return: the solved (voltage, current) tuple
+    :type disc_num: float
+    :return: voltage, current
+    :rtype: tuple(numpy.ndarray, numpy.ndarray)
     """
 
     current_range = np.linspace(i_min, i_max, num=disc_num)
@@ -508,17 +534,21 @@ def solve_iv_range_obj(subcells: List, i_min, i_max, disc_num=1000):
     than a list of (V,J) tuples.
 
     :param subcells: A list of SolarCell objects
+    :type subcells: list[solarcell.SolarCell]
     :param i_min: The minimum of the range of the current 
+    :type i_min: float
     :param i_max: The maximum of the range of the current
+    :type i_max: float
     :param disc_num: number of descretions between i_min and i_max
-    :return: A tuple of solved (voltage,current)
+    :type disc_num: float
+    :return: voltage, current
+    :rtype: tuple(numpy.ndarray, numpy.ndarray)
     """
 
-    # TODO: disc_num is not used in this function!
 
     # discretize positive and negative current separately
-    n_i_range = np.linspace(i_min, 0, num=500)
-    p_i_range = np.linspace(0, i_max, num=500)
+    n_i_range = np.linspace(i_min, 0, num=int(disc_num/2))
+    p_i_range = np.linspace(0, i_max, num=int(disc_num/2))
 
     # rearrange the discretized points
     current_range = np.sort(np.unique(np.concatenate((n_i_range, p_i_range))))
