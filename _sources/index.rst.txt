@@ -40,6 +40,11 @@ Pypvcell APIs
     ivsolver
     transfer_matrix_optics
 
+Highly experimental modules (not documented yet) in ``lab`` folder:
+
+- `SMARTS interface <https://github.com/kanhua/pypvcell/tree/master/lab/SMARTS>`_
+- `Analytical PIN solver <https://github.com/kanhua/pypvcell/blob/master/lab/analytical_pin.py>`_
+
 
 Liscence:
 --------------------------
