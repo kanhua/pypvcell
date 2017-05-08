@@ -74,16 +74,19 @@
 <col class="field-body" />
 <tbody valign="top">
 <tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
-<li><strong>eg_in_ev</strong> &#8211; band gap in eV</li>
-<li><strong>temperature</strong> &#8211; temperature in K</li>
-<li><strong>n1</strong> &#8211; ideality factor</li>
-<li><strong>n_c</strong> &#8211; refractive index of the cell</li>
-<li><strong>n_s</strong> &#8211; refractive index of the surroundings</li>
-<li><strong>approx</strong> &#8211; Set <code class="docutils literal"><span class="pre">true</span></code> to use approximation</li>
+<li><strong>eg_in_ev</strong> (<em>float</em>) &#8211; band gap in eV</li>
+<li><strong>temperature</strong> (<em>float</em>) &#8211; temperature in K</li>
+<li><strong>n1</strong> (<em>float</em>) &#8211; ideality factor</li>
+<li><strong>n_c</strong> (<em>float</em>) &#8211; refractive index of the cell</li>
+<li><strong>n_s</strong> (<em>float</em>) &#8211; refractive index of the surroundings</li>
+<li><strong>approx</strong> (<em>bool</em>) &#8211; Set <code class="docutils literal"><span class="pre">true</span></code> to use approximation</li>
 </ul>
 </td>
 </tr>
-<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last">the value of J01</p>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first">the value of J01</p>
+</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><p class="first last">float</p>
 </td>
 </tr>
 </tbody>
@@ -92,7 +95,7 @@
 
 <dl class="function">
 <dt id="pypvcell.ivsolver.calculate_j01_from_qe">
-<code class="descclassname">pypvcell.ivsolver.</code><code class="descname">calculate_j01_from_qe</code><span class="sig-paren">(</span><em>qe</em>, <em>n_c=3.5</em>, <em>n_s=1</em>, <em>threshold=0.001</em>, <em>step_in_ev=1e-05</em>, <em>lead_term=None</em>, <em>T=300</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pypvcell/ivsolver.html#calculate_j01_from_qe"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pypvcell.ivsolver.calculate_j01_from_qe" title="Permalink to this definition">¶</a></dt>
+<code class="descclassname">pypvcell.ivsolver.</code><code class="descname">calculate_j01_from_qe</code><span class="sig-paren">(</span><em>qe: pypvcell.spectrum.Spectrum</em>, <em>n_c=3.5</em>, <em>n_s=1</em>, <em>threshold=0.001</em>, <em>step_in_ev=1e-05</em>, <em>lead_term=None</em>, <em>T=300</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pypvcell/ivsolver.html#calculate_j01_from_qe"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pypvcell.ivsolver.calculate_j01_from_qe" title="Permalink to this definition">¶</a></dt>
 <dd><p>Calculate j01 from known absorptivity or QE using the following expression:</p>
 <div class="math">
 \[J_{01}=\frac{2\pi q (n_c^2+n_s^2)}{\mbox{h}^3 \mbox{c}^2}\int_{0}^{\infty} \frac{a(E)E^2 dE}{\exp\left(\frac{E}{kT}\right)-1}\]</div>
@@ -101,16 +104,19 @@
 <col class="field-body" />
 <tbody valign="top">
 <tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
-<li><strong>T</strong> &#8211; temperature in Kelvin</li>
-<li><strong>n_c</strong> &#8211; the refractive index of the material</li>
-<li><strong>n_s</strong> &#8211; the refractive index of surroundings</li>
-<li><strong>qe</strong> &#8211; QE or absorptivity. A spectrum_base class</li>
-<li><strong>threshold</strong> &#8211; ignore the QE whose values are under the threshold</li>
-<li><strong>step_in_ev</strong> &#8211; meshgrid size when doing numerical integration trapz()</li>
+<li><strong>T</strong> (<em>float</em>) &#8211; temperature in Kelvin</li>
+<li><strong>n_c</strong> (<em>float</em>) &#8211; the refractive index of the material</li>
+<li><strong>n_s</strong> (<em>float</em>) &#8211; the refractive index of surroundings</li>
+<li><strong>qe</strong> (<a class="reference internal" href="spectrum_class.html#pypvcell.spectrum.Spectrum" title="pypvcell.spectrum.Spectrum"><em>Spectrum</em></a>) &#8211; QE or absorptivity.</li>
+<li><strong>threshold</strong> (<em>float</em>) &#8211; ignore the QE whose values are under the threshold</li>
+<li><strong>step_in_ev</strong> (<em>float</em>) &#8211; meshgrid size when doing numerical integration trapz()</li>
 </ul>
 </td>
 </tr>
-<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last">j01</p>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first">j01</p>
+</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><p class="first last">float</p>
 </td>
 </tr>
 </tbody>
@@ -127,16 +133,19 @@ This implementation drops the element that does not have log value, i.e. any log
 <col class="field-body" />
 <tbody valign="top">
 <tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
-<li><strong>current</strong> &#8211; demand current, array_like</li>
-<li><strong>j01</strong> &#8211; saturation current density</li>
-<li><strong>rad_eta</strong> &#8211; radiative efficiency</li>
-<li><strong>n1</strong> &#8211; diode factor</li>
-<li><strong>temperature</strong> &#8211; temperature in K</li>
-<li><strong>jsc</strong> &#8211; Jsc. It has to be a positive value.</li>
+<li><strong>current</strong> (<em>numpy.ndarray</em>) &#8211; demand current</li>
+<li><strong>j01</strong> (<em>float</em>) &#8211; saturation current density</li>
+<li><strong>rad_eta</strong> (<em>float</em>) &#8211; radiative efficiency</li>
+<li><strong>n1</strong> (<em>float</em>) &#8211; diode factor</li>
+<li><strong>temperature</strong> (<em>float</em>) &#8211; temperature in K</li>
+<li><strong>jsc</strong> (<em>float</em>) &#8211; Jsc. It has to be a positive value.</li>
 </ul>
 </td>
 </tr>
-<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last">voltage, current, indexes that the values were kepted</p>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first">voltage, current, indexes that the values were kept</p>
+</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><p class="first last">tuple(numpy.ndarray, numpy.ndarray, numpy.ndarray)</p>
 </td>
 </tr>
 </tbody>
@@ -154,14 +163,17 @@ This implementation drops the element that does not have log value, i.e. any log
 <col class="field-body" />
 <tbody valign="top">
 <tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
-<li><strong>v_i</strong> &#8211; a list of (voltage, current) tuple of subcells,</li>
-<li><strong>i_min</strong> &#8211; The minimum of the range of the current</li>
-<li><strong>i_max</strong> &#8211; The maximum of the range of the current</li>
-<li><strong>disc_num</strong> &#8211; The number of points of current to be discretized</li>
+<li><strong>v_i</strong> (<em>list</em><em>[</em><em>tuple</em><em>(</em><em>numpy.ndarray</em><em>,</em><em>numpy.ndarray</em><em>)</em><em></em><em>]</em><em></em>) &#8211; a list of (voltage, current) tuple of subcells</li>
+<li><strong>i_min</strong> (<em>float</em>) &#8211; The minimum of the range of the current</li>
+<li><strong>i_max</strong> (<em>float</em>) &#8211; The maximum of the range of the current</li>
+<li><strong>disc_num</strong> (<em>float</em>) &#8211; The number of points of current to be discretized</li>
 </ul>
 </td>
 </tr>
-<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last">the solved (voltage, current) tuple</p>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first">voltage, current</p>
+</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><p class="first last">tuple(numpy.ndarray, numpy.ndarray)</p>
 </td>
 </tr>
 </tbody>
@@ -182,28 +194,18 @@ than a list of (V,J) tuples.</p>
 <col class="field-body" />
 <tbody valign="top">
 <tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
-<li><strong>subcells</strong> &#8211; A list of SolarCell objects</li>
-<li><strong>i_min</strong> &#8211; The minimum of the range of the current</li>
-<li><strong>i_max</strong> &#8211; The maximum of the range of the current</li>
-<li><strong>disc_num</strong> &#8211; number of descretions between i_min and i_max</li>
+<li><strong>subcells</strong> (<em>list</em><em>[</em><em>solarcell.SolarCell</em><em>]</em><em></em>) &#8211; A list of SolarCell objects</li>
+<li><strong>i_min</strong> (<em>float</em>) &#8211; The minimum of the range of the current</li>
+<li><strong>i_max</strong> (<em>float</em>) &#8211; The maximum of the range of the current</li>
+<li><strong>disc_num</strong> (<em>float</em>) &#8211; number of descretions between i_min and i_max</li>
 </ul>
 </td>
 </tr>
-<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last">A tuple of solved (voltage,current)</p>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first">voltage, current</p>
 </td>
 </tr>
-</tbody>
-</table>
-</dd></dl>
-
-<dl class="function">
-<dt id="pypvcell.ivsolver.solve_mj_iv">
-<code class="descclassname">pypvcell.ivsolver.</code><code class="descname">solve_mj_iv</code><span class="sig-paren">(</span><em>v_i</em>, <em>i_max=None</em>, <em>discret_num=10000</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pypvcell/ivsolver.html#solve_mj_iv"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pypvcell.ivsolver.solve_mj_iv" title="Permalink to this definition">¶</a></dt>
-<dd><table class="docutils field-list" frame="void" rules="none">
-<col class="field-name" />
-<col class="field-body" />
-<tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>v_i</strong> (<em>List</em><em>[</em><em>Tuple</em><em>[</em><em>np.ndarray</em><em>,</em><em>np.ndarray</em><em>]</em><em></em><em>]</em><em></em>) &#8211; a list of (voltage,current) tuple</td>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><p class="first last">tuple(numpy.ndarray, numpy.ndarray)</p>
+</td>
 </tr>
 </tbody>
 </table>
@@ -223,12 +225,15 @@ than a list of (V,J) tuples.</p>
 <tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
 <li><strong>subcells</strong> &#8211; a list of SolarCell objects</li>
 <li><strong>i_max</strong> &#8211; the maximum</li>
-<li><strong>disc_num</strong> &#8211; number of discretization</li>
-<li><strong>verbose</strong> &#8211; <code class="docutils literal"><span class="pre">True</span></code> to display the intermediate results</li>
+<li><strong>disc_num</strong> (<em>int</em>) &#8211; number of discretization</li>
+<li><strong>verbose</strong> (<em>int</em>) &#8211; display the intermediate results</li>
 </ul>
 </td>
 </tr>
-<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last">solved (voltage, current) tuple</p>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first">solved (voltage, current)</p>
+</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><p class="first last">tuple(numpy.ndarray, numpy.ndarray)</p>
 </td>
 </tr>
 </tbody>
@@ -245,12 +250,15 @@ It adds up the maximum power of each subcell and divde them by the illumination 
 <col class="field-body" />
 <tbody valign="top">
 <tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
-<li><strong>v_i</strong> &#8211; a list of (voltage,current) tuple. Voltage and current are 1D numpy arrays. The current density is in W/m^2</li>
+<li><strong>v_i</strong> (<em>float</em>) &#8211; Voltage and current are 1D numpy arrays. The current density is in W/m^2</li>
 <li><strong>ill_power</strong> &#8211; the illumnation power in W/m^2</li>
 </ul>
 </td>
 </tr>
-<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last">efficiency</p>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first">efficiency</p>
+</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><p class="first last">float</p>
 </td>
 </tr>
 </tbody>

@@ -114,13 +114,20 @@
 <span class="sd">    Calculate the voltage from demand current.</span>
 <span class="sd">    This implementation drops the element that does not have log value, i.e. any log(x) that x&lt;0</span>
 
-<span class="sd">    :param current: demand current, array_like</span>
+<span class="sd">    :param current: demand current</span>
+<span class="sd">    :type current: numpy.ndarray</span>
 <span class="sd">    :param j01: saturation current density</span>
+<span class="sd">    :type j01: float</span>
 <span class="sd">    :param rad_eta: radiative efficiency</span>
+<span class="sd">    :type rad_eta: float</span>
 <span class="sd">    :param n1: diode factor</span>
+<span class="sd">    :type n1: float</span>
 <span class="sd">    :param temperature: temperature in K</span>
+<span class="sd">    :type temperature: float</span>
 <span class="sd">    :param jsc: Jsc. It has to be a positive value.</span>
-<span class="sd">    :return: voltage, current, indexes that the values were kepted</span>
+<span class="sd">    :type jsc: float</span>
+<span class="sd">    :return: voltage, current, indexes that the values were kept</span>
+<span class="sd">    :rtype: tuple(numpy.ndarray, numpy.ndarray, numpy.ndarray)</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
     <span class="k">if</span> <span class="n">jsc</span> <span class="o">&lt;</span> <span class="mi">0</span><span class="p">:</span>
@@ -205,7 +212,7 @@
 <span class="n">j01_lead_term</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">power</span><span class="p">(</span><span class="n">sc</span><span class="o">.</span><span class="n">e</span><span class="p">,</span> <span class="mi">4</span><span class="p">)</span> <span class="o">*</span> <span class="mi">2</span> <span class="o">*</span> <span class="n">sc</span><span class="o">.</span><span class="n">pi</span> <span class="o">/</span> <span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">power</span><span class="p">(</span><span class="n">sc</span><span class="o">.</span><span class="n">c</span><span class="p">,</span> <span class="mi">2</span><span class="p">)</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">power</span><span class="p">(</span><span class="n">sc</span><span class="o">.</span><span class="n">h</span><span class="p">,</span> <span class="mi">3</span><span class="p">))</span>
 
 
-<div class="viewcode-block" id="calculate_j01_from_qe"><a class="viewcode-back" href="../../ivsolver.html#pypvcell.ivsolver.calculate_j01_from_qe">[docs]</a><span class="k">def</span> <span class="nf">calculate_j01_from_qe</span><span class="p">(</span><span class="n">qe</span><span class="p">,</span> <span class="n">n_c</span><span class="o">=</span><span class="mf">3.5</span><span class="p">,</span> <span class="n">n_s</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">threshold</span><span class="o">=</span><span class="mi">1</span><span class="n">e</span><span class="o">-</span><span class="mi">3</span><span class="p">,</span> <span class="n">step_in_ev</span><span class="o">=</span><span class="mi">1</span><span class="n">e</span><span class="o">-</span><span class="mi">5</span><span class="p">,</span> <span class="n">lead_term</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">T</span><span class="o">=</span><span class="mi">300</span><span class="p">):</span>
+<div class="viewcode-block" id="calculate_j01_from_qe"><a class="viewcode-back" href="../../ivsolver.html#pypvcell.ivsolver.calculate_j01_from_qe">[docs]</a><span class="k">def</span> <span class="nf">calculate_j01_from_qe</span><span class="p">(</span><span class="n">qe</span><span class="p">:</span><span class="n">Spectrum</span><span class="p">,</span> <span class="n">n_c</span><span class="o">=</span><span class="mf">3.5</span><span class="p">,</span> <span class="n">n_s</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">threshold</span><span class="o">=</span><span class="mi">1</span><span class="n">e</span><span class="o">-</span><span class="mi">3</span><span class="p">,</span> <span class="n">step_in_ev</span><span class="o">=</span><span class="mi">1</span><span class="n">e</span><span class="o">-</span><span class="mi">5</span><span class="p">,</span> <span class="n">lead_term</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">T</span><span class="o">=</span><span class="mi">300</span><span class="p">):</span>
     <span class="sd">r&quot;&quot;&quot;</span>
 <span class="sd">    Calculate j01 from known absorptivity or QE using the following expression:</span>
 <span class="sd">    </span>
@@ -214,12 +221,19 @@
 <span class="sd">        </span>
 <span class="sd">    </span>
 <span class="sd">    :param T: temperature in Kelvin</span>
+<span class="sd">    :type T: float</span>
 <span class="sd">    :param n_c: the refractive index of the material</span>
+<span class="sd">    :type n_c: float</span>
 <span class="sd">    :param n_s: the refractive index of surroundings</span>
-<span class="sd">    :param qe: QE or absorptivity. A spectrum_base class</span>
+<span class="sd">    :type n_s: float</span>
+<span class="sd">    :param qe: QE or absorptivity.</span>
+<span class="sd">    :type qe: Spectrum</span>
 <span class="sd">    :param threshold: ignore the QE whose values are under the threshold</span>
+<span class="sd">    :type threshold: float</span>
 <span class="sd">    :param step_in_ev: meshgrid size when doing numerical integration trapz()</span>
+<span class="sd">    :type step_in_ev: float </span>
 <span class="sd">    :return: j01</span>
+<span class="sd">    :rtype: float</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
     <span class="k">assert</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">qe</span><span class="p">,</span> <span class="n">Spectrum</span><span class="p">)</span>
@@ -282,12 +296,19 @@
 <span class="sd">    </span>
 
 <span class="sd">    :param eg_in_ev: band gap in eV</span>
+<span class="sd">    :type eg_in_ev: float</span>
 <span class="sd">    :param temperature: temperature in K</span>
+<span class="sd">    :type temperature: float</span>
 <span class="sd">    :param n1: ideality factor</span>
+<span class="sd">    :type n1: float</span>
 <span class="sd">    :param n_c: refractive index of the cell</span>
+<span class="sd">    :type n_c: float</span>
 <span class="sd">    :param n_s: refractive index of the surroundings</span>
+<span class="sd">    :type n_s: float</span>
 <span class="sd">    :param approx: Set ``true`` to use approximation    </span>
+<span class="sd">    :type approx: bool</span>
 <span class="sd">    :return: the value of J01</span>
+<span class="sd">    :rtype: float</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
     <span class="n">eg</span> <span class="o">=</span> <span class="n">eg_in_ev</span> <span class="o">*</span> <span class="n">sc</span><span class="o">.</span><span class="n">e</span>
@@ -333,9 +354,12 @@
 <span class="sd">    It adds up the maximum power of each subcell and divde them by the illumination power.</span>
 <span class="sd">    </span>
 
-<span class="sd">    :param v_i: a list of (voltage,current) tuple. Voltage and current are 1D numpy arrays. The current density is in W/m^2</span>
+<span class="sd">    :param v_i: Voltage and current are 1D numpy arrays. The current density is in W/m^2</span>
+<span class="sd">    :type v_i: tuple(numpy.ndarray, numpy.ndarray)</span>
 <span class="sd">    :param ill_power: the illumnation power in W/m^2</span>
+<span class="sd">    :type v_i: float</span>
 <span class="sd">    :return: efficiency</span>
+<span class="sd">    :rtype: float</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
     <span class="n">max_p_list</span> <span class="o">=</span> <span class="p">[]</span>
@@ -345,13 +369,7 @@
     <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">max_p_list</span><span class="p">)</span> <span class="o">/</span> <span class="n">ill_power</span></div>
 
 
-<div class="viewcode-block" id="solve_mj_iv"><a class="viewcode-back" href="../../ivsolver.html#pypvcell.ivsolver.solve_mj_iv">[docs]</a><span class="k">def</span> <span class="nf">solve_mj_iv</span><span class="p">(</span><span class="n">v_i</span><span class="p">,</span> <span class="n">i_max</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">discret_num</span><span class="o">=</span><span class="mi">10000</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;</span>
-
-<span class="sd">    :param v_i: a list of (voltage,current) tuple</span>
-<span class="sd">    :type v_i: List[Tuple[np.ndarray,np.ndarray]]</span>
-<span class="sd">    &quot;&quot;&quot;</span>
-
+<span class="k">def</span> <span class="nf">solve_mj_iv</span><span class="p">(</span><span class="n">v_i</span><span class="p">,</span> <span class="n">i_max</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">discret_num</span><span class="o">=</span><span class="mi">10000</span><span class="p">):</span>
     <span class="c1"># Select the minimum of range maximums</span>
 
     <span class="c1"># Select the maximum of range minimums</span>
@@ -402,7 +420,7 @@
         <span class="n">voltage_sum</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">hstack</span><span class="p">(([</span><span class="o">-</span><span class="mf">0.5</span><span class="p">,</span> <span class="n">voltage_sum</span><span class="p">]))</span>
         <span class="n">current_range</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">hstack</span><span class="p">(([</span><span class="n">current_range</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">*</span> <span class="p">(</span><span class="mi">1</span> <span class="o">-</span> <span class="mf">0.0001</span><span class="p">)],</span> <span class="n">current_range</span><span class="p">))</span>
 
-    <span class="k">return</span> <span class="n">voltage_sum</span><span class="p">,</span> <span class="n">current_range</span></div>
+    <span class="k">return</span> <span class="n">voltage_sum</span><span class="p">,</span> <span class="n">current_range</span>
 
 
 <span class="k">def</span> <span class="nf">new_solve_mj_iv</span><span class="p">(</span><span class="n">v_i</span><span class="p">,</span> <span class="n">i_max</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">disc_num</span><span class="o">=</span><span class="mi">1000</span><span class="p">,</span> <span class="n">verbose</span><span class="o">=</span><span class="mi">0</span><span class="p">):</span>
@@ -464,8 +482,11 @@
 <span class="sd">    :param subcells: a list of SolarCell objects</span>
 <span class="sd">    :param i_max: the maximum</span>
 <span class="sd">    :param disc_num: number of discretization</span>
-<span class="sd">    :param verbose: ``True`` to display the intermediate results</span>
-<span class="sd">    :return: solved (voltage, current) tuple</span>
+<span class="sd">    :type disc_num: int</span>
+<span class="sd">    :param verbose: display the intermediate results</span>
+<span class="sd">    :type verbose: int</span>
+<span class="sd">    :return: solved (voltage, current)</span>
+<span class="sd">    :rtype: tuple(numpy.ndarray, numpy.ndarray) </span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
     <span class="c1"># Determine the range of current</span>
@@ -529,11 +550,16 @@
 <span class="sd">    .. math::</span>
 <span class="sd">        V_{tot}(I_m)=\sum_{i=1}^N V_i(I_{m})</span>
 <span class="sd">            </span>
-<span class="sd">    :param v_i: a list of (voltage, current) tuple of subcells, </span>
-<span class="sd">    :param i_min: The minimum of the range of the current </span>
+<span class="sd">    :param v_i: a list of (voltage, current) tuple of subcells</span>
+<span class="sd">    :type v_i: list[tuple(numpy.ndarray,numpy.ndarray)]</span>
+<span class="sd">    :param i_min: The minimum of the range of the current</span>
+<span class="sd">    :type i_min: float</span>
 <span class="sd">    :param i_max: The maximum of the range of the current</span>
+<span class="sd">    :type i_max: float</span>
 <span class="sd">    :param disc_num: The number of points of current to be discretized</span>
-<span class="sd">    :return: the solved (voltage, current) tuple</span>
+<span class="sd">    :type disc_num: float</span>
+<span class="sd">    :return: voltage, current</span>
+<span class="sd">    :rtype: tuple(numpy.ndarray, numpy.ndarray)</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
     <span class="n">current_range</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linspace</span><span class="p">(</span><span class="n">i_min</span><span class="p">,</span> <span class="n">i_max</span><span class="p">,</span> <span class="n">num</span><span class="o">=</span><span class="n">disc_num</span><span class="p">)</span>
@@ -560,17 +586,21 @@
 <span class="sd">    than a list of (V,J) tuples.</span>
 
 <span class="sd">    :param subcells: A list of SolarCell objects</span>
+<span class="sd">    :type subcells: list[solarcell.SolarCell]</span>
 <span class="sd">    :param i_min: The minimum of the range of the current </span>
+<span class="sd">    :type i_min: float</span>
 <span class="sd">    :param i_max: The maximum of the range of the current</span>
+<span class="sd">    :type i_max: float</span>
 <span class="sd">    :param disc_num: number of descretions between i_min and i_max</span>
-<span class="sd">    :return: A tuple of solved (voltage,current)</span>
+<span class="sd">    :type disc_num: float</span>
+<span class="sd">    :return: voltage, current</span>
+<span class="sd">    :rtype: tuple(numpy.ndarray, numpy.ndarray)</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
-    <span class="c1"># TODO: disc_num is not used in this function!</span>
 
     <span class="c1"># discretize positive and negative current separately</span>
-    <span class="n">n_i_range</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linspace</span><span class="p">(</span><span class="n">i_min</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="n">num</span><span class="o">=</span><span class="mi">500</span><span class="p">)</span>
-    <span class="n">p_i_range</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linspace</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">i_max</span><span class="p">,</span> <span class="n">num</span><span class="o">=</span><span class="mi">500</span><span class="p">)</span>
+    <span class="n">n_i_range</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linspace</span><span class="p">(</span><span class="n">i_min</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="n">num</span><span class="o">=</span><span class="nb">int</span><span class="p">(</span><span class="n">disc_num</span><span class="o">/</span><span class="mi">2</span><span class="p">))</span>
+    <span class="n">p_i_range</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linspace</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">i_max</span><span class="p">,</span> <span class="n">num</span><span class="o">=</span><span class="nb">int</span><span class="p">(</span><span class="n">disc_num</span><span class="o">/</span><span class="mi">2</span><span class="p">))</span>
 
     <span class="c1"># rearrange the discretized points</span>
     <span class="n">current_range</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sort</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">unique</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">concatenate</span><span class="p">((</span><span class="n">n_i_range</span><span class="p">,</span> <span class="n">p_i_range</span><span class="p">))))</span>
