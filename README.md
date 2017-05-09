@@ -35,4 +35,4 @@ We recommend using python version later than 3.5.
 
 
 ## License
-MIT
+Apache-2.0
