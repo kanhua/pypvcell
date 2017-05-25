@@ -62,17 +62,24 @@
 </div>
 <div class="section" id="setup-your-python-environment">
 <h2>Setup your Python environment<a class="headerlink" href="#setup-your-python-environment" title="Permalink to this headline">¶</a></h2>
-<ol class="arabic simple">
-<li>Download <a class="reference external" href="http://continuum.io/downloads">Anaconda</a> or <a class="reference external" href="https://conda.io/miniconda.html">Miniconda</a>. Read <a class="reference external" href="https://conda.io/docs/download.html#should-i-download-anaconda-or-miniconda">this</a> if you are not sure which one suit you best. Both Anaconda and Miniconda offer Python 2.7 and Python 3.x versions. To run pypvcell, you need <strong>python 3.x</strong>.</li>
-<li>If you choose to install Miniconda, type the following script in Powershell or Terminal:</li>
+<ol class="arabic">
+<li><p class="first">Download <a class="reference external" href="http://continuum.io/downloads">Anaconda</a> or <a class="reference external" href="https://conda.io/miniconda.html">Miniconda</a>. Read <a class="reference external" href="https://conda.io/docs/download.html#should-i-download-anaconda-or-miniconda">this</a> if you are not sure which one suit you best. Both Anaconda and Miniconda offer Python 2.7 and Python 3.x versions. To run pypvcell, you need <strong>python 3.x</strong>.</p>
+</li>
+<li><p class="first">If you choose to install Miniconda, type the following script in Powershell or Terminal:</p>
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="n">conda</span> <span class="n">install</span> <span class="n">numpy</span> <span class="n">scipy</span> <span class="n">matplotlib</span> <span class="n">jupyter</span> <span class="n">pandas</span>
+</pre></div>
+</div>
+</li>
+<li><p class="first">You also have to install <a class="reference external" href="http://pint.readthedocs.io/en/0.8/">pint</a>. This is a toolkit for doing unit conversion in python. You can install it by using conda forge:</p>
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="n">conda</span> <span class="n">install</span> <span class="o">-</span><span class="n">c</span> <span class="n">conda</span><span class="o">-</span><span class="n">forge</span> <span class="n">pint</span>
+</pre></div>
+</div>
+</li>
 </ol>
-<p>conda install numpy scipy matplotlib jupyter pandas</p>
-<ol class="arabic simple" start="3">
-<li>You also have to install <a class="reference external" href="http://pint.readthedocs.io/en/0.8/">pint</a>. This is a toolkit for doing unit conversion in python. You can install it by using conda forge:</li>
-</ol>
-<p>conda install -c conda-forge pint</p>
 <p>or using pip:</p>
-<p>pip install pint</p>
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="n">pip</span> <span class="n">install</span> <span class="n">pint</span>
+</pre></div>
+</div>
 <p>If you did not see error messages during the installations, you should be good to go.</p>
 </div>
 <div class="section" id="install-pypvcell-via-pip">
