@@ -57,12 +57,23 @@
 <h2>Package requirements<a class="headerlink" href="#package-requirements" title="Permalink to this headline">¶</a></h2>
 <ul class="simple">
 <li>Pypvcell supports 3.x.</li>
-<li>Numpy, Scipy, pint, Matplotlib</li>
+<li>Numpy, Scipy, pint, Matplotlib, jupyter</li>
 </ul>
 </div>
-<div class="section" id="if-you-are-new-to-python">
-<h2>If you are new to python<a class="headerlink" href="#if-you-are-new-to-python" title="Permalink to this headline">¶</a></h2>
-<p>You can obtain a copy of python language along with the some scientific compuation packages by downloading it from Anaconda.https://www.continuum.io/downloads</p>
+<div class="section" id="setup-your-python-environment">
+<h2>Setup your Python environment<a class="headerlink" href="#setup-your-python-environment" title="Permalink to this headline">¶</a></h2>
+<ol class="arabic simple">
+<li>Download <a class="reference external" href="http://continuum.io/downloads">Anaconda</a> or <a class="reference external" href="https://conda.io/miniconda.html">Miniconda</a>. Read <a class="reference external" href="https://conda.io/docs/download.html#should-i-download-anaconda-or-miniconda">this</a> if you are not sure which one suit you best. Both Anaconda and Miniconda offer Python 2.7 and Python 3.x versions. To run pypvcell, you need <strong>python 3.x</strong>.</li>
+<li>If you choose to install Miniconda, type the following script in Powershell or Terminal:</li>
+</ol>
+<p>conda install numpy scipy matplotlib jupyter pandas</p>
+<ol class="arabic simple" start="3">
+<li>You also have to install <a class="reference external" href="http://pint.readthedocs.io/en/0.8/">pint</a>. This is a toolkit for doing unit conversion in python. You can install it by using conda forge:</li>
+</ol>
+<p>conda install -c conda-forge pint</p>
+<p>or using pip:</p>
+<p>pip install pint</p>
+<p>If you did not see error messages during the installations, you should be good to go.</p>
 </div>
 <div class="section" id="install-pypvcell-via-pip">
 <h2>Install Pypvcell via pip<a class="headerlink" href="#install-pypvcell-via-pip" title="Permalink to this headline">¶</a></h2>
@@ -85,13 +96,6 @@ You can then directly play with the code in the pypvcell directory.</p>
 We are planning to add this project to [the python package index](<a class="reference external" href="https://pypi.python.org/pypi">https://pypi.python.org/pypi</a>) after a more steady version of pypvcell is released.
 This would make the installation through PIP a little bit easier in the future.</p>
 </div>
-<div class="section" id="id1">
-<h2>Package requirements<a class="headerlink" href="#id1" title="Permalink to this headline">¶</a></h2>
-<ul class="simple">
-<li>Pypvcell support both Python 2.x and 3.x. However, we recommend using Python 3.</li>
-<li>Numpy, Scipy, pint, Matplotlib</li>
-</ul>
-</div>
 </div>
 
 
@@ -104,9 +108,8 @@ This would make the installation through PIP a little bit easier in the future.<
   <ul>
 <li><a class="reference internal" href="#">Installing Pypvcell</a><ul>
 <li><a class="reference internal" href="#package-requirements">Package requirements</a></li>
-<li><a class="reference internal" href="#if-you-are-new-to-python">If you are new to python</a></li>
+<li><a class="reference internal" href="#setup-your-python-environment">Setup your Python environment</a></li>
 <li><a class="reference internal" href="#install-pypvcell-via-pip">Install Pypvcell via pip</a></li>
-<li><a class="reference internal" href="#id1">Package requirements</a></li>
 </ul>
 </li>
 </ul>

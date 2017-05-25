@@ -5,18 +5,27 @@ Package requirements
 --------------------------
 
 - Pypvcell supports 3.x.
-- Numpy, Scipy, pint, Matplotlib
+- Numpy, Scipy, pint, Matplotlib, jupyter
 
 
-If you are new to python
--------------------------
+Setup your Python environment
+------------------------------
 
-You can obtain a copy of python language along with the some scientific compuation packages by downloading it from Anaconda.https://www.continuum.io/downloads
+1. Download `Anaconda <http://continuum.io/downloads>`_ or `Miniconda <https://conda.io/miniconda.html>`_. Read `this <https://conda.io/docs/download.html#should-i-download-anaconda-or-miniconda>`_ if you are not sure which one suit you best. Both Anaconda and Miniconda offer Python 2.7 and Python 3.x versions. To run pypvcell, you need **python 3.x**.
 
+2. If you choose to install Miniconda, type the following script in Powershell or Terminal::
 
+conda install numpy scipy matplotlib jupyter pandas
 
+3. You also have to install `pint <http://pint.readthedocs.io/en/0.8/>`_. This is a toolkit for doing unit conversion in python. You can install it by using conda forge::
 
+conda install -c conda-forge pint
 
+or using pip::
+
+pip install pint
+
+If you did not see error messages during the installations, you should be good to go.
 
 
 Install Pypvcell via pip
@@ -43,14 +52,6 @@ You can then directly play with the code in the pypvcell directory.
 P.S.
 We are planning to add this project to [the python package index](https://pypi.python.org/pypi) after a more steady version of pypvcell is released.
 This would make the installation through PIP a little bit easier in the future.
-
-
-
-Package requirements
---------------------------
-
-- Pypvcell support both Python 2.x and 3.x. However, we recommend using Python 3.
-- Numpy, Scipy, pint, Matplotlib
 
 
 

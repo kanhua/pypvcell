@@ -72,7 +72,7 @@
 <span class="kn">from</span> <span class="nn">pypvcell.spectrum</span> <span class="k">import</span> <span class="n">Spectrum</span><span class="p">,</span><span class="n">_energy_to_length</span>
 
 
-<div class="viewcode-block" id="gen_step_qe_array"><a class="viewcode-back" href="../../photocurrent_m.html#pypvcell.photocurrent.gen_step_qe_array">[docs]</a><span class="k">def</span> <span class="nf">gen_step_qe_array</span><span class="p">(</span><span class="n">bandEdge_in_eV</span><span class="p">,</span> <span class="n">qe_in_ratio</span><span class="p">,</span> <span class="n">qe_below_edge</span><span class="o">=</span><span class="mi">1</span><span class="n">e</span><span class="o">-</span><span class="mi">3</span><span class="p">,</span> <span class="n">wl_bound</span><span class="o">=</span><span class="p">(</span><span class="mf">0.01</span><span class="p">,</span> <span class="mi">5</span><span class="p">)):</span>
+<div class="viewcode-block" id="gen_step_qe_array"><a class="viewcode-back" href="../../photocurrent_m.html#pypvcell.photocurrent.gen_step_qe_array">[docs]</a><span class="k">def</span> <span class="nf">gen_step_qe_array</span><span class="p">(</span><span class="n">bandEdge_in_eV</span><span class="p">,</span> <span class="n">qe_in_ratio</span><span class="p">,</span> <span class="n">qe_below_edge</span><span class="o">=</span><span class="mf">1e-3</span><span class="p">,</span> <span class="n">wl_bound</span><span class="o">=</span><span class="p">(</span><span class="mf">0.01</span><span class="p">,</span> <span class="mi">5</span><span class="p">)):</span>
     <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Generate a staircase QE array :</span>
 <span class="sd">    EQE(E)= qe if E &gt;= Eg</span>
@@ -88,12 +88,12 @@
 <span class="sd">    :return: A 4x2 array, the first column is photon energy (in eV) and the second column is the qe</span>
 <span class="sd">    :rtype: np.ndarray</span>
 <span class="sd">    &quot;&quot;&quot;</span>
-    <span class="n">edge_step</span> <span class="o">=</span> <span class="mi">1</span><span class="n">e</span><span class="o">-</span><span class="mi">4</span>
+    <span class="n">edge_step</span> <span class="o">=</span> <span class="mf">1e-4</span>
     <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([[</span><span class="n">wl_bound</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">qe_below_edge</span><span class="p">],</span> <span class="p">[</span><span class="n">bandEdge_in_eV</span><span class="p">,</span> <span class="n">qe_below_edge</span><span class="p">],</span>
                      <span class="p">[</span><span class="n">bandEdge_in_eV</span> <span class="o">+</span> <span class="n">edge_step</span><span class="p">,</span> <span class="n">qe_in_ratio</span><span class="p">],</span> <span class="p">[</span><span class="n">wl_bound</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="n">qe_in_ratio</span><span class="p">]])</span></div>
 
 
-<div class="viewcode-block" id="gen_step_qe"><a class="viewcode-back" href="../../photocurrent_m.html#pypvcell.photocurrent.gen_step_qe">[docs]</a><span class="k">def</span> <span class="nf">gen_step_qe</span><span class="p">(</span><span class="n">bandEdge_in_eV</span><span class="p">,</span> <span class="n">qe_in_ratio</span><span class="p">,</span> <span class="n">qe_below_edge</span><span class="o">=</span><span class="mi">1</span><span class="n">e</span><span class="o">-</span><span class="mi">6</span><span class="p">,</span> <span class="n">wl_bound</span><span class="o">=</span><span class="p">(</span><span class="mf">0.0001</span><span class="p">,</span> <span class="mi">5</span><span class="p">)):</span>
+<div class="viewcode-block" id="gen_step_qe"><a class="viewcode-back" href="../../photocurrent_m.html#pypvcell.photocurrent.gen_step_qe">[docs]</a><span class="k">def</span> <span class="nf">gen_step_qe</span><span class="p">(</span><span class="n">bandEdge_in_eV</span><span class="p">,</span> <span class="n">qe_in_ratio</span><span class="p">,</span> <span class="n">qe_below_edge</span><span class="o">=</span><span class="mf">1e-6</span><span class="p">,</span> <span class="n">wl_bound</span><span class="o">=</span><span class="p">(</span><span class="mf">0.0001</span><span class="p">,</span> <span class="mi">5</span><span class="p">)):</span>
     <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Generate a staircase QE array. Same as gen_square_qe_array() except that it generates a Spectrum class object.</span>
 <span class="sd">    EQE(E)= qe if E &gt;= Eg</span>
