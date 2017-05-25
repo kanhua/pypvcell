@@ -15,15 +15,15 @@ Setup your Python environment
 
 2. If you choose to install Miniconda, type the following script in Powershell or Terminal::
 
-conda install numpy scipy matplotlib jupyter pandas
+    conda install numpy scipy matplotlib jupyter pandas
 
 3. You also have to install `pint <http://pint.readthedocs.io/en/0.8/>`_. This is a toolkit for doing unit conversion in python. You can install it by using conda forge::
 
-conda install -c conda-forge pint
+    conda install -c conda-forge pint
 
 or using pip::
 
-pip install pint
+    pip install pint
 
 If you did not see error messages during the installations, you should be good to go.
 
