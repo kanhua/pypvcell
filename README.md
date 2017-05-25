@@ -30,8 +30,7 @@ pip install ./
 
 ## Requirements
 
-Although Pypvcell supports both Python 2.X and Python 3.X.
-We recommend using python version later than 3.5.
+Pypvcell requires python 3.6 or higher.
 
 
 ## License
