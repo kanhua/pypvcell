@@ -4,7 +4,7 @@ __author__ = 'kanhua'
 
 import unittest
 import numpy as np
-from fom import ff, voc, isc
+from pypvcell.fom import ff, voc, isc
 
 
 class FoMTestCase(unittest.TestCase):

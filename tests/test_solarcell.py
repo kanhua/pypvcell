@@ -7,7 +7,7 @@ from pypvcell.solarcell import SQCell, MJCell, DBCell
 from pypvcell.photocurrent import gen_step_qe
 
 
-class MyTestCase(unittest.TestCase):
+class SolarCellTestCase(unittest.TestCase):
     def setUp(self):
         self.input_ill = load_astm("AM1.5g")
 
@@ -24,7 +24,7 @@ class MyTestCase(unittest.TestCase):
             if sp_arr[0, i] > 1.42:
                 self.assertEqual(sp_arr[1, i], 0)
 
-        if True:
+        if False:
             plt.plot(sp_arr[0, :], sp_arr[1, :])
             plt.show()
 
@@ -55,12 +55,12 @@ class MyTestCase(unittest.TestCase):
 
         gaas_db = DBCell(qe=gaas_qe, rad_eta=1, T=300)
 
-        gaas_db.set_input_spectrum(Illumination("AM1.5g"))
+        gaas_db.set_input_spectrum(load_astm("AM1.5g"))
 
         gaas_db_eta = gaas_db.get_eta()
 
         sq_gaas = SQCell(eg=1.42, cell_T=300)
-        sq_gaas.set_input_spectrum(Illumination("AM1.5g"))
+        sq_gaas.set_input_spectrum(load_astm("AM1.5g"))
 
         sq_gaas_eta = sq_gaas.get_eta()
 
@@ -70,7 +70,7 @@ class MyTestCase(unittest.TestCase):
 
         qe_val = 0.8
 
-        ill = Illumination("AM1.5g")
+        ill = load_astm("AM1.5g")
 
         gaas_qe = gen_step_qe(1.42, qe_val)
 
