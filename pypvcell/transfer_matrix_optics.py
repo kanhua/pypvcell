@@ -43,6 +43,7 @@ films, Journal of Applied Physics, vol. 86, pp. 487 (1999). DOI: `10.1063/1.3707
    limitations under the License.
 """
 
+import os
 from os.path import join, isfile
 from scipy.interpolate import interp1d
 import numpy as np
@@ -50,7 +51,7 @@ import matplotlib.pyplot as plt
 from typing import List
 import warnings
 
-MAT_DIR = './matdata'
+MAT_DIR = join(os.path.dirname(__file__),'matdata')
 MAT_PREFIX = 'nk_'
 
 

@@ -1,7 +1,7 @@
-__pycache__
-.DS_Store
+__pycache__/
+.DS_Store/
 *.py[cod]
-.idea
+.idea/
 *.npz
 .ipynb_checkpoints
 *.pdf
