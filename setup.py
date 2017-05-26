@@ -17,12 +17,12 @@ setup(
     # https://packaging.python.org/en/latest/single_source_version.html
     version='0.1.0',
 
-    description='A sample Python project',
+    description='A toolkit for oslar cell modeling',
     long_description=long_description,
 
     # The project's main homepage.
     # TODO add url here
-    url='#TODO add url',
+    url='https://kanhua.github.io/pypvcell',
 
     # Author details
     author='Kan-Hua Lee',
@@ -84,7 +84,7 @@ setup(
     # installed, specify them here.  If using Python 2.6 or less, then these
     # have to be included in MANIFEST.in as well.
     package_data={
-        'pypvcell': ['*.csv'],
+        'pypvcell': ['*.csv','matdata/*'],
     },
 
     # Although 'package_data' is the preferred approach, in some case you may
