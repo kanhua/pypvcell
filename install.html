@@ -8,7 +8,7 @@
     
     <title>Installing Pypvcell &#8212; pypvcell 0.1.0 documentation</title>
     
-    <link rel="stylesheet" href="_static/alabaster.css" type="text/css" />
+    <link rel="stylesheet" href="_static/sphinxdoc.css" type="text/css" />
     <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
     
     <script type="text/javascript">
@@ -29,13 +29,7 @@
     <link rel="search" title="Search" href="search.html" />
     <link rel="next" title="Tutorial and Application Examples" href="tutorial.html" />
     <link rel="prev" title="Pypvcell: A tool box for modeling solar cells" href="index.html" />
-
-   
-  <link rel="stylesheet" href="_static/custom.css" type="text/css" />
-  
-  
-  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
-
+ 
 <script type="text/javascript">
     var _gaq = _gaq || [];
     _gaq.push(['_setAccount', 'XXX account number XXX']);
@@ -44,7 +38,62 @@
 
   </head>
   <body role="document">
-  
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="tutorial.html" title="Tutorial and Application Examples"
+             accesskey="N">next</a> |</li>
+        <li class="right" >
+          <a href="index.html" title="Pypvcell: A tool box for modeling solar cells"
+             accesskey="P">previous</a> |</li>
+        <li class="nav-item nav-item-0"><a href="index.html">pypvcell 0.1.0 documentation</a> &#187;</li> 
+      </ul>
+    </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+  <h3><a href="index.html">Table Of Contents</a></h3>
+  <ul>
+<li><a class="reference internal" href="#">Installing Pypvcell</a><ul>
+<li><a class="reference internal" href="#setup-your-python-environment">Setup your Python environment</a></li>
+<li><a class="reference internal" href="#install-pypvcell">Install Pypvcell</a></li>
+<li><a class="reference internal" href="#test-the-installed-package">Test the Installed Package</a></li>
+<li><a class="reference internal" href="#what-to-explore-next">What to Explore Next</a></li>
+</ul>
+</li>
+</ul>
+
+  <h4>Previous topic</h4>
+  <p class="topless"><a href="index.html"
+                        title="previous chapter">Pypvcell: A tool box for modeling solar cells</a></p>
+  <h4>Next topic</h4>
+  <p class="topless"><a href="tutorial.html"
+                        title="next chapter">Tutorial and Application Examples</a></p>
+  <div role="note" aria-label="source link">
+    <h3>This Page</h3>
+    <ul class="this-page-menu">
+      <li><a href="_sources/install.rst.txt"
+            rel="nofollow">Show Source</a></li>
+    </ul>
+   </div>
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <form class="search" action="search.html" method="get">
+      <div><input type="text" name="q" /></div>
+      <div><input type="submit" value="Go" /></div>
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
 
     <div class="document">
       <div class="documentwrapper">
@@ -53,13 +102,8 @@
             
   <div class="section" id="installing-pypvcell">
 <h1>Installing Pypvcell<a class="headerlink" href="#installing-pypvcell" title="Permalink to this headline">¶</a></h1>
-<div class="section" id="package-requirements">
-<h2>Package requirements<a class="headerlink" href="#package-requirements" title="Permalink to this headline">¶</a></h2>
-<ul class="simple">
-<li>Pypvcell supports 3.x.</li>
-<li>Numpy, Scipy, pint, Matplotlib, jupyter</li>
-</ul>
-</div>
+<p>The page will lead you through the installation of pypvcell.
+If you already have your scientific python environment set up, you can skip the next section and directly go to <strong>Install pypvcell</strong> section.</p>
 <div class="section" id="setup-your-python-environment">
 <h2>Setup your Python environment<a class="headerlink" href="#setup-your-python-environment" title="Permalink to this headline">¶</a></h2>
 <ol class="arabic">
@@ -82,17 +126,26 @@
 </div>
 <p>If you did not see error messages during the installations, you should be good to go.</p>
 </div>
-<div class="section" id="install-pypvcell-via-pip">
-<h2>Install Pypvcell via pip<a class="headerlink" href="#install-pypvcell-via-pip" title="Permalink to this headline">¶</a></h2>
-<p>We recommend a two step process:</p>
-<p>First, download the repository with git clone:</p>
+<div class="section" id="install-pypvcell">
+<h2>Install Pypvcell<a class="headerlink" href="#install-pypvcell" title="Permalink to this headline">¶</a></h2>
+<p>Before you start installing pypvcell, make sure you have the following packages installed in your python environment:</p>
+<ul class="simple">
+<li>Python 3.x or higher</li>
+<li>Numpy, Scipy, pint, Matplotlib, jupyter</li>
+</ul>
+<p>If you followed the procedures described in the previous section, you should be good to continue.</p>
+<ol class="arabic">
+<li><p class="first">Download pypvcell from <a class="reference external" href="https://github.com/kanhua/pypvcell/archive/master.zip">gitub</a> and unzip it, or using git clone to download:</p>
 <div class="highlight-default"><div class="highlight"><pre><span></span><span class="n">git</span> <span class="n">clone</span> <span class="n">https</span><span class="p">:</span><span class="o">//</span><span class="n">github</span><span class="o">.</span><span class="n">com</span><span class="o">/</span><span class="n">kanhua</span><span class="o">/</span><span class="n">pypvcell</span><span class="o">.</span><span class="n">git</span>
 </pre></div>
 </div>
-<p>Switch to the downloaded Pypvcell directory, and install it via pip:</p>
+</li>
+<li><p class="first">Switch to the downloaded Pypvcell directory, and install it via pip:</p>
 <div class="highlight-default"><div class="highlight"><pre><span></span><span class="n">pip</span> <span class="n">install</span> <span class="o">./</span>
 </pre></div>
 </div>
+</li>
+</ol>
 <p>If you would like to do some experimental changes of pypvcell, you can add parameter -e, i.e.,:</p>
 <div class="highlight-default"><div class="highlight"><pre><span></span><span class="n">pip</span> <span class="n">install</span> <span class="o">-</span><span class="n">e</span> <span class="o">./</span>
 </pre></div>
@@ -125,65 +178,31 @@ If you see any issues, feel free to report it <a class="reference external" href
           </div>
         </div>
       </div>
-      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
-        <div class="sphinxsidebarwrapper">
-  <h3><a href="index.html">Table Of Contents</a></h3>
-  <ul>
-<li><a class="reference internal" href="#">Installing Pypvcell</a><ul>
-<li><a class="reference internal" href="#package-requirements">Package requirements</a></li>
-<li><a class="reference internal" href="#setup-your-python-environment">Setup your Python environment</a></li>
-<li><a class="reference internal" href="#install-pypvcell-via-pip">Install Pypvcell via pip</a></li>
-<li><a class="reference internal" href="#test-the-installed-package">Test the Installed Package</a></li>
-<li><a class="reference internal" href="#what-to-explore-next">What to Explore Next</a></li>
-</ul>
-</li>
-</ul>
-<div class="relations">
-<h3>Related Topics</h3>
-<ul>
-  <li><a href="index.html">Documentation overview</a><ul>
-      <li>Previous: <a href="index.html" title="previous chapter">Pypvcell: A tool box for modeling solar cells</a></li>
-      <li>Next: <a href="tutorial.html" title="next chapter">Tutorial and Application Examples</a></li>
-  </ul></li>
-</ul>
-</div>
-  <div role="note" aria-label="source link">
-    <h3>This Page</h3>
-    <ul class="this-page-menu">
-      <li><a href="_sources/install.rst.txt"
-            rel="nofollow">Show Source</a></li>
-    </ul>
-   </div>
-<div id="searchbox" style="display: none" role="search">
-  <h3>Quick search</h3>
-    <form class="search" action="search.html" method="get">
-      <div><input type="text" name="q" /></div>
-      <div><input type="submit" value="Go" /></div>
-      <input type="hidden" name="check_keywords" value="yes" />
-      <input type="hidden" name="area" value="default" />
-    </form>
-</div>
-<script type="text/javascript">$('#searchbox').show(0);</script>
-        </div>
-      </div>
       <div class="clearer"></div>
     </div>
-
-    <div class="footer">
-      &copy;2017, Kan-Hua Lee.
-      
-      |
-      Powered by <a href="http://sphinx-doc.org/">Sphinx 1.5.5</a>
-      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.10</a>
-      
-      |
-      <a href="_sources/install.rst.txt"
-          rel="nofollow">Page source</a>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="tutorial.html" title="Tutorial and Application Examples"
+             >next</a> |</li>
+        <li class="right" >
+          <a href="index.html" title="Pypvcell: A tool box for modeling solar cells"
+             >previous</a> |</li>
+        <li class="nav-item nav-item-0"><a href="index.html">pypvcell 0.1.0 documentation</a> &#187;</li> 
+      </ul>
     </div>
 
-    
-
-    
+    <div class="footer" role="contentinfo">
+        &#169; Copyright 2017, Kan-Hua Lee.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.5.5.
+    </div>
 <script>
     (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
                 (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),

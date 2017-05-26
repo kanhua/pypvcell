@@ -1,11 +1,8 @@
 Installing Pypvcell
 ====================
 
-Package requirements
---------------------------
-
-- Pypvcell supports 3.x.
-- Numpy, Scipy, pint, Matplotlib, jupyter
+The page will lead you through the installation of pypvcell.
+If you already have your scientific python environment set up, you can skip the next section and directly go to **Install pypvcell** section.
 
 
 Setup your Python environment
@@ -28,16 +25,21 @@ or using pip::
 If you did not see error messages during the installations, you should be good to go.
 
 
-Install Pypvcell via pip
--------------------------
+Install Pypvcell
+-----------------
 
-We recommend a two step process:
+Before you start installing pypvcell, make sure you have the following packages installed in your python environment:
 
-First, download the repository with git clone::
+- Python 3.x or higher
+- Numpy, Scipy, pint, Matplotlib, jupyter
+
+If you followed the procedures described in the previous section, you should be good to continue.
+
+1. Download pypvcell from `gitub <https://github.com/kanhua/pypvcell/archive/master.zip>`_ and unzip it, or using git clone to download::
 
     git clone https://github.com/kanhua/pypvcell.git
 
-Switch to the downloaded Pypvcell directory, and install it via pip::
+2. Switch to the downloaded Pypvcell directory, and install it via pip::
 
     pip install ./
 
