@@ -24,7 +24,7 @@ Get Started
 
 Overview of the model
 -----------------------
-.. image:: ./resources/pypvcell_architecture.png
+.. image:: resources/pypvcell_architecture.png
 
 
 
