@@ -48,10 +48,27 @@ If you would like to do some experimental changes of pypvcell, you can add param
 In this way, instead of copying file to your python site-packages directory, pip creates a link to your downloaded pypvcell folder.
 You can then directly play with the code in the pypvcell directory.
 
-
 P.S.
 We are planning to add this project to [the python package index](https://pypi.python.org/pypi) after a more steady version of pypvcell is released.
 This would make the installation through PIP a little bit easier in the future.
 
+Test the Installed Package
+-----------------------------
+
+In ``pypvcell/tests/`` folder, run::
+
+    python3 all_utests.py
+
+
+If all tests are passed, you should be able to run pypvcell properly on your machine.
+If you see any issues, feel free to report it `here <https://github.com/kanhua/pypvcell/issues>`_.
+
+
+What to Explore Next
+-----------------------------
+
+Run a jupyter notebook file in ``demos/`` folder. For instance::
+
+    jupyter notebook ./demos/efficiency_vs_bandgap.ipynb
 
 
