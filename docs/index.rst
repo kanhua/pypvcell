@@ -11,6 +11,11 @@ Features
 * Innovative designs of APIs for rapid development and prototype your model.
 * Extensively tested and validated.
 
+Get the source
+---------------
+
+Source codes is hosted on `git <https://github.com/kanhua/pypvcell>`_ for `download <https://github.com/kanhua/pypvcell/archive/master.zip>`_.
+
 
 Get Started
 -----------------
@@ -24,8 +29,7 @@ Get Started
 
 Overview of the model
 -----------------------
-.. image:: ./resources/pypvcell_architecture.png
-
+.. image:: resources/pypvcell_architecture.png
 
 
 Pypvcell APIs
@@ -39,6 +43,7 @@ Pypvcell APIs
     fom_m
     ivsolver
     transfer_matrix_optics
+
 
 Highly experimental modules (not documented yet) in ``lab`` folder:
 
