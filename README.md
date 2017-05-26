@@ -15,18 +15,7 @@ To see Pypvcell in actions, visit [demo](./demos/). This examples for provided a
 
 ## Installation
 
-We recommend install this project under virtualenv so that it will not interfere your current working environment.
-Clone this repository with:
-
-```
-git clone https://github.com/kanhua/pypvcell.git
-```
-
-In the downloaded pypvcell directory, install it by using
-
-```
-pip install ./
-```
+Please visit [here](https://kanhua.github.io/pypvcell/install.html) for full installation instructions.
 
 ## Requirements
 
