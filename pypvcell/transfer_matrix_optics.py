@@ -57,7 +57,7 @@ MAT_PREFIX = 'nk_'
 
 def get_ntotal(mat_name, lambdas):
     fname = join(MAT_DIR, "%s%s.csv" % (MAT_PREFIX, mat_name))
-    fdata = np.loadtxt(fname, delimiter=',', skiprows=2, comments='#')
+    fdata = np.loadtxt(fname, delimiter=',', skiprows=1, comments='#')
 
     wl = fdata[:, 0]
     nr = fdata[:, 1]
