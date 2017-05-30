@@ -1,5 +1,5 @@
 Transfer Matrix Optics
-=========
+=======================
 
 .. automodule:: pypvcell.transfer_matrix_optics
 

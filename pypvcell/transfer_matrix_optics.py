@@ -181,7 +181,7 @@ class TMLayers(object):
         :return: Tuple: (Reflection array, Transmission array)
         """
 
-        warnings.warn("Illumination class will be deprecated in future version.", DeprecationWarning)
+        warnings.warn("get_RT_fast() will be deprecated in future version.", DeprecationWarning)
         # initialize an array
 
         nr = self.nr
@@ -194,6 +194,11 @@ class TMLayers(object):
         return R, T
 
     def get_RT(self):
+        """
+        Calculate the reflection and transmission
+
+        :return: Tuple: (Reflection array, Transmission array)
+        """
 
         # initialize an array
 
