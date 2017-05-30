@@ -14,7 +14,7 @@ Features
 Get the source
 ---------------
 
-Source codes is hosted on `git <https://github.com/kanhua/pypvcell>`_ for `download <https://github.com/kanhua/pypvcell/archive/master.zip>`_.
+Source codes is hosted on `github <https://github.com/kanhua/pypvcell>`_ for `download <https://github.com/kanhua/pypvcell/archive/master.zip>`_.
 
 
 Get Started

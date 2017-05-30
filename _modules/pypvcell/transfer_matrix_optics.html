@@ -115,6 +115,7 @@
 <span class="sd">   limitations under the License.</span>
 <span class="sd">&quot;&quot;&quot;</span>
 
+<span class="kn">import</span> <span class="nn">os</span>
 <span class="kn">from</span> <span class="nn">os.path</span> <span class="k">import</span> <span class="n">join</span><span class="p">,</span> <span class="n">isfile</span>
 <span class="kn">from</span> <span class="nn">scipy.interpolate</span> <span class="k">import</span> <span class="n">interp1d</span>
 <span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
@@ -122,13 +123,13 @@
 <span class="kn">from</span> <span class="nn">typing</span> <span class="k">import</span> <span class="n">List</span>
 <span class="kn">import</span> <span class="nn">warnings</span>
 
-<span class="n">MAT_DIR</span> <span class="o">=</span> <span class="s1">&#39;./matdata&#39;</span>
+<span class="n">MAT_DIR</span> <span class="o">=</span> <span class="n">join</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">dirname</span><span class="p">(</span><span class="vm">__file__</span><span class="p">),</span><span class="s1">&#39;matdata&#39;</span><span class="p">)</span>
 <span class="n">MAT_PREFIX</span> <span class="o">=</span> <span class="s1">&#39;nk_&#39;</span>
 
 
 <span class="k">def</span> <span class="nf">get_ntotal</span><span class="p">(</span><span class="n">mat_name</span><span class="p">,</span> <span class="n">lambdas</span><span class="p">):</span>
     <span class="n">fname</span> <span class="o">=</span> <span class="n">join</span><span class="p">(</span><span class="n">MAT_DIR</span><span class="p">,</span> <span class="s2">&quot;</span><span class="si">%s%s</span><span class="s2">.csv&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="n">MAT_PREFIX</span><span class="p">,</span> <span class="n">mat_name</span><span class="p">))</span>
-    <span class="n">fdata</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">loadtxt</span><span class="p">(</span><span class="n">fname</span><span class="p">,</span> <span class="n">delimiter</span><span class="o">=</span><span class="s1">&#39;,&#39;</span><span class="p">,</span> <span class="n">skiprows</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span> <span class="n">comments</span><span class="o">=</span><span class="s1">&#39;#&#39;</span><span class="p">)</span>
+    <span class="n">fdata</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">loadtxt</span><span class="p">(</span><span class="n">fname</span><span class="p">,</span> <span class="n">delimiter</span><span class="o">=</span><span class="s1">&#39;,&#39;</span><span class="p">,</span> <span class="n">skiprows</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">comments</span><span class="o">=</span><span class="s1">&#39;#&#39;</span><span class="p">)</span>
 
     <span class="n">wl</span> <span class="o">=</span> <span class="n">fdata</span><span class="p">[:,</span> <span class="mi">0</span><span class="p">]</span>
     <span class="n">nr</span> <span class="o">=</span> <span class="n">fdata</span><span class="p">[:,</span> <span class="mi">1</span><span class="p">]</span>
@@ -252,7 +253,7 @@
 <span class="sd">        :return: Tuple: (Reflection array, Transmission array)</span>
 <span class="sd">        &quot;&quot;&quot;</span>
 
-        <span class="n">warnings</span><span class="o">.</span><span class="n">warn</span><span class="p">(</span><span class="s2">&quot;Illumination class will be deprecated in future version.&quot;</span><span class="p">,</span> <span class="ne">DeprecationWarning</span><span class="p">)</span>
+        <span class="n">warnings</span><span class="o">.</span><span class="n">warn</span><span class="p">(</span><span class="s2">&quot;get_RT_fast() will be deprecated in future version.&quot;</span><span class="p">,</span> <span class="ne">DeprecationWarning</span><span class="p">)</span>
         <span class="c1"># initialize an array</span>
 
         <span class="n">nr</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">nr</span>
@@ -264,7 +265,12 @@
 
         <span class="k">return</span> <span class="n">R</span><span class="p">,</span> <span class="n">T</span></div>
 
-    <span class="k">def</span> <span class="nf">get_RT</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<div class="viewcode-block" id="TMLayers.get_RT"><a class="viewcode-back" href="../../transfer_matrix_optics.html#pypvcell.transfer_matrix_optics.TMLayers.get_RT">[docs]</a>    <span class="k">def</span> <span class="nf">get_RT</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Calculate the reflection and transmission</span>
+
+<span class="sd">        :return: Tuple: (Reflection array, Transmission array)</span>
+<span class="sd">        &quot;&quot;&quot;</span>
 
         <span class="c1"># initialize an array</span>
 
@@ -275,7 +281,7 @@
         <span class="c1"># T[ind] = abs((2 / (1 + n[0, ind]))) / np.sqrt(1 - R_glass[ind] * R[ind])</span>
         <span class="n">T</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">power</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">abs</span><span class="p">(</span><span class="mi">1</span> <span class="o">/</span> <span class="n">S</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="p">:]),</span> <span class="mi">2</span><span class="p">)</span> <span class="o">*</span> <span class="n">nr</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="p">:]</span> <span class="o">/</span> <span class="n">nr</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="p">:]</span>
 
-        <span class="k">return</span> <span class="n">R</span><span class="p">,</span> <span class="n">T</span>
+        <span class="k">return</span> <span class="n">R</span><span class="p">,</span> <span class="n">T</span></div>
 
     <span class="k">def</span> <span class="nf">_get_inv_S</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">S</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
