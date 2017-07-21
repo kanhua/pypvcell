@@ -17,3 +17,7 @@ This tutorial demonstrates how to use ``Spectrum`` class in pypvcell to handle t
 - `Optimal band gap calculation <http://nbviewer.jupyter.org/github/kanhua/pypvcell/blob/master/demos/efficiency_vs_bandgap.ipynb>`_
 
 This example demonstrates how to calculate optimal band gaps of single and multi-junction solar cells by using pypvcell.
+
+- `METPV11 data reader <http://nbviewer.jupyter.org/github/kanhua/pypvcell/blob/master/demos/metpv_data_reader_demo.ipynb>`_
+
+It demonstrates how to access `METPV-11 data <http://www.nedo.go.jp/library/nissharyou.html>`_ data using Pypvcell.
