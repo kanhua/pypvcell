@@ -1,6 +1,6 @@
+
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
   "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
-
 
 <html xmlns="http://www.w3.org/1999/xhtml">
   <head>
@@ -37,7 +37,7 @@
 </script>
 
   </head>
-  <body role="document">
+  <body>
     <div class="related" role="navigation" aria-label="related navigation">
       <h3>Navigation</h3>
       <ul>
@@ -103,13 +103,13 @@
 <div class="section" id="module-pypvcell.photocurrent">
 <span id="methods-in-this-module"></span><h2>Methods in this module<a class="headerlink" href="#module-pypvcell.photocurrent" title="Permalink to this headline">¶</a></h2>
 <p>Copyright 2017 Kan-Hua Lee, Toyota Technological Institute</p>
-<p>Licensed under the Apache License, Version 2.0 (the &#8220;License&#8221;);
+<p>Licensed under the Apache License, Version 2.0 (the “License”);
 you may not use this file except in compliance with the License.
 You may obtain a copy of the License at</p>
 <blockquote>
 <div><a class="reference external" href="http://www.apache.org/licenses/LICENSE-2.0">http://www.apache.org/licenses/LICENSE-2.0</a></div></blockquote>
 <p>Unless required by applicable law or agreed to in writing, software
-distributed under the License is distributed on an &#8220;AS IS&#8221; BASIS,
+distributed under the License is distributed on an “AS IS” BASIS,
 WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License.</p>
@@ -122,8 +122,8 @@ limitations under the License.</p>
 <col class="field-body" />
 <tbody valign="top">
 <tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
-<li><strong>input_illumination</strong> (<em>Illumination</em>) &#8211; illumination spectrum</li>
-<li><strong>qe</strong> (<a class="reference internal" href="spectrum_class.html#pypvcell.spectrum.Spectrum" title="pypvcell.spectrum.Spectrum"><em>Spectrum</em></a>) &#8211; QE</li>
+<li><strong>input_illumination</strong> (<em>Illumination</em>) – illumination spectrum</li>
+<li><strong>qe</strong> (<a class="reference internal" href="spectrum_class.html#pypvcell.spectrum.Spectrum" title="pypvcell.spectrum.Spectrum"><em>Spectrum</em></a>) – QE</li>
 </ul>
 </td>
 </tr>
@@ -143,8 +143,8 @@ limitations under the License.</p>
 <col class="field-body" />
 <tbody valign="top">
 <tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
-<li><strong>input_illumination</strong> (<em>Illumination</em>) &#8211; illumination (class)</li>
-<li><strong>eg</strong> &#8211; Band gap of the material (in eV)</li>
+<li><strong>input_illumination</strong> (<em>Illumination</em>) – illumination (class)</li>
+<li><strong>eg</strong> – Band gap of the material (in eV)</li>
 </ul>
 </td>
 </tr>
@@ -166,8 +166,8 @@ For example, if the unit of <code class="docutils literal"><span class="pre">abs
 <col class="field-body" />
 <tbody valign="top">
 <tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
-<li><strong>absorption</strong> (<a class="reference internal" href="spectrum_class.html#pypvcell.spectrum.Spectrum" title="pypvcell.spectrum.Spectrum"><em>Spectrum</em></a>) &#8211; Spectrum class instance, the unit of absorption: 1/m</li>
-<li><strong>layer_thickness</strong> (<em>float</em>) &#8211; layer thickness, unit: m</li>
+<li><strong>absorption</strong> (<a class="reference internal" href="spectrum_class.html#pypvcell.spectrum.Spectrum" title="pypvcell.spectrum.Spectrum"><em>Spectrum</em></a>) – Spectrum class instance, the unit of absorption: 1/m</li>
+<li><strong>layer_thickness</strong> (<em>float</em>) – layer thickness, unit: m</li>
 </ul>
 </td>
 </tr>
@@ -189,7 +189,7 @@ For example, if the unit of <code class="docutils literal"><span class="pre">abs
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>eqe</strong> &#8211; </td>
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>eqe</strong> – </td>
 </tr>
 </tbody>
 </table>
@@ -211,10 +211,10 @@ EQE(E)= z (z~0) if E&lt;Eg</p>
 <col class="field-body" />
 <tbody valign="top">
 <tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
-<li><strong>bandEdge_in_eV</strong> (<em>float</em>) &#8211; set Eg</li>
-<li><strong>qe_in_ratio</strong> (<em>float</em>) &#8211; set qe value (qe) above Eg</li>
-<li><strong>qe_below_edge</strong> &#8211; set qe value (z) below Eg</li>
-<li><strong>wl_bound</strong> (<em>Tuple</em><em>[</em><em>float</em><em>,</em><em>float</em><em>]</em><em></em>) &#8211; tuple: (minE, maxE), The minimum and maximum of photon energy of this array</li>
+<li><strong>bandEdge_in_eV</strong> (<em>float</em>) – set Eg</li>
+<li><strong>qe_in_ratio</strong> (<em>float</em>) – set qe value (qe) above Eg</li>
+<li><strong>qe_below_edge</strong> – set qe value (z) below Eg</li>
+<li><strong>wl_bound</strong> (<em>Tuple</em><em>[</em><em>float</em><em>,</em><em>float</em><em>]</em>) – tuple: (minE, maxE), The minimum and maximum of photon energy of this array</li>
 </ul>
 </td>
 </tr>
@@ -239,10 +239,10 @@ EQE(E)= z (z~0) if E&lt;Eg</p>
 <col class="field-body" />
 <tbody valign="top">
 <tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
-<li><strong>bandEdge_in_eV</strong> (<em>float</em>) &#8211; set Eg</li>
-<li><strong>qe_in_ratio</strong> (<em>float</em>) &#8211; set qe value (qe) above Eg</li>
-<li><strong>qe_below_edge</strong> &#8211; set qe value (z) below Eg</li>
-<li><strong>wl_bound</strong> (<em>Tuple</em><em>[</em><em>float</em><em>,</em><em>float</em><em>]</em><em></em>) &#8211; tuple: (minE, maxE), The minimum and maximum of photon energy of this array</li>
+<li><strong>bandEdge_in_eV</strong> (<em>float</em>) – set Eg</li>
+<li><strong>qe_in_ratio</strong> (<em>float</em>) – set qe value (qe) above Eg</li>
+<li><strong>qe_below_edge</strong> – set qe value (z) below Eg</li>
+<li><strong>wl_bound</strong> (<em>Tuple</em><em>[</em><em>float</em><em>,</em><em>float</em><em>]</em>) – tuple: (minE, maxE), The minimum and maximum of photon energy of this array</li>
 </ul>
 </td>
 </tr>
@@ -259,14 +259,14 @@ EQE(E)= z (z~0) if E&lt;Eg</p>
 <dl class="function">
 <dt id="pypvcell.photocurrent.lambert_abs">
 <code class="descclassname">pypvcell.photocurrent.</code><code class="descname">lambert_abs</code><span class="sig-paren">(</span><em>absorption: typing.List[pypvcell.spectrum.Spectrum], layer_thicknesses: typing.List[float]</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pypvcell/photocurrent.html#lambert_abs"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pypvcell.photocurrent.lambert_abs" title="Permalink to this definition">¶</a></dt>
-<dd><p>Calculate transmission of stacked layers using Beer-Lambert&#8217;s law</p>
+<dd><p>Calculate transmission of stacked layers using Beer-Lambert’s law</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
 <tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
-<li><strong>absorption</strong> &#8211; an array absorption class, the unit of absorption should be 1/m</li>
-<li><strong>layer_thicknesses</strong> &#8211; an array of layer thickness</li>
+<li><strong>absorption</strong> – an array absorption class, the unit of absorption should be 1/m</li>
+<li><strong>layer_thicknesses</strong> – an array of layer thickness</li>
 </ul>
 </td>
 </tr>
@@ -307,7 +307,7 @@ EQE(E)= z (z~0) if E&lt;Eg</p>
 
     <div class="footer" role="contentinfo">
         &#169; Copyright 2017, Kan-Hua Lee.
-      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.5.5.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.6.2.
     </div>
 <script>
     (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){

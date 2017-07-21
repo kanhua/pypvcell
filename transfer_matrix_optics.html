@@ -1,6 +1,6 @@
+
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
   "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
-
 
 <html xmlns="http://www.w3.org/1999/xhtml">
   <head>
@@ -36,7 +36,7 @@
 </script>
 
   </head>
-  <body role="document">
+  <body>
     <div class="related" role="navigation" aria-label="related navigation">
       <h3>Navigation</h3>
       <ul>
@@ -90,9 +90,9 @@
         <div class="bodywrapper">
           <div class="body" role="main">
             
-  <div class="section" id="transfer-matrix-optics">
-<h1>Transfer Matrix Optics<a class="headerlink" href="#transfer-matrix-optics" title="Permalink to this headline">¶</a></h1>
-<span class="target" id="module-pypvcell.transfer_matrix_optics"></span><p>This module calculates transfer matrix optics.
+  <div class="section" id="module-pypvcell.transfer_matrix_optics">
+<span id="transfer-matrix-optics"></span><h1>Transfer Matrix Optics<a class="headerlink" href="#module-pypvcell.transfer_matrix_optics" title="Permalink to this headline">¶</a></h1>
+<p>This module calculates transfer matrix optics.
 Basic usages look like this:</p>
 <div class="highlight-default"><div class="highlight"><pre><span></span><span class="c1"># Setup the layers</span>
 <span class="n">layers</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;Air&#39;</span><span class="p">,</span> <span class="s1">&#39;SiO2_2&#39;</span><span class="p">,</span> <span class="s1">&#39;TiO2_2&#39;</span><span class="p">,</span> <span class="s1">&#39;GaAs_2&#39;</span><span class="p">]</span>
@@ -117,19 +117,19 @@ films, Journal of Applied Physics, vol. 86, pp. 487 (1999). DOI: <cite>10.1063/1
 <h2>APIs<a class="headerlink" href="#apis" title="Permalink to this headline">¶</a></h2>
 <dl class="class">
 <dt id="pypvcell.transfer_matrix_optics.TMLayers">
-<em class="property">class </em><code class="descclassname">pypvcell.transfer_matrix_optics.</code><code class="descname">TMLayers</code><span class="sig-paren">(</span><em>layers: typing.List[T], thicknesses: typing.List[T], wl_range=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pypvcell/transfer_matrix_optics.html#TMLayers"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pypvcell.transfer_matrix_optics.TMLayers" title="Permalink to this definition">¶</a></dt>
+<em class="property">class </em><code class="descclassname">pypvcell.transfer_matrix_optics.</code><code class="descname">TMLayers</code><span class="sig-paren">(</span><em>layers: typing.List</em>, <em>thicknesses: typing.List</em>, <em>wl_range=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pypvcell/transfer_matrix_optics.html#TMLayers"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pypvcell.transfer_matrix_optics.TMLayers" title="Permalink to this definition">¶</a></dt>
 <dd><dl class="method">
 <dt id="pypvcell.transfer_matrix_optics.TMLayers.__init__">
-<code class="descname">__init__</code><span class="sig-paren">(</span><em>layers: typing.List[T], thicknesses: typing.List[T], wl_range=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pypvcell/transfer_matrix_optics.html#TMLayers.__init__"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pypvcell.transfer_matrix_optics.TMLayers.__init__" title="Permalink to this definition">¶</a></dt>
+<code class="descname">__init__</code><span class="sig-paren">(</span><em>layers: typing.List</em>, <em>thicknesses: typing.List</em>, <em>wl_range=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pypvcell/transfer_matrix_optics.html#TMLayers.__init__"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pypvcell.transfer_matrix_optics.TMLayers.__init__" title="Permalink to this definition">¶</a></dt>
 <dd><p>Initialize the multi-layer system</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
 <tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
-<li><strong>layers</strong> &#8211; list. The name of the layers. The layer name should be in the folder <code class="docutils literal"><span class="pre">matdata/</span></code>.</li>
-<li><strong>thicknesses</strong> &#8211; The thickness of the layers.</li>
-<li><strong>wl_range</strong> &#8211; ndarray. The reference wavelength range.</li>
+<li><strong>layers</strong> – list. The name of the layers. The layer name should be in the folder <code class="docutils literal"><span class="pre">matdata/</span></code>.</li>
+<li><strong>thicknesses</strong> – The thickness of the layers.</li>
+<li><strong>wl_range</strong> – ndarray. The reference wavelength range.</li>
 </ul>
 </td>
 </tr>
@@ -194,7 +194,7 @@ films, Journal of Applied Physics, vol. 86, pp. 487 (1999). DOI: <cite>10.1063/1
 
     <div class="footer" role="contentinfo">
         &#169; Copyright 2017, Kan-Hua Lee.
-      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.5.5.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.6.2.
     </div>
 <script>
     (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
