@@ -2,7 +2,7 @@ import pandas as pd
 import numpy as np
 
 from pvlib.tracking import SingleAxisTracker
-from pvlib.irradiance import total_irrad, aoi_projection
+from pvlib.irradiance import total_irrad, aoi_projection, aoi
 from pvlib.location import Location
 
 
@@ -22,6 +22,7 @@ class NEDOLocation(object):
         with open(nedo_day_file) as f:
             headline = next(f)
         byte_num, loc_name, lat1, lat2, lon1, lon2, height = headline.split(sep=',')
+        self.loc_num=byte_num
         self.loc_name = loc_name
         self.latitude = float(lat1) + 0.1 * float(lat2)
         self.longitude = float(lon1) + 0.1 * float(lon2)
@@ -86,6 +87,8 @@ class NEDOLocation(object):
                                apparent_zenith=solar_pos['apparent_zenith'],
                                azimuth=solar_pos['azimuth'], dni=dni_arr,
                                ghi=self.hour_df['GHI'], dhi=self.hour_df['dHI'])
+
+        irrad_df['aoi']= aoi(surface_tilt,surface_azimuth,solar_pos['zenith'],solar_pos['azimuth'])
 
         irrad_df['DNI'] = dni_arr
 
