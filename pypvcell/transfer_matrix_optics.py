@@ -51,11 +51,18 @@ import matplotlib.pyplot as plt
 from typing import List
 import warnings
 
-MAT_DIR = join(os.path.dirname(__file__),'matdata')
+MAT_DIR = join(os.path.dirname(__file__), 'matdata')
 MAT_PREFIX = 'nk_'
 
 
 def get_ntotal(mat_name, lambdas):
+    """
+    Read the nk values of material "mat_name"
+
+    :param mat_name: the name of the material
+    :param lambdas: the required wavelengths (nm)
+    :return: the refractive index (complex) coresponds to lambdas
+    """
     fname = join(MAT_DIR, "%s%s.csv" % (MAT_PREFIX, mat_name))
     fdata = np.loadtxt(fname, delimiter=',', skiprows=1, comments='#')
 
@@ -72,6 +79,19 @@ def get_ntotal(mat_name, lambdas):
     nt = ip_nr + 1j * ip_nk
 
     return nt
+
+
+def get_ntotal_fn(mat_name):
+    fname = join(MAT_DIR, "%s%s.csv" % (MAT_PREFIX, mat_name))
+    fdata = np.loadtxt(fname, delimiter=',', skiprows=1, comments='#')
+
+    wl = fdata[:, 0]
+    nr = fdata[:, 1]
+    nk = fdata[:, 2]
+
+    nt = nr + 1j * nk
+
+    return interp1d(wl, nt)
 
 
 def inter_mat(n1, n2):
@@ -100,7 +120,7 @@ def prop_mat(layer_nr, layer_d, wavelength):
 
 
 class TMLayers(object):
-    def __init__(self, layers:List, thicknesses:List, wl_range=None):
+    def __init__(self, layers: List, thicknesses: List, wl_range=None):
         """
         Initialize the multi-layer system
         
@@ -218,7 +238,6 @@ class TMLayers(object):
         :param S: 
         :return: 
         """
-
 
         invS = np.moveaxis(S, -1, 0)
 
