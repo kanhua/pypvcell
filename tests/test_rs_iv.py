@@ -7,7 +7,7 @@ __author__ = 'kanhua'
 import unittest
 import numpy as np
 import matplotlib.pyplot as plt
-from ivsolver import gen_rec_iv_with_rs_by_newton, gen_rec_iv
+from pypvcell.ivsolver import gen_rec_iv_with_rs_by_newton, gen_rec_iv
 
 
 I01_array = (1e-20, 1e-18, 1e-17)
