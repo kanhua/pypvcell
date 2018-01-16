@@ -17,17 +17,18 @@ class NEDOLocation(object):
 
     """
 
-    def __init__(self, nedo_day_file, custom_year=2016):
+    def __init__(self, nedo_day_file, custom_year=2016,process_data=True):
         self.main_df = load_nedo_data(nedo_day_file, custom_year)
         with open(nedo_day_file) as f:
             headline = next(f)
         byte_num, loc_name, lat1, lat2, lon1, lon2, height = headline.split(sep=',')
         self.loc_num=byte_num
         self.loc_name = loc_name
-        self.latitude = float(lat1) + 0.1 * float(lat2)
-        self.longitude = float(lon1) + 0.1 * float(lon2)
+        self.latitude = float(lat1) + 1/60 * float(lat2)
+        self.longitude = float(lon1) + 1/60 * float(lon2)
         self.altitude = float(height)
-        self.extract_unstack_hour_data(norm=False)
+        if process_data:
+            self.extract_unstack_hour_data(norm=False)
 
     def extract_unstack_hour_data(self, norm=False):
         ext_df = extract_hour_data(self.main_df)
@@ -65,9 +66,9 @@ class NEDOLocation(object):
 
         return dni_arr
 
-    def tilt_irr(self, surface_tilt=None, surface_azimuth=180, include_solar_pos=False):
+    def tilt_irr(self, surface_tilt=None, surface_azimuth=180, include_solar_pos=False)->pd.DataFrame:
         """
-        Calculate the irradiances on a tilted surface
+        Calculate the irradiances(DNI) and angle of incidence (aoi) on a tilted surface
 
         :param surface_tilt: The surface tilt angle (in degree).
         :param surface_azimuth: The azimuth angle of the surface. Default is 180 degrees.

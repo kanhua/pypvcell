@@ -66,6 +66,10 @@ class SolarCell(object):
 
         raise NotImplementedError()
 
+    def get_j_from_v(self,voltage):
+
+        raise NotImplementedError()
+
     def set_description(self,desp):
 
         self.desp=desp
@@ -166,6 +170,11 @@ class SQCell(SolarCell):
         return one_diode_v_from_i(current,self.j01,rad_eta=self.rad_eta,
                                   n1=1,temperature=self.cell_T,jsc=self.jsc)
 
+    def get_j_from_v(self,volt):
+
+        _, current = gen_rec_iv_by_rad_eta(self.j01, 1, 1, self.cell_T, np.inf, voltage=volt, jsc=self.jsc)
+
+        return current
 
 class DBCell(SolarCell):
     def __init__(self, qe, rad_eta, T, n_c=3.5, n_s=1, qe_cutoff=1e-3):
