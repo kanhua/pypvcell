@@ -44,6 +44,38 @@ def n_intrinsic(Eg, mEff_e, mEff_h, T):
     return np.sqrt(niSquared)
 
 
+def calc_jdiff(ni,dn,dp,Na,Nd,Ln,Lp):
+    """
+    Calculation the diffusion saturation current
+
+    :param ni: intrinsic density
+    :param dn: diffusivity in n layer
+    :param dp: diffusivity in p layer
+    :param Na: doping density in p layer
+    :param Nd: doping density in n layer
+    :param Ln: diffusion length in n layer
+    :param Lp: diffusion length in p layer
+    :return: saturation current
+    """
+
+    return sc.e*ni*ni*(dn/(Na*Ln)+dp/(Nd*Lp))
+
+
+def calc_jcr(ni,wn,wp,tn,tp):
+    """
+    calculate the saturation recombination current (exp(qV/2kT)-1)
+
+    :param ni: intrinsic density
+    :param wn: depletion width in n layer
+    :param wp: depletion width in p layer
+    :param tn: lifetime of electron
+    :param tp: lifetime of holes
+    :return:
+    """
+
+    return sc.e*ni*(wn+wp)/(tn*tp)**0.5
+
+
 
 def calc_jnp(V, Vbi, alphaBottom, alphaI, alphaTop, bsInitial, bs_incident_on_top, d_bottom, d_top, energies, T,
              l_bottom, l_top, ni, pn_or_np, s_bottom, s_top, w_bottom, w_top, x_bottom, x_top, xi):
