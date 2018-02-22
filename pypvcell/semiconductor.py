@@ -47,6 +47,7 @@ def n_intrinsic(Eg, mEff_e, mEff_h, T):
 def calc_jdiff(ni,dn,dp,Na,Nd,Ln,Lp):
     """
     Calculation the diffusion saturation current
+    All parameters are in MKS units
 
     :param ni: intrinsic density
     :param dn: diffusivity in n layer
