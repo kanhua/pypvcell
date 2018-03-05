@@ -16,7 +16,7 @@
 from pypvcell.illumination import Illumination
 from pypvcell.photocurrent import gen_step_qe, calc_jsc_from_eg, calc_jsc
 from .ivsolver import calculate_j01, gen_rec_iv_by_rad_eta, solve_mj_iv, new_solve_mj_iv, one_diode_v_from_i, \
-    solve_mj_iv_obj_with_optimization
+    solve_mj_iv_obj_with_optimization,one_diode_v_from_i_p
 from .fom import max_power
 from .spectrum import Spectrum, _energy_to_length
 from .detail_balanced_MJ import calculate_j01_from_qe
@@ -119,6 +119,7 @@ class SQCell(SolarCell):
         self.n_s = n_s
         self.rad_eta = rad_eta
         self.approx = approx
+        self.jsc=0
 
         self.desp = 'SQCell'
         self._construct()
@@ -167,7 +168,12 @@ class SQCell(SolarCell):
     def get_v_from_j(self, current):
 
         return one_diode_v_from_i(current, self.j01, rad_eta=self.rad_eta,
-                                  n1=1, temperature=self.cell_T, jsc=self.jsc)
+                                  n1=1, temperature=self.cell_T, jsc=self.jsc)[0]
+
+    def get_v_from_j_p(self,current):
+
+        return one_diode_v_from_i_p(current, self.j01, rad_eta=self.rad_eta,
+                                    n1=1, temperature=self.cell_T, jsc=self.jsc)
 
     def get_j_from_v(self, volt):
 
@@ -374,14 +380,23 @@ class SeriesConnect(SolarCell):
 
         return np.array(solved_j)
 
-    def get_single_j_from_v(self, voltage):
+    def get_single_j_from_v(self, voltage,x0=0):
 
         def f(x):
             return self.get_v_from_j(x) - voltage
 
-        j = newton(f, 1, fprime=self.get_v_from_j_p)
+        j = newton(f, x0=x0, fprime=self.get_v_from_j_p)
 
         return j
+
+    def get_single_j_from_v_bisect(self,voltage,a,b):
+
+        from scipy.optimize import bisect
+
+        def f(x):
+            return self.get_v_from_j(x) - voltage
+
+        return bisect(f, a, b)
 
 
 class ParallelConnect(SolarCell):
@@ -414,12 +429,12 @@ class ParallelConnect(SolarCell):
 
         return np.array(solved_j)
 
-    def get_single_v_from_j(self, current):
+    def get_single_v_from_j(self, current,x0=0.0):
 
         def f(x):
             return self.get_j_from_v(x) - current
 
-        j = newton(f, x0=0, fprime=self.get_j_from_v_p)
+        j = newton(f, x0=x0, fprime=self.get_j_from_v_p)
         # solved_j.append(j)
 
         return j

@@ -79,15 +79,26 @@ def one_diode_v_from_i(current, j01, rad_eta, n1, temperature, jsc):
     """
 
     if jsc < 0:
-        raise ValueError("Jsc should be a positve value")
+        raise ValueError("Jsc should be a positive value")
 
     log_component = rad_eta * (current + jsc) / j01 + 1
 
-    index = log_component > 0
-    n_current = current[index]
-    log_component = log_component[index]
+    if hasattr(log_component, "__iter__"):
+        index = log_component > 0
+        n_current = current[index]
+        log_component = log_component[index]
+    else:
+        n_current = 1
+        index = 0
+        if log_component < 0:
+            return np.nan, n_current, index
 
     return (n1 * sc.k * temperature / sc.e) * np.log(log_component), n_current, index
+
+
+def one_diode_v_from_i_p(current, j01, rad_eta, n1, temperature, jsc):
+    m = rad_eta / j01
+    return (n1 * sc.k * temperature / sc.e) * (m / (m * (current + jsc) + 1))
 
 
 def gen_rec_iv_with_rs_by_reverse(j01, j02, n1, n2, temperature, rshunt, rseries, voltage, jsc=0):
@@ -160,7 +171,7 @@ def gen_rec_iv_with_rs_by_newton(j01, j02, n1, n2, temperature, rshunt, rseries,
 j01_lead_term = np.power(sc.e, 4) * 2 * sc.pi / (np.power(sc.c, 2) * np.power(sc.h, 3))
 
 
-def calculate_j01_from_qe(qe:Spectrum, n_c=3.5, n_s=1, threshold=1e-3, step_in_ev=1e-5, lead_term=None, T=300):
+def calculate_j01_from_qe(qe: Spectrum, n_c=3.5, n_s=1, threshold=1e-3, step_in_ev=1e-5, lead_term=None, T=300):
     r"""
     Calculate j01 from known absorptivity or QE using the following expression:
     
@@ -261,7 +272,7 @@ def calculate_j01(eg_in_ev, temperature, n1, n_c=3.5, n_s=1, approx=False):
 
     eg = eg_in_ev * sc.e
     Term1 = 2 * sc.pi * (n_c ** 2 + n_s ** 2) * sc.e / (
-        np.power(sc.h, 3) * np.power(sc.c, 2))
+            np.power(sc.h, 3) * np.power(sc.c, 2))
     Term2 = sc.k * temperature * np.exp(-eg / (n1 * sc.k * temperature))
     if approx == False:
         Term3 = np.power(eg, 2) + (2 * eg * sc.k * temperature) + (2 * np.power(sc.k, 2) * np.power(temperature, 2))
@@ -321,7 +332,6 @@ def solve_mj_iv(v_i, i_max=None, discret_num=10000):
     # Select the minimum of range maximums
 
     # Select the maximum of range minimums
-
 
     # check the input
     i_range_max = 0
@@ -545,10 +555,9 @@ def solve_iv_range_obj(subcells: List, i_min, i_max, disc_num=1000):
     :rtype: tuple(numpy.ndarray, numpy.ndarray)
     """
 
-
     # discretize positive and negative current separately
-    n_i_range = np.linspace(i_min, 0, num=int(disc_num/2))
-    p_i_range = np.linspace(0, i_max, num=int(disc_num/2))
+    n_i_range = np.linspace(i_min, 0, num=int(disc_num / 2))
+    p_i_range = np.linspace(0, i_max, num=int(disc_num / 2))
 
     # rearrange the discretized points
     current_range = np.sort(np.unique(np.concatenate((n_i_range, p_i_range))))
