@@ -15,13 +15,14 @@
 """
 from pypvcell.illumination import Illumination
 from pypvcell.photocurrent import gen_step_qe, calc_jsc_from_eg, calc_jsc
-from .ivsolver import calculate_j01, gen_rec_iv_by_rad_eta, solve_mj_iv,new_solve_mj_iv,one_diode_v_from_i,solve_mj_iv_obj_with_optimization
+from .ivsolver import calculate_j01, gen_rec_iv_by_rad_eta, solve_mj_iv, new_solve_mj_iv, one_diode_v_from_i, \
+    solve_mj_iv_obj_with_optimization
 from .fom import max_power
-from .spectrum import Spectrum,_energy_to_length
+from .spectrum import Spectrum, _energy_to_length
 from .detail_balanced_MJ import calculate_j01_from_qe
 import numpy as np
 import scipy.constants as sc
-
+from scipy.optimize import newton
 
 thermal_volt = sc.k / sc.e
 
@@ -62,21 +63,21 @@ class SolarCell(object):
 
         raise NotImplementedError()
 
-    def get_v_from_j(self,current):
+    def get_v_from_j(self, current):
 
         raise NotImplementedError()
 
-    def get_j_from_v(self,voltage):
+    def get_j_from_v(self, voltage):
 
         raise NotImplementedError()
 
-    def set_description(self,desp):
+    def set_description(self, desp):
 
-        self.desp=desp
+        self.desp = desp
 
     def __str__(self):
 
-        if self.desp==None:
+        if self.desp == None:
             return "solar cell"
         else:
             return self.desp
@@ -96,14 +97,13 @@ class TransparentCell(SolarCell):
         return 0
 
 
-
 class SQCell(SolarCell):
     """
     A SolarCell at Shockley-Queisser limit
 
     """
 
-    def __init__(self, eg, cell_T, rad_eta=1, n_c=3.5, n_s=1,approx=False):
+    def __init__(self, eg, cell_T, rad_eta=1, n_c=3.5, n_s=1, approx=False):
         """
         Initialize a SQ solar cell.
         It loads the class and sets up J01 of the cell
@@ -118,9 +118,9 @@ class SQCell(SolarCell):
         self.n_c = n_c
         self.n_s = n_s
         self.rad_eta = rad_eta
-        self.approx=approx
+        self.approx = approx
 
-        self.desp='SQCell'
+        self.desp = 'SQCell'
         self._construct()
 
     def _construct(self):
@@ -128,11 +128,10 @@ class SQCell(SolarCell):
         method = 'ana'
         if method == 'ana':
             self.j01 = calculate_j01(self.eg, temperature=self.cell_T,
-                                     n1=1, n_c=self.n_c, n_s=self.n_s,approx=self.approx)
+                                     n1=1, n_c=self.n_c, n_s=self.n_s, approx=self.approx)
         elif method == 'num':
-            qe=gen_step_qe(self.eg,1)
-            self.j01=calculate_j01_from_qe(qe,n_c=self.n_c,n_s=self.n_s,T=self.cell_T)
-
+            qe = gen_step_qe(self.eg, 1)
+            self.j01 = calculate_j01_from_qe(qe, n_c=self.n_c, n_s=self.n_s, T=self.cell_T)
 
     def set_input_spectrum(self, input_spectrum):
         self.ill = input_spectrum
@@ -140,13 +139,13 @@ class SQCell(SolarCell):
 
     def get_transmit_spectrum(self):
 
-        sp=self.ill.get_spectrum(to_x_unit='m')
+        sp = self.ill.get_spectrum(to_x_unit='m')
 
-        filter_y = sp[0, :] >= _energy_to_length(self.eg,'eV','m')
+        filter_y = sp[0, :] >= _energy_to_length(self.eg, 'eV', 'm')
 
         filter = Spectrum(sp[0, :], filter_y, x_unit='m')
 
-        return self.ill*filter
+        return self.ill * filter
 
     def get_eta(self):
         volt = np.linspace(-0.5, self.eg, num=300)
@@ -165,16 +164,17 @@ class SQCell(SolarCell):
 
         return volt, current
 
-    def get_v_from_j(self,current):
+    def get_v_from_j(self, current):
 
-        return one_diode_v_from_i(current,self.j01,rad_eta=self.rad_eta,
-                                  n1=1,temperature=self.cell_T,jsc=self.jsc)
+        return one_diode_v_from_i(current, self.j01, rad_eta=self.rad_eta,
+                                  n1=1, temperature=self.cell_T, jsc=self.jsc)
 
-    def get_j_from_v(self,volt):
+    def get_j_from_v(self, volt):
 
         _, current = gen_rec_iv_by_rad_eta(self.j01, 1, 1, self.cell_T, np.inf, voltage=volt, jsc=self.jsc)
 
         return current
+
 
 class DBCell(SolarCell):
     def __init__(self, qe, rad_eta, T, n_c=3.5, n_s=1, qe_cutoff=1e-3):
@@ -261,7 +261,7 @@ class MJCell(SolarCell):
         """
 
         self.subcell = subcell
-        self.connect=connect
+        self.connect = connect
 
     def set_input_spectrum(self, input_spectrum):
 
@@ -280,37 +280,147 @@ class MJCell(SolarCell):
 
         return self.subcell[-1].get_transmit_spectrum()
 
-    def get_iv(self, volt=None,verbose=0):
+    def get_iv(self, volt=None, verbose=0):
 
         subcell_voltage = np.linspace(-5, 1.9, num=300)
         all_iv = [(sc.get_iv(volt=subcell_voltage)) for sc in self.subcell]
 
-        #v, i = new_solve_mj_iv(all_iv)
+        # v, i = new_solve_mj_iv(all_iv)
 
-        v,i=solve_mj_iv_obj_with_optimization(self.subcell, verbose=verbose)
+        v, i = solve_mj_iv_obj_with_optimization(self.subcell, verbose=verbose)
 
         return v, i
 
-    def get_eta(self,verbose=0):
+    def get_eta(self, verbose=0):
 
-        if self.connect=='2T':
+        if self.connect == '2T':
 
             v, i = self.get_iv(verbose=verbose)
 
-            eta = max_power(v, i)/self.ill.rsum()
+            eta = max_power(v, i) / self.ill.rsum()
 
-        elif self.connect=='MS':
-            mp=0
+        elif self.connect == 'MS':
+            mp = 0
             for sc in self.subcell:
-                mp+=max_power(*sc.get_iv())
+                mp += max_power(*sc.get_iv())
 
-            eta=mp/self.ill.rsum()
+            eta = mp / self.ill.rsum()
 
         return eta
 
     def get_subcell_jsc(self):
 
-        jsc=np.array([sc.get_iv(0)[1] for sc in self.subcell])
+        jsc = np.array([sc.get_iv(0)[1] for sc in self.subcell])
 
         return jsc
+
+
+class ResistorCell(SolarCell):
+
+    def __init__(self, resistance):
+        self.r = resistance
+
+    def get_v_from_j(self, current):
+        return current * self.r
+
+    def get_j_from_v(self, voltage):
+        return voltage / self.r
+
+    def get_v_from_j_p(self, current):
+        return self.r
+
+    def get_j_from_v_p(self, voltage):
+        return 1/self.r
+
+    def get_j_from_v_by_newton(self, voltage):
+
+        voltage=float(voltage)
+
+        def f(x):
+            return self.get_v_from_j(x)-voltage
+
+        j = newton(f, x0=0, fprime=self.get_v_from_j_p)
+
+        return j
+
+
+class SeriesConnect(SolarCell):
+    def __init__(self, s_list):
+        self.s_list = s_list
+
+    def get_v_from_j(self, current):
+
+        result_v = np.zeros_like(current)
+        for scell in self.s_list:
+            v = scell.get_v_from_j(current)
+            result_v += v
+        return result_v
+
+    def get_v_from_j_p(self, current):
+
+        result_v = np.zeros_like(current)
+        for scell in self.s_list:
+            v = scell.get_v_from_j_p(current)
+            result_v += v
+        return result_v
+
+    def get_j_from_v(self, voltage):
+
+        solved_j = []
+
+        for v in voltage:
+            j = self.get_single_j_from_v(v)
+            solved_j.append(j)
+
+        return np.array(solved_j)
+
+    def get_single_j_from_v(self, voltage):
+
+        def f(x):
+            return self.get_v_from_j(x) - voltage
+
+        j = newton(f, 1, fprime=self.get_v_from_j_p)
+
+        return j
+
+
+class ParallelConnect(SolarCell):
+    def __init__(self, s_list):
+        self.s_list = s_list
+
+    def get_j_from_v(self, current):
+
+        result_j = np.zeros_like(current)
+        for scell in self.s_list:
+            j = scell.get_j_from_v(current)
+            result_j += j
+        return result_j
+
+    def get_j_from_v_p(self, voltage):
+
+        result_v = np.zeros_like(voltage)
+        for scell in self.s_list:
+            v = scell.get_j_from_v_p(voltage)
+            result_v += v
+        return result_v
+
+    def get_v_from_j(self, current):
+
+        solved_j = []
+
+        for v in current:
+            j = self.get_single_v_from_j(v)
+            solved_j.append(j)
+
+        return np.array(solved_j)
+
+    def get_single_v_from_j(self, current):
+
+        def f(x):
+            return self.get_j_from_v(x) - current
+
+        j = newton(f, x0=0, fprime=self.get_j_from_v_p)
+        # solved_j.append(j)
+
+        return j
 
