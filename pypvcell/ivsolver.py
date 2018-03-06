@@ -48,11 +48,25 @@ def gen_rec_iv(j01, j02, n1, n2, temperature, rshunt, voltage, jsc=0):
 
 def gen_rec_iv_by_rad_eta(j01, rad_eta, n1, temperature, rshunt, voltage, jsc=0):
     if np.isinf(rshunt):
-        shunt_term = 0
+        shunt_term = 0.0
     else:
         shunt_term = voltage / rshunt
 
-    current = (j01 / rad_eta * (np.exp(sc.e * voltage / (n1 * sc.k * temperature)) - 1) +
+    m = sc.e / (n1 * sc.k * temperature)
+
+    current = (j01 / rad_eta * (np.exp(m * voltage) - 1) +
+               shunt_term) - jsc
+    return (voltage, current)
+
+def gen_rec_iv_by_rad_eta_no1(j01, rad_eta, n1, temperature, rshunt, voltage, jsc=0):
+    if np.isinf(rshunt):
+        shunt_term = 0.0
+    else:
+        shunt_term = voltage / rshunt
+
+    m = sc.e / (n1 * sc.k * temperature)
+
+    current = (j01 / rad_eta * (np.exp(m * voltage)) +
                shunt_term) - jsc
     return (voltage, current)
 
