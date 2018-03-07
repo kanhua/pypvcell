@@ -541,6 +541,12 @@ class DiodeSeriesConnect(SolarCell):
 
         x_data, y_data = self.construct_iv()
 
+        is_larger = np.greater(voltage, np.min(x_data))
+        is_smaller = np.less(voltage, np.max(x_data))
+
+        if (not np.all(is_larger)) or (not np.all(is_smaller)):
+            raise ValueError("the voltage is outside the range of interpolation")
+
         j = np.interp(voltage, x_data, y_data)
 
         return j

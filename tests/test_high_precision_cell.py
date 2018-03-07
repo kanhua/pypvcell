@@ -42,6 +42,36 @@ class TestHighPrecisionSQCellCase(unittest.TestCase):
 
         self.assertTrue(np.allclose(test_v, ttest_v))
 
+    def test_diode_solver(self):
+        hp1 = HighPSQCell(1.42, cell_T=300)
+        hp1.set_input_spectrum(load_astm())
+
+        hp2 = HighPSQCell(1.42, cell_T=300)
+        hp2.set_input_spectrum(load_astm())
+
+        hp3 = HighPSQCell(1.42, cell_T=300)
+        hp3.set_input_spectrum(load_astm())
+
+        ref_hp = HighPSQCell(1.42, cell_T=300)
+        ref_hp.set_input_spectrum(load_astm())
+
+        d1 = DiodeSeriesConnect([hp1, hp2, hp3])
+
+        test_v = 1.0
+        j1 = d1.get_j_from_v(test_v)
+        j2 = ref_hp.get_j_from_v(test_v / 3.0)
+        # by circuit law, j1 should equal to j2
+
+        self.assertTrue(np.isclose(j1, j2))
+
+        # extend the examination range
+
+        test_v = np.linspace(-1, 1, 10)
+        j1 = d1.get_j_from_v(test_v)
+        j2 = ref_hp.get_j_from_v(test_v / 3.0)
+
+        self.assertTrue(np.allclose(j1, j2))
+
 
 if __name__ == '__main__':
     unittest.main()
