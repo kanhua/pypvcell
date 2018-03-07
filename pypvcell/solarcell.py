@@ -15,8 +15,8 @@
 """
 from pypvcell.illumination import Illumination
 from pypvcell.photocurrent import gen_step_qe, calc_jsc_from_eg, calc_jsc
-from .ivsolver import calculate_j01, gen_rec_iv_by_rad_eta, solve_mj_iv, new_solve_mj_iv, one_diode_v_from_i, \
-    solve_mj_iv_obj_with_optimization, one_diode_v_from_i_p, gen_rec_iv_by_rad_eta_no1, one_diode_v_from_i_no1
+from .ivsolver import calculate_j01, gen_rec_iv_by_rad_eta, one_diode_v_from_i, \
+    solve_mj_iv_obj_with_optimization, one_diode_v_from_i_p
 from .fom import max_power
 from .spectrum import Spectrum, _energy_to_length
 from .detail_balanced_MJ import calculate_j01_from_qe
@@ -200,8 +200,8 @@ class HighPSQCell(SQCell):
 
     def get_v_from_j(self, current):
 
-        return one_diode_v_from_i_no1(current, self.j01, rad_eta=self.rad_eta,
-                                      n1=1, temperature=self.cell_T, jsc=self.jsc)[0]
+        return one_diode_v_from_i(current, self.j01, rad_eta=self.rad_eta, n1=1, temperature=self.cell_T,
+                                  jsc=self.jsc, minus_one=False)[0]
 
     def get_v_from_j_numerical(self, current, x0=0.0):
 
@@ -219,7 +219,8 @@ class HighPSQCell(SQCell):
 
     def get_j_from_v(self, volt, to_tup=False):
 
-        _, current = gen_rec_iv_by_rad_eta_no1(self.j01, 1, 1, self.cell_T, np.inf, voltage=volt, jsc=0)
+        _, current = gen_rec_iv_by_rad_eta(self.j01, 1, 1, self.cell_T,
+                                           np.inf, voltage=volt, jsc=0, minus_one=False)
 
         tot_current = current - self.jsc
 
@@ -536,33 +537,6 @@ class DiodeSeriesConnect(SolarCell):
 
         return self.get_single_j_from_v(voltage)
 
-    def get_single_j_from_v_x(self, voltage, x0=0):
-
-        def f(x):
-            return self.get_v_from_j(x) - voltage
-
-        # try:
-
-        # j = newton(f, x0=x0, fprime=self.get_v_from_j_p)
-
-        # except RuntimeError:
-
-        reverse_j = np.empty((len(self.s_list), 2), dtype=float)
-        for idx, scell in enumerate(self.s_list):
-            reverse_j[idx, :] = (scell.get_j_from_v(-10, to_tup=True))
-
-        #            a = np.max(reverse_j)
-        #            b = 100.0
-
-        reverse_j = np.array(reverse_j)
-        print(reverse_j)
-        j_tuple = (np.max(reverse_j[:, 0]), np.min(reverse_j[:, 1]))
-        print(j_tuple)
-
-        j = self.get_single_j_from_v_bisect_fancy(voltage, j_tuple)
-
-        return j
-
     def get_single_j_from_v(self, voltage):
 
         x_data, y_data = self.construct_iv()
@@ -593,24 +567,3 @@ class DiodeSeriesConnect(SolarCell):
             v_range[idx] = v
 
         return v_range, j_tuple[0] + np.power(10, i_range)
-
-    def get_single_j_from_v_bisect(self, voltage, a, b):
-
-        def f(x):
-            return self.get_v_from_j(x) - voltage
-
-        print("V(x)={}".format(voltage))
-        print("f(a)={}".format(f(a)))
-        print("f(b)={}".format(f(b)))
-
-        return bisect(f, a, b)
-
-    def get_single_j_from_v_bisect_fancy(self, voltage, j_tuple):
-
-        def f(x):
-            j_dark = np.power(10, x)
-            return self.get_v_from_j((j_tuple[0], j_dark)) - voltage
-
-        logj = bisect(f, -200, 1)
-
-        return np.power(10, logj)

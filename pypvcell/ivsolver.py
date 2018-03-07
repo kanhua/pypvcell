@@ -45,7 +45,21 @@ def gen_rec_iv(j01, j02, n1, n2, temperature, rshunt, voltage, jsc=0):
     return (voltage, current)
 
 
-def gen_rec_iv_by_rad_eta(j01, rad_eta, n1, temperature, rshunt, voltage, jsc=0):
+def gen_rec_iv_by_rad_eta(j01, rad_eta, n1, temperature,
+                          rshunt, voltage, jsc=0, minus_one=True):
+    """
+    Calculate recombination current from voltage
+
+    :param j01:
+    :param rad_eta:
+    :param n1:
+    :param temperature:
+    :param rshunt:
+    :param voltage:
+    :param jsc:
+    :param minus_one: True to add -1 in the exponential term
+    :return:
+    """
     if np.isinf(rshunt):
         shunt_term = 0.0
     else:
@@ -53,61 +67,14 @@ def gen_rec_iv_by_rad_eta(j01, rad_eta, n1, temperature, rshunt, voltage, jsc=0)
 
     m = sc.e / (n1 * sc.k * temperature)
 
-    current = (j01 / rad_eta * (np.exp(m * voltage) - 1) +
-               shunt_term) - jsc
-    return (voltage, current)
-
-
-def gen_rec_iv_by_rad_eta_no1(j01, rad_eta, n1, temperature, rshunt, voltage, jsc=0):
-    if np.isinf(rshunt):
-        shunt_term = 0.0
+    if minus_one:
+        min_one = 1.0
     else:
-        shunt_term = voltage / rshunt
+        min_one = 0.0
 
-    m = sc.e / (n1 * sc.k * temperature)
-
-    current = (j01 / rad_eta * (np.exp(m * voltage)) +
+    current = (j01 / rad_eta * (np.exp(m * voltage) - min_one) +
                shunt_term) - jsc
-    return (voltage, current)
-
-
-def one_diode_v_from_i(current, j01, rad_eta, n1, temperature, jsc):
-    """
-    Calculate the voltage from demand current.
-    This implementation drops the element that does not have log value, i.e. any log(x) that x<0
-
-    :param current: demand current
-    :type current: numpy.ndarray
-    :param j01: saturation current density
-    :type j01: float
-    :param rad_eta: radiative efficiency
-    :type rad_eta: float
-    :param n1: diode factor
-    :type n1: float
-    :param temperature: temperature in K
-    :type temperature: float
-    :param jsc: Jsc. It has to be a positive value.
-    :type jsc: float
-    :return: voltage, current, indexes that the values were kept
-    :rtype: tuple(numpy.ndarray, numpy.ndarray, numpy.ndarray)
-    """
-
-    if jsc < 0:
-        raise ValueError("Jsc should be a positive value")
-
-    log_component = rad_eta * (current + jsc) / j01 + 1
-
-    if hasattr(log_component, "__iter__"):
-        index = log_component > 0
-        n_current = current[index]
-        log_component = log_component[index]
-    else:
-        n_current = 1
-        index = 0
-        if log_component < 0:
-            return np.nan, n_current, index
-
-    return (n1 * sc.k * temperature / sc.e) * np.log(log_component), n_current, index
+    return voltage, current
 
 
 def one_diode_v_from_i_p(current, j01, rad_eta, n1, temperature, jsc):
@@ -115,13 +82,14 @@ def one_diode_v_from_i_p(current, j01, rad_eta, n1, temperature, jsc):
     return (n1 * sc.k * temperature / sc.e) * (m / (m * (current + jsc) + 1))
 
 
-def one_diode_v_from_i_no1(current, j01, rad_eta, n1, temperature, jsc):
+def one_diode_v_from_i(current, j01, rad_eta, n1, temperature, jsc, minus_one=True):
     """
     Calculate the voltage from demand current.
     This implementation drops the element that does not have log value, i.e. any log(x) that x<0
 
-    :param current: demand current
-    :type current: numpy.ndarray
+
+    :param current: demand current. This can be a numpy.nd array or a tuple (-Jsc, Jd)
+    :type current: numpy.ndarray or tuple
     :param j01: saturation current density
     :type j01: float
     :param rad_eta: radiative efficiency
@@ -132,6 +100,7 @@ def one_diode_v_from_i_no1(current, j01, rad_eta, n1, temperature, jsc):
     :type temperature: float
     :param jsc: Jsc. It has to be a positive value.
     :type jsc: float
+    :param minus_one: set True to add one in exponential term
     :return: voltage, current, indexes that the values were kept
     :rtype: tuple(numpy.ndarray, numpy.ndarray, numpy.ndarray)
     """
@@ -146,6 +115,9 @@ def one_diode_v_from_i_no1(current, j01, rad_eta, n1, temperature, jsc):
         total_current = current + jsc
 
     log_component = rad_eta * (total_current) / j01
+
+    if minus_one:
+        log_component += 1.0
 
     if hasattr(log_component, "__iter__"):
         index = np.array(log_component) > 0
