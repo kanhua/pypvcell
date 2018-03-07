@@ -9,7 +9,6 @@ This module collects the functions that solves I-V characteristics, including:
 
 """
 
-## Copyright
 """
    Copyright 2017 Kan-Hua Lee, Toyota Technological Institute
 
@@ -57,6 +56,7 @@ def gen_rec_iv_by_rad_eta(j01, rad_eta, n1, temperature, rshunt, voltage, jsc=0)
     current = (j01 / rad_eta * (np.exp(m * voltage) - 1) +
                shunt_term) - jsc
     return (voltage, current)
+
 
 def gen_rec_iv_by_rad_eta_no1(j01, rad_eta, n1, temperature, rshunt, voltage, jsc=0):
     if np.isinf(rshunt):
@@ -113,6 +113,51 @@ def one_diode_v_from_i(current, j01, rad_eta, n1, temperature, jsc):
 def one_diode_v_from_i_p(current, j01, rad_eta, n1, temperature, jsc):
     m = rad_eta / j01
     return (n1 * sc.k * temperature / sc.e) * (m / (m * (current + jsc) + 1))
+
+
+def one_diode_v_from_i_no1(current, j01, rad_eta, n1, temperature, jsc):
+    """
+    Calculate the voltage from demand current.
+    This implementation drops the element that does not have log value, i.e. any log(x) that x<0
+
+    :param current: demand current
+    :type current: numpy.ndarray
+    :param j01: saturation current density
+    :type j01: float
+    :param rad_eta: radiative efficiency
+    :type rad_eta: float
+    :param n1: diode factor
+    :type n1: float
+    :param temperature: temperature in K
+    :type temperature: float
+    :param jsc: Jsc. It has to be a positive value.
+    :type jsc: float
+    :return: voltage, current, indexes that the values were kept
+    :rtype: tuple(numpy.ndarray, numpy.ndarray, numpy.ndarray)
+    """
+
+    if jsc < 0:
+        raise ValueError("Jsc should be a positive value")
+
+    if isinstance(current, tuple):
+        c1 = current[0] + jsc
+        total_current = c1 + current[1]
+    else:
+        total_current = current + jsc
+
+    log_component = rad_eta * (total_current) / j01
+
+    if hasattr(log_component, "__iter__"):
+        index = np.array(log_component) > 0
+        n_current = total_current[index]
+        log_component = log_component[index]
+    else:
+        n_current = 1
+        index = 0
+        if log_component < 0:
+            return np.nan, n_current, index
+
+    return (n1 * sc.k * temperature / sc.e) * np.log(log_component), n_current, index
 
 
 def gen_rec_iv_with_rs_by_reverse(j01, j02, n1, n2, temperature, rshunt, rseries, voltage, jsc=0):

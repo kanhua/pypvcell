@@ -16,13 +16,13 @@
 from pypvcell.illumination import Illumination
 from pypvcell.photocurrent import gen_step_qe, calc_jsc_from_eg, calc_jsc
 from .ivsolver import calculate_j01, gen_rec_iv_by_rad_eta, solve_mj_iv, new_solve_mj_iv, one_diode_v_from_i, \
-    solve_mj_iv_obj_with_optimization,one_diode_v_from_i_p
+    solve_mj_iv_obj_with_optimization, one_diode_v_from_i_p, gen_rec_iv_by_rad_eta_no1, one_diode_v_from_i_no1
 from .fom import max_power
 from .spectrum import Spectrum, _energy_to_length
 from .detail_balanced_MJ import calculate_j01_from_qe
 import numpy as np
 import scipy.constants as sc
-from scipy.optimize import newton
+from scipy.optimize import newton, bisect
 
 thermal_volt = sc.k / sc.e
 
@@ -119,7 +119,7 @@ class SQCell(SolarCell):
         self.n_s = n_s
         self.rad_eta = rad_eta
         self.approx = approx
-        self.jsc=0
+        self.jsc = 0
 
         self.desp = 'SQCell'
         self._construct()
@@ -170,7 +170,7 @@ class SQCell(SolarCell):
         return one_diode_v_from_i(current, self.j01, rad_eta=self.rad_eta,
                                   n1=1, temperature=self.cell_T, jsc=self.jsc)[0]
 
-    def get_v_from_j_p(self,current):
+    def get_v_from_j_p(self, current):
 
         return one_diode_v_from_i_p(current, self.j01, rad_eta=self.rad_eta,
                                     n1=1, temperature=self.cell_T, jsc=self.jsc)
@@ -180,6 +180,75 @@ class SQCell(SolarCell):
         _, current = gen_rec_iv_by_rad_eta(self.j01, 1, 1, self.cell_T, np.inf, voltage=volt, jsc=self.jsc)
 
         return current
+
+
+class HighPSQCell(SQCell):
+    """
+    This calculate a SQ-limit solar cell like SQCell,
+    but uses the some trick to deal with current at negative voltage numerically
+
+    """
+
+    def get_iv(self, volt=None):
+        if volt is None:
+            max_volt = guess_max_volt(rad_eta=self.rad_eta, jsc=self.jsc, j01=self.j01, cell_T=self.cell_T) + 0.2
+            volt = np.linspace(-10, max_volt, num=1000)
+
+        volt, current = gen_rec_iv_by_rad_eta(self.j01, 1, 1, self.cell_T, np.inf, voltage=volt, jsc=self.jsc)
+
+        return volt, current
+
+    def get_v_from_j(self, current):
+
+        return one_diode_v_from_i_no1(current, self.j01, rad_eta=self.rad_eta,
+                                      n1=1, temperature=self.cell_T, jsc=self.jsc)[0]
+
+    def get_v_from_j_numerical(self, current, x0=0.0):
+
+        def f(x):
+            return self.get_j_from_v(x, to_tup=False) - current
+
+        v = newton(f, x0=x0, fprime=self.get_j_from_v_p, fprime2=self.get_j_from_v_pp)
+
+        return v
+
+    def get_v_from_j_p(self, current):
+
+        return one_diode_v_from_i_p(current, self.j01, rad_eta=self.rad_eta,
+                                    n1=1, temperature=self.cell_T, jsc=self.jsc)
+
+    def get_j_from_v(self, volt, to_tup=False):
+
+        _, current = gen_rec_iv_by_rad_eta_no1(self.j01, 1, 1, self.cell_T, np.inf, voltage=volt, jsc=0)
+
+        tot_current = current - self.jsc
+
+        if to_tup:
+            return -self.jsc, current
+        else:
+            return tot_current
+
+    def get_j_from_v_p(self, volt):
+
+        m = sc.e / sc.k / self.cell_T
+
+        return 1 / self.rad_eta * m * np.exp(m * volt)
+
+    def get_j_from_v_pp(self, volt):
+
+        m = sc.e / sc.k / self.cell_T
+
+        return 1 / self.rad_eta * m * m * np.exp(m * volt)
+
+    def get_single_j_from_v_bisect_fancy(self, voltage, j_tuple):
+
+        def f(x):
+            j_dark = np.power(10, x)
+            return self.get_v_from_j((j_tuple[0], j_dark)) - voltage
+
+        logj = bisect(f, -20, 1)
+
+        return np.power(10, logj)
 
 
 class DBCell(SolarCell):
@@ -336,14 +405,13 @@ class ResistorCell(SolarCell):
         return self.r
 
     def get_j_from_v_p(self, voltage):
-        return 1/self.r
+        return 1 / self.r
 
     def get_j_from_v_by_newton(self, voltage):
-
-        voltage=float(voltage)
+        voltage = float(voltage)
 
         def f(x):
-            return self.get_v_from_j(x)-voltage
+            return self.get_v_from_j(x) - voltage
 
         j = newton(f, x0=0, fprime=self.get_v_from_j_p)
 
@@ -380,7 +448,7 @@ class SeriesConnect(SolarCell):
 
         return np.array(solved_j)
 
-    def get_single_j_from_v(self, voltage,x0=0):
+    def get_single_j_from_v(self, voltage, x0=0):
 
         def f(x):
             return self.get_v_from_j(x) - voltage
@@ -389,7 +457,7 @@ class SeriesConnect(SolarCell):
 
         return j
 
-    def get_single_j_from_v_bisect(self,voltage,a,b):
+    def get_single_j_from_v_bisect(self, voltage, a, b):
 
         from scipy.optimize import bisect
 
@@ -429,7 +497,7 @@ class ParallelConnect(SolarCell):
 
         return np.array(solved_j)
 
-    def get_single_v_from_j(self, current,x0=0.0):
+    def get_single_v_from_j(self, current, x0=0.0):
 
         def f(x):
             return self.get_j_from_v(x) - current
@@ -439,3 +507,110 @@ class ParallelConnect(SolarCell):
 
         return j
 
+
+class DiodeSeriesConnect(SolarCell):
+    def __init__(self, s_list):
+        self.s_list = s_list
+
+    def get_v_from_j(self, current):
+
+        result_v = np.zeros_like(current, dtype=np.float)
+        for scell in self.s_list:
+            v = scell.get_v_from_j(current)
+            # print("cell v:{}".format(v))
+            try:
+                result_v += v
+            except TypeError:
+                print("TypeError happens: v={}", format(v))
+        return result_v
+
+    def get_v_from_j_p(self, current):
+
+        result_v = np.zeros_like(current)
+        for scell in self.s_list:
+            v = scell.get_v_from_j_p(current)
+            result_v += v
+        return result_v
+
+    def get_j_from_v(self, voltage):
+
+        return self.get_single_j_from_v(voltage)
+
+    def get_single_j_from_v_x(self, voltage, x0=0):
+
+        def f(x):
+            return self.get_v_from_j(x) - voltage
+
+        # try:
+
+        # j = newton(f, x0=x0, fprime=self.get_v_from_j_p)
+
+        # except RuntimeError:
+
+        reverse_j = np.empty((len(self.s_list), 2), dtype=float)
+        for idx, scell in enumerate(self.s_list):
+            reverse_j[idx, :] = (scell.get_j_from_v(-10, to_tup=True))
+
+        #            a = np.max(reverse_j)
+        #            b = 100.0
+
+        reverse_j = np.array(reverse_j)
+        print(reverse_j)
+        j_tuple = (np.max(reverse_j[:, 0]), np.min(reverse_j[:, 1]))
+        print(j_tuple)
+
+        j = self.get_single_j_from_v_bisect_fancy(voltage, j_tuple)
+
+        return j
+
+    def get_single_j_from_v(self, voltage):
+
+        x_data, y_data = self.construct_iv()
+
+        j = np.interp(voltage, x_data, y_data)
+
+        return j
+
+    def construct_iv(self, reverse_voltage=-5.0, points_to_generate=100):
+
+        reverse_j = np.empty((len(self.s_list), 2), dtype=float)
+        for idx, scell in enumerate(self.s_list):
+            reverse_j[idx, :] = (scell.get_j_from_v(reverse_voltage, to_tup=True))
+
+        reverse_j = np.array(reverse_j)
+        j_tuple = (np.max(reverse_j[:, 0]), reverse_j[np.argmax(reverse_j[:, 0]), 1])
+
+        start_index = np.log10(j_tuple[1])
+
+        i_range = np.arange(start_index, start_index + points_to_generate, 1.0)
+        v_range = np.zeros_like(i_range, dtype=np.float)
+
+        for idx, i in enumerate(i_range):
+            v = 0
+            for scell in self.s_list:
+                # print((j_tuple[0], np.power(i,10)))
+                v += scell.get_v_from_j((j_tuple[0], np.power(10, i)))
+            v_range[idx] = v
+
+        return v_range, j_tuple[0] + np.power(10, i_range)
+
+    def get_single_j_from_v_bisect(self, voltage, a, b):
+
+        def f(x):
+            return self.get_v_from_j(x) - voltage
+
+        print("V(x)={}".format(voltage))
+        print("f(a)={}".format(f(a)))
+        print("f(b)={}".format(f(b)))
+
+        return bisect(f, a, b)
+
+    def get_single_j_from_v_bisect_fancy(self, voltage, j_tuple):
+
+        def f(x):
+            j_dark = np.power(10, x)
+            return self.get_v_from_j((j_tuple[0], j_dark)) - voltage
+
+        logj = bisect(f, -200, 1)
+
+        return np.power(10, logj)
