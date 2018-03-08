@@ -500,7 +500,7 @@ def solve_mj_iv_obj_with_optimization(subcells, i_max=None, disc_num=1000, verbo
     if np.max(p) < 0:
         raise ValueError("Negative maximum power value")
 
-    # Solve the next few interations
+    # Solve the next few iterations
     nv = v
     ni = i
 

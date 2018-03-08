@@ -13,6 +13,8 @@
    See the License for the specific language governing permissions and
    limitations under the License.
 """
+from typing import List
+
 from pypvcell.illumination import Illumination
 from pypvcell.photocurrent import gen_step_qe, calc_jsc_from_eg, calc_jsc
 from .ivsolver import calculate_j01, gen_rec_iv_by_rad_eta, one_diode_v_from_i, \
@@ -81,6 +83,20 @@ class SolarCell(object):
             return "solar cell"
         else:
             return self.desp
+
+
+def set_input_spectrum(subcells: List[SolarCell], input_spectrum: Illumination):
+    filtered_spectrum = None
+
+    # Set spectrum for each subcell
+    for i, sc in enumerate(subcells):
+        if i == 0:
+            sc.set_input_spectrum(input_spectrum)
+        else:
+            sc.set_input_spectrum(filtered_spectrum)
+        filtered_spectrum = sc.get_transmit_spectrum()
+
+    return subcells
 
 
 class TransparentCell(SolarCell):
@@ -513,9 +529,17 @@ class DiodeSeriesConnect(SolarCell):
     def __init__(self, s_list):
         self.s_list = s_list
 
+    def set_input_spectrum(self, input_spectrum):
+
+        self.s_list = set_input_spectrum(self.s_list, input_spectrum)
+
     def get_v_from_j(self, current):
 
-        result_v = np.zeros_like(current, dtype=np.float)
+        if isinstance(current, tuple):
+            result_v = np.zeros_like(current[1], dtype=np.float)
+        else:
+            result_v = np.zeros_like(current, dtype=np.float)
+
         for scell in self.s_list:
             v = scell.get_v_from_j(current)
             # print("cell v:{}".format(v))
@@ -533,38 +557,76 @@ class DiodeSeriesConnect(SolarCell):
             result_v += v
         return result_v
 
-    def get_j_from_v(self, voltage):
+    def get_j_from_v(self, voltage, to_tup=False):
 
-        return self.get_single_j_from_v(voltage)
+        return self.get_single_j_from_v(voltage, to_tup)
 
-    def get_single_j_from_v(self, voltage):
+    def get_single_j_from_v(self, voltage, to_tup=False):
 
-        x_data, y_data = self.construct_iv()
+        max_reverse_voltage = -5
+        if np.min(voltage) < max_reverse_voltage:
+            max_reverse_voltage = np.min(voltage)
+
+        x_data, y_data, y_data_tup = self.construct_iv(reverse_voltage=max_reverse_voltage)
 
         is_larger = np.greater(voltage, np.min(x_data))
         is_smaller = np.less(voltage, np.max(x_data))
-
+        # print("xdata:", x_data)
+        # print("max_reverse_voltage", max_reverse_voltage)
         if (not np.all(is_larger)) or (not np.all(is_smaller)):
-            raise ValueError("the voltage is outside the range of interpolation")
+            print(voltage)
+            raise ValueError("the voltage is outside the range of interpolation: min={}, max={}". \
+                             format(np.min(x_data), np.max(x_data)))
 
         j = np.interp(voltage, x_data, y_data)
 
-        return j
+        # print(y_data_tup[1])
+        j_diode_part = np.interp(voltage, x_data, y_data_tup[1])
 
-    def construct_iv(self, reverse_voltage=-5.0, points_to_generate=100):
+        if to_tup:
+            return y_data_tup[0], j_diode_part
+        else:
+            return j
 
-        reverse_j = np.empty((len(self.s_list), 2), dtype=float)
+    def construct_iv(self, reverse_voltage=-5.0, points_to_generate=200):
+
+        reverse_j = np.empty((len(self.s_list), 2), dtype=np.float)
         for idx, scell in enumerate(self.s_list):
             reverse_j[idx, :] = (scell.get_j_from_v(reverse_voltage, to_tup=True))
 
+        # take a peak at the voltage
+        i_range, j_tuple, v_range = self.construct_v_from_j(points_to_generate, reverse_j)
+
+        min_voltage = np.min(v_range)
+
+        # the minimum voltage yielded by the previous calculation may be slightly larger than
+        # reverse_voltage, we therefore needs to run the calculation again to take into account the offset
+        # This is not optimized yet.
+
+        volt_diff = min_voltage - reverse_voltage
+
+        if volt_diff > 0:
+            for idx, scell in enumerate(self.s_list):
+                reverse_j[idx, :] = (scell.get_j_from_v(reverse_voltage - volt_diff - 0.5, to_tup=True))
+
+            i_range, j_tuple, v_range = self.construct_v_from_j(points_to_generate, reverse_j)
+
+        return v_range, j_tuple[0] + np.power(10, i_range), (j_tuple[0], np.power(10, i_range))
+
+    def construct_v_from_j(self, points_to_generate, reverse_j):
         reverse_j = np.array(reverse_j)
         j_tuple = (np.max(reverse_j[:, 0]), reverse_j[np.argmax(reverse_j[:, 0]), 1])
-
+        jsc_index = np.log10(abs(j_tuple[0]))
         start_index = np.log10(j_tuple[1])
 
-        i_range = np.arange(start_index, start_index + points_to_generate, 1.0)
+        i_range_1 = np.linspace(start_index, jsc_index - 3, int(points_to_generate / 2))
+        i_range_2 = np.linspace(jsc_index - 3, jsc_index + 1, int(points_to_generate / 2))
+
+        i_range = np.concatenate((i_range_1, i_range_2))
+
         v_range = np.zeros_like(i_range, dtype=np.float)
 
+        # iterate by the index of diode term
         for idx, i in enumerate(i_range):
             v = 0
             for scell in self.s_list:
@@ -572,4 +634,4 @@ class DiodeSeriesConnect(SolarCell):
                 v += scell.get_v_from_j((j_tuple[0], np.power(10, i)))
             v_range[idx] = v
 
-        return v_range, j_tuple[0] + np.power(10, i_range)
+        return i_range, j_tuple, v_range
