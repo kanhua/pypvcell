@@ -135,9 +135,9 @@ def calc_ere(qe, voc, T=300, ill=Illumination("AM1.5g"), verbose=0):
 
     jd = calculate_j01_from_qe(qe, lead_term=None)
 
-    #ere = np.exp(sc.e * voc / (sc.k * cell_T)) * jd / jsc/(3.5**2*2)
+    ere = np.exp(sc.e * voc / (sc.k * T)) * jd / jsc/(3.5**2*2)
 
-    ere = np.exp(sc.e * voc / (sc.k * T)) * jd / jsc
+    #ere = np.exp(sc.e * voc / (sc.k * T)) * jd / jsc
 
     return ere
 

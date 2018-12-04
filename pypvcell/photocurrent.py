@@ -17,7 +17,7 @@ from typing import Tuple, List
 import numpy as np
 import scipy.constants as sc
 from pypvcell.illumination import Illumination
-from pypvcell.spectrum import Spectrum,_energy_to_length
+from pypvcell.spectrum import Spectrum, _energy_to_length
 
 
 def gen_step_qe_array(bandEdge_in_eV, qe_in_ratio, qe_below_edge=1e-3, wl_bound=(0.01, 5)):
@@ -64,7 +64,27 @@ def gen_step_qe(bandEdge_in_eV, qe_in_ratio, qe_below_edge=1e-6, wl_bound=(0.000
     return output_spec
 
 
-def lambert_abs(absorption: List[Spectrum],layer_thicknesses: List[float]):
+def gen_sub_qe_array(eg1, qe1, eg2, qe2,
+                     qe_below_edge=1e-6, wl_bound=(0.0001, 5), ouput_type="spectrum"):
+    edge_step = 1e-4
+    lb = wl_bound[0]
+    ub = wl_bound[1]
+
+    qe = [[lb, qe_below_edge],
+          [eg2 - edge_step, qe_below_edge],
+          [eg2, qe2],
+          [eg1 - edge_step, qe2],
+          [eg1, qe1],
+          [ub, qe1]]
+    qe = np.array(qe)
+
+    if ouput_type == "spectrum":
+        qe = Spectrum(x_data=qe[:, 0], y_data=qe[:, 1], x_unit='eV')
+
+    return qe
+
+
+def lambert_abs(absorption: List[Spectrum], layer_thicknesses: List[float]):
     """
     Calculate transmission of stacked layers using Beer-Lambert's law
 
@@ -73,16 +93,16 @@ def lambert_abs(absorption: List[Spectrum],layer_thicknesses: List[float]):
     :return: transmission
     """
 
-    assert len(absorption)==len(layer_thicknesses)
+    assert len(absorption) == len(layer_thicknesses)
 
-    standard_x,y=absorption[0].get_spectrum('m')
+    standard_x, y = absorption[0].get_spectrum('m')
 
-    term=np.zeros_like(y)
+    term = np.zeros_like(y)
     for idx in range(len(absorption)):
-        x,y=absorption[idx].get_interp_spectrum(standard_x,to_x_unit='m')
-        term+=y*layer_thicknesses[idx]
+        x, y = absorption[idx].get_interp_spectrum(standard_x, to_x_unit='m')
+        term += y * layer_thicknesses[idx]
 
-    t=np.exp(-term)
+    t = np.exp(-term)
     return t
 
 
@@ -131,25 +151,24 @@ def calc_jsc(input_illumination, qe):
 
     # initialise a QE interp object
 
-    ix,_=input_illumination.get_spectrum(to_x_unit='m')
-    qx,_=qe.get_spectrum(to_x_unit='m')
+    ix, _ = input_illumination.get_spectrum(to_x_unit='m')
+    qx, _ = qe.get_spectrum(to_x_unit='m')
 
-    lower_bound=max([ix[0],qx[0]])
-    upper_bound=min([ix[-1],qx[-1]])
+    lower_bound = max([ix[0], qx[0]])
+    upper_bound = min([ix[-1], qx[-1]])
 
     # Rearrange the new x-axis. This procedure ensures that the new wavelength range is the intersection of
     # illumination spectrum and qe
-    new_x=np.concatenate((ix,qx))
-    new_x=np.sort(new_x)
-    new_x=new_x[(new_x > lower_bound) & (new_x<upper_bound)]
-    new_x=np.concatenate(([lower_bound], new_x, [upper_bound]))
+    new_x = np.concatenate((ix, qx))
+    new_x = np.sort(new_x)
+    new_x = new_x[(new_x > lower_bound) & (new_x < upper_bound)]
+    new_x = np.concatenate(([lower_bound], new_x, [upper_bound]))
 
+    ill_array = input_illumination.get_interp_spectrum(new_x, to_x_unit='m', to_y_area_unit='m**-2',
+                                                       to_photon_flux=True,
+                                                       interp_left=0, interp_right=0, raise_error=False)
 
-    ill_array=input_illumination.get_interp_spectrum(new_x,to_x_unit='m',to_y_area_unit='m**-2',to_photon_flux=True,
-                                                     interp_left=0,interp_right=0,raise_error=False)
-
-    qe_array=qe.get_interp_spectrum(new_x,to_x_unit='m')
-
+    qe_array = qe.get_interp_spectrum(new_x, to_x_unit='m')
 
     return sc.e * np.trapz(ill_array[1, :] * qe_array[1, :], ill_array[0, :])
 
@@ -167,10 +186,9 @@ def calc_jsc_from_eg(input_illumination, eg):
     if not isinstance(input_illumination, Spectrum):
         raise TypeError("input_illumination should be a subclass of Spectrum, preferably Illumination class")
 
-    bg_m=_energy_to_length(eg,'eV','m')
+    bg_m = _energy_to_length(eg, 'eV', 'm')
 
-
-    ill_array = input_illumination.get_interp_spectrum(input_illumination.core_x[input_illumination.core_x<=bg_m],
+    ill_array = input_illumination.get_interp_spectrum(input_illumination.core_x[input_illumination.core_x <= bg_m],
                                                        to_x_unit='m',
                                                        to_y_area_unit='m**-2', to_photon_flux=True)
 
@@ -178,7 +196,8 @@ def calc_jsc_from_eg(input_illumination, eg):
 
     return jsc
 
-def eqe_to_iqe(eqe,reflectivity):
+
+def eqe_to_iqe(eqe, reflectivity):
     """
     calculate internal quantum efficiency from external quantum efficiency
 
@@ -190,4 +209,4 @@ def eqe_to_iqe(eqe,reflectivity):
     :type Spectrum
     """
 
-    return eqe/(1-reflectivity)
+    return eqe / (1 - reflectivity)

@@ -113,7 +113,6 @@ def _energy_to_length_factor(e_unit, l_unit):
     :return: c,h
     """
 
-
     dest_h_u = ug.parse_units('%s s' % e_unit)
     dest_c_u = ug.parse_units('%s/s' % l_unit)
     if dest_h_u.dimensionality != _h_unit.dimensionality:
@@ -174,7 +173,7 @@ def compare_wavelength_dimension(unit_1, unit_2):
         return True
     elif set([un1, un2]) == set([_lu, _ilu]):
         return True
-    elif set([un1,un2]) == set([_lu,_itu]):
+    elif set([un1, un2]) == set([_lu, _itu]):
         return True
     else:
         return False
@@ -353,48 +352,44 @@ class Spectrum(object):
 
             # The conversion is bi-directional, we use nm -> cm^-1 as the example for the following comments
 
-            x_data_q = x_data * src_x_u # attach the unit to the quantities
+            x_data_q = x_data * src_x_u  # attach the unit to the quantities
 
-            inv_scr_x_u=1/src_x_u # get the inverse unit of x for converting y, nm -> nm-1
+            inv_scr_x_u = 1 / src_x_u  # get the inverse unit of x for converting y, nm -> nm-1
 
-            x_data_q = 1 / x_data_q # Do the inverse of x data and its unit
+            x_data_q = 1 / x_data_q  # Do the inverse of x data and its unit
 
-            new_x_data = x_data_q.to(des_x_u).m # Do the unit conversion and retrieve the value
+            new_x_data = x_data_q.to(des_x_u).m  # Do the unit conversion and retrieve the value
 
             new_y_data = ug.convert(y_data, au1, au2)
 
             if is_spec_density:
-
                 # Convert the values of y, for example, from  []/nm to []/cm, assuming that we are converting x from [nm] to [cm]
-                new_y_data=ug.convert(new_y_data,inv_scr_x_u,des_x_u)
+                new_y_data = ug.convert(new_y_data, inv_scr_x_u, des_x_u)
 
                 # Then run dk=d(lambda)/lambda^2
                 new_y_data = new_y_data / new_x_data ** 2
 
-        elif src_x_udim==_lu and des_x_udim==_itu:
+        elif src_x_udim == _lu and des_x_udim == _itu:
 
-            c=ug.convert(sc.c,'m/s',from_x_unit+' '+to_x_unit)
+            c = ug.convert(sc.c, 'm/s', from_x_unit + ' ' + to_x_unit)
 
-            new_x_data= c/x_data
-
-            new_y_data = ug.convert(y_data, au1, au2)
-
-            if is_spec_density:
-
-                new_y_data=new_y_data*c/new_x_data**2
-
-        elif src_x_udim==_itu and des_x_udim==_lu:
-
-            c=ug.convert(sc.c,'m/s',to_x_unit+' '+from_x_unit)
-
-            new_x_data= c/x_data
+            new_x_data = c / x_data
 
             new_y_data = ug.convert(y_data, au1, au2)
 
             if is_spec_density:
+                new_y_data = new_y_data * c / new_x_data ** 2
 
-                new_y_data=new_y_data*c/new_x_data**2
+        elif src_x_udim == _itu and des_x_udim == _lu:
 
+            c = ug.convert(sc.c, 'm/s', to_x_unit + ' ' + from_x_unit)
+
+            new_x_data = c / x_data
+
+            new_y_data = ug.convert(y_data, au1, au2)
+
+            if is_spec_density:
+                new_y_data = new_y_data * c / new_x_data ** 2
 
         return new_x_data, new_y_data
 
@@ -427,7 +422,6 @@ class Spectrum(object):
 
         return np.vstack((x_data, y_data))
 
-
     def get_interp_spectrum(self, to_x_data, to_x_unit, to_y_area_unit=None, to_photon_flux=False, interp_left=None,
                             interp_right=None, raise_error=True):
 
@@ -446,17 +440,15 @@ class Spectrum(object):
 
         orig_spectrum = self.get_spectrum(to_x_unit, to_y_area_unit, to_photon_flux=to_photon_flux)
 
-        if np.min(to_x_data)<orig_spectrum[0,0] or np.max(to_x_data) > orig_spectrum[0,-1]:
-            if raise_error==True:
+        if np.min(to_x_data) < orig_spectrum[0, 0] or np.max(to_x_data) > orig_spectrum[0, -1]:
+            if raise_error == True:
                 raise ValueError("The interped value is out of bound")
-
 
         output_spectrum = np.zeros((2, to_x_data.shape[0]))
 
         output_spectrum[0, :] = to_x_data
         output_spectrum[1, :] = np.interp(to_x_data, orig_spectrum[0, :],
                                           orig_spectrum[1, :], left=interp_left, right=interp_right)
-
 
         return output_spectrum
 
@@ -569,14 +561,13 @@ class Spectrum(object):
         :return:  The integrated value.
         """
 
-        if self.is_spec_density==False:
+        if self.is_spec_density == False:
             raise ArithmeticError("This spectrum instance is not integrable, since self.is_spec_density is false")
 
         else:
             return np.trapz(self.core_y, self.core_x)
 
-
-    def cut(self,start,end,unit):
+    def cut(self, start, end, unit):
         """
         Cut a particular band of spectrum y(x), where start<x<end
 
@@ -586,34 +577,26 @@ class Spectrum(object):
         :return: a new spectrum
         """
 
-        bound_sp= self.get_interp_spectrum(to_x_data=np.array([start, end]), to_x_unit=unit)
+        bound_sp = self.get_interp_spectrum(to_x_data=np.array([start, end]), to_x_unit=unit)
 
-        center_sp=self.get_spectrum(to_x_unit=unit)
+        center_sp = self.get_spectrum(to_x_unit=unit)
 
-        center_sp=center_sp[:,center_sp[0,:]>=start]
+        center_sp = center_sp[:, center_sp[0, :] >= start]
         center_sp = center_sp[:, center_sp[0, :] <= end]
 
-        c_sp=np.hstack((bound_sp,center_sp))
+        c_sp = np.hstack((bound_sp, center_sp))
 
         # Sort the spectrum by wavelength
-        sorted_idx = np.argsort(c_sp[0,:])
-        c_sp=c_sp[:,sorted_idx]
+        sorted_idx = np.argsort(c_sp[0, :])
+        c_sp = c_sp[:, sorted_idx]
 
-        new_spec=copy.deepcopy(self)
+        new_spec = copy.deepcopy(self)
 
-        new_spec.set_spectrum(c_sp[0,:],c_sp[1,:],x_unit=unit,y_area_unit=self.y_area_unit,
+        new_spec.set_spectrum(c_sp[0, :], c_sp[1, :], x_unit=unit, y_area_unit=self.y_area_unit,
                               is_spec_density=self.is_spec_density,
                               is_photon_flux=False)
 
         return new_spec
-
-
-
-
-
-
-
-
 
 
 if __name__ == "__main__":

@@ -136,9 +136,11 @@ class SQCell(SolarCell):
         self.rad_eta = rad_eta
         self.approx = approx
         self.jsc = 0
+        self.j02 = None
 
         self.desp = 'SQCell'
         self._construct()
+        self.subcell = [self]
 
     def _construct(self):
 
@@ -177,14 +179,15 @@ class SQCell(SolarCell):
             max_volt = guess_max_volt(rad_eta=self.rad_eta, jsc=self.jsc, j01=self.j01, cell_T=self.cell_T) + 0.2
             volt = np.linspace(-10, max_volt, num=1000)
 
-        volt, current = gen_rec_iv_by_rad_eta(self.j01, 1, 1, self.cell_T, np.inf, voltage=volt, jsc=self.jsc)
+        volt, current = gen_rec_iv_by_rad_eta(self.j01, self.rad_eta, 1, self.cell_T, np.inf, voltage=volt,
+                                              jsc=self.jsc)
 
         return volt, current
 
     def get_v_from_j(self, current):
 
         return one_diode_v_from_i(current, self.j01, rad_eta=self.rad_eta,
-                                  n1=1, temperature=self.cell_T, jsc=self.jsc)[0]
+                                  n1=1, temperature=self.cell_T, jsc=self.jsc)
 
     def get_v_from_j_p(self, current):
 
@@ -193,7 +196,7 @@ class SQCell(SolarCell):
 
     def get_j_from_v(self, volt):
 
-        _, current = gen_rec_iv_by_rad_eta(self.j01, 1, 1, self.cell_T, np.inf, voltage=volt, jsc=self.jsc)
+        _, current = gen_rec_iv_by_rad_eta(self.j01, self.rad_eta, 1, self.cell_T, np.inf, voltage=volt, jsc=self.jsc)
 
         return current
 
