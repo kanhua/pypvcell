@@ -44,6 +44,15 @@ def guess_max_volt(rad_eta, jsc, j01, cell_T):
 
 
 class SolarCell(object):
+
+    def __init__(self):
+
+        self.j01 = None
+        self.j02 = None
+        self.jsc = 0
+
+        self.subcell = []
+
     def get_iv(self):
         raise NotImplementedError()
 
@@ -129,6 +138,9 @@ class SQCell(SolarCell):
         :param n_c: refractive index of cell
         :param n_s: refractive index of ambient
         """
+
+        super().__init__()
+
         self.eg = eg
         self.cell_T = cell_T
         self.n_c = n_c
@@ -285,6 +297,8 @@ class DBCell(SolarCell):
         :param qe_cutoff: set the qe value to zero if it is lower than qe_cutoff. This is for avoiding the small ground in experimental data ends up becoming large when multiplying generalized Planck's distribution.
         """
 
+        super().__init__()
+
         self.qe = qe
         self.rad_eta = rad_eta
         self.n_c = n_c
@@ -297,6 +311,8 @@ class DBCell(SolarCell):
 
         self._check_qe()
         self._construct()
+
+        self.subcell = [self]
 
     def _construct(self):
 
