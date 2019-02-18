@@ -50,6 +50,8 @@ class SolarCell(object):
         self.j01 = None
         self.j02 = None
         self.jsc = 0
+        self.j01_r = None
+        self.j02_r = None
 
         self.subcell = []
 
@@ -163,6 +165,8 @@ class SQCell(SolarCell):
         elif method == 'num':
             qe = gen_step_qe(self.eg, 1)
             self.j01 = calculate_j01_from_qe(qe, n_c=self.n_c, n_s=self.n_s, T=self.cell_T)
+
+        self.j01_r = self.j01 / self.rad_eta
 
     def set_input_spectrum(self, input_spectrum):
         self.ill = input_spectrum
@@ -322,6 +326,8 @@ class DBCell(SolarCell):
     def _construct(self):
 
         self.j01 = calculate_j01_from_qe(self.qe, n_c=self.n_c, n_s=self.n_s, threshold=self.qe_cutoff, T=self.cell_T)
+
+        self.j01_r = self.j01 / self.rad_eta
 
     def _check_qe(self):
         """
