@@ -284,10 +284,11 @@ class HighPSQCell(SQCell):
 
 
 class DBCell(SolarCell):
-    def __init__(self, qe, rad_eta, T, n_c=3.5, n_s=1, qe_cutoff=1e-3):
+    def __init__(self, qe: Spectrum, rad_eta: float, T: float, n_c=3.5, n_s=1, qe_cutoff=1e-3, eg=None):
         """
         Initialize the solar cell object
 
+        :param eg: band gap (in eV)
         :param T: temperature of the cell
         :param qe: quantum efficiency of the cell
         :type qe: Spectrum
@@ -305,6 +306,10 @@ class DBCell(SolarCell):
         self.n_s = n_s
         self.qe_cutoff = qe_cutoff
         self.cell_T = T
+
+        self.n1 = 1
+        self.n2 = 2
+        self.eg = eg
 
         self.ill = None
         self.jsc = None
