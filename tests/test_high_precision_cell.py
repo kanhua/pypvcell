@@ -6,6 +6,8 @@ import matplotlib.pyplot as plt
 from pypvcell.solarcell import HighPSQCell, DiodeSeriesConnect
 from pypvcell.illumination import load_astm
 
+import matplotlib.pyplot as plt
+
 
 class TestHighPrecisionSQCellCase(unittest.TestCase):
 
@@ -71,6 +73,29 @@ class TestHighPrecisionSQCellCase(unittest.TestCase):
         j2 = ref_hp.get_j_from_v(test_v / 3.0)
 
         self.assertTrue(np.allclose(j1, j2))
+
+    def test_multi_junction_diode(self):
+        hp1 = HighPSQCell(1.87, cell_T=300)
+        hp1.set_input_spectrum(load_astm())
+
+        hp2 = HighPSQCell(1.42, cell_T=300)
+        hp2.set_input_spectrum(load_astm())
+
+        hp3 = HighPSQCell(1.0, cell_T=300)
+        hp3.set_input_spectrum(load_astm())
+
+        d1 = DiodeSeriesConnect([hp1, hp2, hp3])
+
+        test_v = 1.0
+        j1 = d1.get_j_from_v(test_v)
+
+        test_v = np.linspace(-2, 3.4, num=200)
+        j1 = d1.get_j_from_v(test_v)
+
+        plt.plot(test_v, j1)
+        plt.show()
+
+
 
 
 if __name__ == '__main__':
