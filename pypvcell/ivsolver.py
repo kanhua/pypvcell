@@ -25,7 +25,7 @@ This module collects the functions that solves I-V characteristics, including:
    limitations under the License.
 """
 
-from typing import List, Tuple
+from typing import List, Tuple, Callable
 import numpy as np
 from scipy.interpolate import interp1d
 from scipy.optimize import newton_krylov
@@ -613,3 +613,33 @@ def solve_iv_range_obj(subcells: List, i_min, i_max, disc_num=1000):
         current_range = current_range[~np.isnan(voltage_sum)]
 
     return voltage_sum, current_range
+
+def solve_v_from_j_adding_epsilon(iv_func:Callable[[np.ndarray],np.ndarray],
+                                  current:np.ndarray,equation_solver_func,epsilon):
+    """
+
+    :param iv_func: a I(V) function
+    :param current: an array of current that needs to be solved
+    :param equation_solver_func: bisect, newton, or other scipy solvers
+    :param epsilon: small offset added to current. The solver will solve current*(1+epsilon) and current*(1-epsilon)
+    :return: a 2xN [voltage,current] array
+    """
+
+    def eqn_func(x,j0):
+        return iv_func(x)-j0
+
+    solved_iv_pair=[]
+    if epsilon!=0:
+        ratio=[1-epsilon,1+epsilon]
+    else:
+        ratio=[1]
+    for j1 in current:
+        for r in ratio:
+            jj = j1 * r
+            try:
+                solved_iv_pair.append((equation_solver_func(eqn_func, -23, 5, args=jj), jj))
+            except ValueError:
+                print("no solution found for {}".format(jj))
+
+
+    return np.array(solved_iv_pair)
