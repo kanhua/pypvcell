@@ -130,7 +130,7 @@ class SQCell(SolarCell):
 
     """
 
-    def __init__(self, eg, cell_T, rad_eta=1, n_c=3.5, n_s=1, approx=False):
+    def __init__(self, eg, cell_T, rad_eta=1, n_c=3.5, n_s=1, approx=False,plug_in_term=None):
         """
         Initialize a SQ solar cell.
         It loads the class and sets up J01 of the cell
@@ -155,6 +155,7 @@ class SQCell(SolarCell):
         self.desp = 'SQCell'
         self._construct()
         self.subcell = [self]
+        self.plug_in_term=plug_in_term
 
     def _construct(self):
 
@@ -196,7 +197,7 @@ class SQCell(SolarCell):
             volt = np.linspace(-10, max_volt, num=1000)
 
         volt, current = gen_rec_iv_by_rad_eta(self.j01, self.rad_eta, 1, self.cell_T, np.inf, voltage=volt,
-                                              jsc=self.jsc)
+                                              jsc=self.jsc,plug_in_term=self.plug_in_term)
 
         return volt, current
 
@@ -212,7 +213,8 @@ class SQCell(SolarCell):
 
     def get_j_from_v(self, volt):
 
-        _, current = gen_rec_iv_by_rad_eta(self.j01, self.rad_eta, 1, self.cell_T, np.inf, voltage=volt, jsc=self.jsc)
+        _, current = gen_rec_iv_by_rad_eta(self.j01, self.rad_eta, 1, self.cell_T, np.inf,
+                                           voltage=volt, jsc=self.jsc,plug_in_term=self.plug_in_term)
 
         return current
 

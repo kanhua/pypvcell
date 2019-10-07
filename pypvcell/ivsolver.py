@@ -46,7 +46,7 @@ def gen_rec_iv(j01, j02, n1, n2, temperature, rshunt, voltage, jsc=0):
 
 
 def gen_rec_iv_by_rad_eta(j01, rad_eta, n1, temperature,
-                          rshunt, voltage, jsc=0, minus_one=True):
+                          rshunt, voltage, jsc=0, minus_one=True,plug_in_term=None):
     """
     Calculate recombination current from voltage
 
@@ -74,6 +74,9 @@ def gen_rec_iv_by_rad_eta(j01, rad_eta, n1, temperature,
 
     current = (j01 / rad_eta * (np.exp(m * voltage) - min_one) +
                shunt_term) - jsc
+    if plug_in_term is not None:
+        current+=plug_in_term(voltage)
+
     return voltage, current
 
 
