@@ -25,7 +25,7 @@ This module collects the functions that solves I-V characteristics, including:
    limitations under the License.
 """
 
-from typing import List, Tuple, Callable
+from typing import List, Tuple, Callable,Iterable
 import numpy as np
 from scipy.interpolate import interp1d
 from scipy.optimize import newton_krylov
@@ -643,3 +643,55 @@ def solve_v_from_j_adding_epsilon(iv_func:Callable[[np.ndarray],np.ndarray],
 
 
     return np.array(solved_iv_pair)
+
+def _clean_j_to_solve(j_to_solve:np.ndarray)->np.ndarray:
+
+    nj=np.ravel(j_to_solve)
+
+    nj=np.unique(nj)
+
+    return nj
+
+def _add_epsilon(j_to_solve:np.ndarray,epsilon:float)->np.ndarray:
+
+    j_to_solve_minus=j_to_solve*(1-epsilon)
+    j_to_solve_plus=j_to_solve*(1+epsilon)
+
+    nj=np.concatenate((j_to_solve_minus,j_to_solve_plus))
+
+    return np.sort(nj)
+
+
+
+
+def solve_series_connected_ivs(iv_funcs:Iterable[Callable[[np.ndarray],np.ndarray]],
+                               vmin:float,vmax:float,vnum:int=20):
+
+    from scipy.optimize import bisect
+    junc_num=len(iv_funcs)
+    j_to_solve=np.empty((junc_num,vnum))
+    volt=np.linspace(vmin,vmax,vnum)
+
+    # fill in the current needs to be solved
+    for idx,iv in enumerate(iv_funcs):
+        j_to_solve[idx,:]=iv(volt)
+
+    j_to_solve=_clean_j_to_solve(j_to_solve)
+
+    j_to_solve=_add_epsilon(j_to_solve,epsilon=0.01)
+
+    solved_v=np.empty((junc_num,j_to_solve.shape[0]))
+
+    # solve the voltage from each current value
+    for v_idx, iv in enumerate(iv_funcs):
+        iv_values=solve_v_from_j_adding_epsilon(iv,j_to_solve,bisect,epsilon=0)
+        solved_v[v_idx,:]=iv_values[:,0]
+
+    iv_pair=np.empty((j_to_solve.shape[0],2))
+
+    # summing up the voltage to get the series-connected voltage values
+    iv_pair[:,0]=np.sum(solved_v,axis=0)
+    iv_pair[:,1]=j_to_solve
+
+    return iv_pair
+
