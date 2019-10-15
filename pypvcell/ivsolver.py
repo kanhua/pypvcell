@@ -662,8 +662,6 @@ def _add_epsilon(j_to_solve:np.ndarray,epsilon:float)->np.ndarray:
     return np.sort(nj)
 
 
-
-
 def solve_series_connected_ivs(iv_funcs:Iterable[Callable[[np.ndarray],np.ndarray]],
                                vmin:float,vmax:float,vnum:int=20):
 
@@ -687,11 +685,11 @@ def solve_series_connected_ivs(iv_funcs:Iterable[Callable[[np.ndarray],np.ndarra
         iv_values=solve_v_from_j_adding_epsilon(iv,j_to_solve,bisect,epsilon=0)
         solved_v[v_idx,:]=iv_values[:,0]
 
-    iv_pair=np.empty((j_to_solve.shape[0],2))
+    iv_pair=np.empty((2,j_to_solve.shape[0]))
 
     # summing up the voltage to get the series-connected voltage values
-    iv_pair[:,0]=np.sum(solved_v,axis=0)
-    iv_pair[:,1]=j_to_solve
+    iv_pair[0,:]=np.sum(solved_v,axis=0)
+    iv_pair[1,:]=j_to_solve
 
     return iv_pair
 

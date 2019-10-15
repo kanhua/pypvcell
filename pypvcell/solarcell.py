@@ -18,7 +18,8 @@ from typing import List
 from pypvcell.illumination import Illumination
 from pypvcell.photocurrent import gen_step_qe, calc_jsc_from_eg, calc_jsc
 from .ivsolver import calculate_j01, gen_rec_iv_by_rad_eta, one_diode_v_from_i, \
-    solve_mj_iv_obj_with_optimization, one_diode_v_from_i_p
+    solve_mj_iv_obj_with_optimization, one_diode_v_from_i_p, \
+    solve_series_connected_ivs, solve_v_from_j_adding_epsilon
 from .fom import max_power
 from .spectrum import Spectrum, _energy_to_length
 from .detail_balanced_MJ import calculate_j01_from_qe
@@ -130,7 +131,7 @@ class SQCell(SolarCell):
 
     """
 
-    def __init__(self, eg, cell_T, rad_eta=1, n_c=3.5, n_s=1, approx=False,plug_in_term=None):
+    def __init__(self, eg, cell_T, rad_eta=1, n_c=3.5, n_s=1, approx=False, plug_in_term=None):
         """
         Initialize a SQ solar cell.
         It loads the class and sets up J01 of the cell
@@ -155,7 +156,7 @@ class SQCell(SolarCell):
         self.desp = 'SQCell'
         self._construct()
         self.subcell = [self]
-        self.plug_in_term=plug_in_term
+        self.plug_in_term = plug_in_term
 
     def _construct(self):
 
@@ -197,7 +198,7 @@ class SQCell(SolarCell):
             volt = np.linspace(-10, max_volt, num=1000)
 
         volt, current = gen_rec_iv_by_rad_eta(self.j01, self.rad_eta, 1, self.cell_T, np.inf, voltage=volt,
-                                              jsc=self.jsc,plug_in_term=self.plug_in_term)
+                                              jsc=self.jsc, plug_in_term=self.plug_in_term)
 
         return volt, current
 
@@ -214,7 +215,7 @@ class SQCell(SolarCell):
     def get_j_from_v(self, volt):
 
         _, current = gen_rec_iv_by_rad_eta(self.j01, self.rad_eta, 1, self.cell_T, np.inf,
-                                           voltage=volt, jsc=self.jsc,plug_in_term=self.plug_in_term)
+                                           voltage=volt, jsc=self.jsc, plug_in_term=self.plug_in_term)
 
         return current
 
@@ -410,10 +411,58 @@ class MJCell(SolarCell):
         all_iv = [(sc.get_iv(volt=subcell_voltage)) for sc in self.subcell]
 
         # v, i = new_solve_mj_iv(all_iv)
+        # v, i = solve_mj_iv_obj_with_optimization(self.subcell, verbose=verbose)
 
-        v, i = solve_mj_iv_obj_with_optimization(self.subcell, verbose=verbose)
+        iv_funcs = [cell.get_j_from_v for cell in self.subcell]
+
+        v, i = solve_series_connected_ivs(iv_funcs, -3, 3, 100)
 
         return v, i
+
+    def get_j_from_v(self, voltage, verbose=False, max_iter=0):
+        # Use iteration based-method to calculate V(J)
+
+        curr_v, curr_i = self.get_iv()
+
+        if (type(voltage) == float) or (type(voltage)==int):
+            voltage=np.array([voltage])
+
+        iter_num = 0
+        interped_i = np.interp(voltage, curr_v, curr_i)
+        while True:
+
+            if iter_num > max_iter:
+                break
+
+            from scipy.optimize import bisect
+            solved_vs = np.empty((len(self.subcell), len(voltage)*2))
+            for subcell_idx, cell in enumerate(self.subcell):
+                if iter_num==0:
+                    solved_iv = solve_v_from_j_adding_epsilon(cell.get_j_from_v, interped_i, bisect, epsilon=0.1)
+                else:
+                    solved_iv = solve_v_from_j_adding_epsilon(cell.get_j_from_v, interped_i, bisect, epsilon=0)
+                solved_v = solved_iv[:, 0]
+                solved_i = solved_iv[:, 1]
+                solved_vs[subcell_idx, :] = solved_v
+
+            solved_v_sum = np.sum(solved_vs, axis=0)
+
+            # add solved result into new array
+            interped_i=np.interp(solved_v_sum,curr_v,curr_i)
+
+            curr_v=np.concatenate((curr_v,solved_v_sum))
+            curr_i=np.concatenate((curr_i,interped_i))
+
+            sorted_index=np.argsort(curr_v)
+            curr_v=curr_v[sorted_index]
+            curr_i=curr_i[sorted_index]
+
+            iter_num += 1
+
+
+        interped_i = np.interp(voltage, curr_v, curr_i)
+
+        return interped_i
 
     def get_eta(self, verbose=0):
 
