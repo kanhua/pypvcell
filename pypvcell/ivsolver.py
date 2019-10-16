@@ -28,7 +28,7 @@ This module collects the functions that solves I-V characteristics, including:
 from typing import List, Tuple, Callable,Iterable
 import numpy as np
 from scipy.interpolate import interp1d
-from scipy.optimize import newton_krylov
+from scipy.optimize import newton_krylov, bisect
 import scipy.constants as sc
 from .spectrum import Spectrum
 import copy
@@ -637,12 +637,26 @@ def solve_v_from_j_adding_epsilon(iv_func:Callable[[np.ndarray],np.ndarray],
         for r in ratio:
             jj = j1 * r
             try:
+                # TODO the voltage range is hard-coded here. Should be modified.
                 solved_iv_pair.append((equation_solver_func(eqn_func, -23, 5, args=jj), jj))
             except ValueError:
                 print("no solution found for {}".format(jj))
 
 
     return np.array(solved_iv_pair)
+
+
+def solve_v_from_j_by_bracket_root_finding(iv_func: Callable[[np.ndarray], np.ndarray], current: np.ndarray,
+                                           v_range_min: float, v_range_max: float, root_finding_func):
+    def eqn_func(x, j0):
+        return iv_func(x) - j0
+
+    solved_iv_pair = []
+    for idx, jj in enumerate(current):
+        print("solving: {}".format(idx))
+        solved_iv_pair.append((root_finding_func(eqn_func, v_range_min, v_range_max, args=jj), jj))
+
+    return np.array(solved_iv_pair).T
 
 def _clean_j_to_solve(j_to_solve:np.ndarray)->np.ndarray:
 
@@ -665,7 +679,6 @@ def _add_epsilon(j_to_solve:np.ndarray,epsilon:float)->np.ndarray:
 def solve_series_connected_ivs(iv_funcs:Iterable[Callable[[np.ndarray],np.ndarray]],
                                vmin:float,vmax:float,vnum:int=20):
 
-    from scipy.optimize import bisect
     junc_num=len(iv_funcs)
     j_to_solve=np.empty((junc_num,vnum))
     volt=np.linspace(vmin,vmax,vnum)
@@ -693,3 +706,12 @@ def solve_series_connected_ivs(iv_funcs:Iterable[Callable[[np.ndarray],np.ndarra
 
     return iv_pair
 
+
+def solve_parallel_connected_ivs(iv_funcs: Iterable[Callable[[np.ndarray], np.ndarray]],
+                                 vmin: float, vmax: float, vnum: int = 20):
+    volt = np.linspace(vmin, vmax, num=vnum)
+    curr = np.zeros_like(volt)
+    for iv_func in iv_funcs:
+        curr += iv_func(volt)
+
+    return np.stack((volt, curr), axis=0)

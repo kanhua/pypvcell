@@ -431,7 +431,7 @@ class MJCell(SolarCell):
         interped_i = np.interp(voltage, curr_v, curr_i)
         while True:
 
-            if iter_num > max_iter:
+            if iter_num >= max_iter:
                 break
 
             from scipy.optimize import bisect
