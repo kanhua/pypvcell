@@ -653,7 +653,6 @@ def solve_v_from_j_by_bracket_root_finding(iv_func: Callable[[np.ndarray], np.nd
 
     solved_iv_pair = []
     for idx, jj in enumerate(current):
-        print("solving: {}".format(idx))
         solved_iv_pair.append((root_finding_func(eqn_func, v_range_min, v_range_max, args=jj), jj))
 
     return np.array(solved_iv_pair).T
@@ -677,7 +676,7 @@ def _add_epsilon(j_to_solve:np.ndarray,epsilon:float)->np.ndarray:
 
 
 def solve_series_connected_ivs(iv_funcs:Iterable[Callable[[np.ndarray],np.ndarray]],
-                               vmin:float,vmax:float,vnum:int=20):
+                               vmin: float, vmax: float, vnum: int = 20, return_subcell_iv=False, add_epsilon=0.01):
 
     junc_num=len(iv_funcs)
     j_to_solve=np.empty((junc_num,vnum))
@@ -689,14 +688,16 @@ def solve_series_connected_ivs(iv_funcs:Iterable[Callable[[np.ndarray],np.ndarra
 
     j_to_solve=_clean_j_to_solve(j_to_solve)
 
-    j_to_solve=_add_epsilon(j_to_solve,epsilon=0.01)
+    j_to_solve = _add_epsilon(j_to_solve, epsilon=add_epsilon)
 
     solved_v=np.empty((junc_num,j_to_solve.shape[0]))
 
     # solve the voltage from each current value
+    subcell_ivs = []
     for v_idx, iv in enumerate(iv_funcs):
         iv_values=solve_v_from_j_adding_epsilon(iv,j_to_solve,bisect,epsilon=0)
         solved_v[v_idx,:]=iv_values[:,0]
+        subcell_ivs.append(iv_values.T)
 
     iv_pair=np.empty((2,j_to_solve.shape[0]))
 
@@ -704,7 +705,10 @@ def solve_series_connected_ivs(iv_funcs:Iterable[Callable[[np.ndarray],np.ndarra
     iv_pair[0,:]=np.sum(solved_v,axis=0)
     iv_pair[1,:]=j_to_solve
 
-    return iv_pair
+    if return_subcell_iv:
+        return iv_pair, np.array(subcell_ivs)
+    else:
+        return iv_pair
 
 
 def solve_parallel_connected_ivs(iv_funcs: Iterable[Callable[[np.ndarray], np.ndarray]],

@@ -168,11 +168,11 @@ class SeriesConnectedCellTestCase(unittest.TestCase):
 
         :return:
         """
-        sq1_cell = SQCell(eg=1.87, cell_T=300, plug_in_term=rev_breakdown_diode)
+        sq1_cell = SQCell(eg=1.87, cell_T=300, plug_in_term=rev_diode)
 
-        sq2_cell = SQCell(eg=1.42, cell_T=300, plug_in_term=rev_breakdown_diode)
+        sq2_cell = SQCell(eg=1.42, cell_T=300, plug_in_term=rev_diode)
 
-        sq3_cell = SQCell(eg=1.0, cell_T=300, plug_in_term=rev_breakdown_diode)
+        sq3_cell = SQCell(eg=1.0, cell_T=300, plug_in_term=rev_diode)
 
         tj_cell = MJCell([sq1_cell, sq2_cell, sq3_cell])
         tj_cell.set_input_spectrum(load_astm(("AM1.5d")))
@@ -181,11 +181,14 @@ class SeriesConnectedCellTestCase(unittest.TestCase):
         # and the photocurrent of each subcell. We don't use the MJCell.get_j_from_v() to solve the I-V
         connected_cells = []
         number_of_mjcell = 3
+
+        multi = np.array([0, 0.25, 0.5])
         for i in range(number_of_mjcell):
             # Need copy.deepcopy to also copy the subcells
             c_tj_cell = copy.deepcopy(tj_cell)
-            multi = np.random.random() * 0.1
-            c_tj_cell.set_input_spectrum(load_astm("AM1.5d") * (1 + multi))
+            # multi = np.random.random() * 0.5
+
+            c_tj_cell.set_input_spectrum(load_astm("AM1.5d") * (1 + multi[i]))
             connected_cells.append(c_tj_cell)
 
         # Extract each subcell, make them into series-connected cells
@@ -195,16 +198,28 @@ class SeriesConnectedCellTestCase(unittest.TestCase):
             for subcell in mj_cells.subcell:
                 iv_funcs.append(subcell.get_j_from_v)
 
+        reverse_plot = True
+
+        if reverse_plot:
+            rev_fac = -1
+        else:
+            rev_fac =1
+
         from pypvcell.fom import isc
-        for cell in connected_cells:
+        for idx, cell in enumerate(connected_cells):
             v, i = cell.get_iv()
-            print(isc(v, i))
-            plt.plot(v, i)
+            print(isc(v, i * rev_fac))
+            plt.plot(v, i * rev_fac, label="MJ cell {}".format(idx + 1))
 
         iv_pair = solve_series_connected_ivs(iv_funcs, vmin=-1, vmax=3.5, vnum=300)
 
-        plt.plot(iv_pair[0], iv_pair[1], '.-')
-        plt.ylim([-200, 0])
+        plt.plot(iv_pair[0], iv_pair[1] * rev_fac, '.-', label="Connected I-V")
+        plt.ylim(sorted([-300 * rev_fac, 0]))
+        plt.xlim([-10, 12])
+        plt.xlabel("voltage (V)")
+        plt.ylabel("current (A/m^2)")
+        plt.legend()
+        plt.savefig("./tests_output/Mjx3_demo.png", dpi=300)
         plt.show()
 
     def test_parallel_connected_mj_cells(self):
@@ -260,7 +275,7 @@ class SeriesConnectedCellTestCase(unittest.TestCase):
         iv_funcs = [tj_cell_1.get_j_from_v, tj_cell_2.get_j_from_v]
 
         parallel_v, parallel_i = solve_parallel_connected_ivs(iv_funcs, vmin=-2, vmax=6, vnum=30)
-        volt = np.linspace(-2, 5, num=30)
+        volt = np.linspace(-2, 6, num=30)
         curr_1 = tj_cell_1.get_j_from_v(volt)
         curr_2 = tj_cell_2.get_j_from_v(volt)
 
