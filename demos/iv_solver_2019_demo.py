@@ -43,7 +43,7 @@ def no_reverse_diode():
     plt.plot(volt, sq3_cell.get_j_from_v(volt), '.-', label="cell 3")
 
     plt.ylim([-350, 0])
-    plt.xlim([-1.5, 2])
+    plt.xlim([-1.5, 4])
 
     plt.xlabel("voltage (V)")
     plt.ylabel("current (A/m^2)")
@@ -70,7 +70,7 @@ def no_reverse_diode():
     # plot summed up the voltages
     plt.plot(sum_v, current_to_solve, '.-', label="connected cell")
 
-    plt.ylim([-150, 0])
+    plt.ylim([-350, 0])
     plt.xlim([-1.5, 4])
     plt.xlabel("voltage (V)")
     plt.ylabel("current (A/m^2)")
@@ -80,7 +80,7 @@ def no_reverse_diode():
     plt.show()
 
 
-def with_reverse_diode():
+def with_reverse_diode(plot_arrow=False):
     sq1_cell = SQCell(eg=1.42, cell_T=300, plug_in_term=rev_diode)
     sq1_cell.set_input_spectrum(load_astm("AM1.5d") * 0.5)
 
@@ -99,32 +99,36 @@ def with_reverse_diode():
     arrow_dy = np.zeros_like(volt)
     plt.plot(volt, sq1_cell.get_j_from_v(volt), '.-', label="cell 1")
     prev_current = None
-    for v in volt:
-        current = sq1_cell.get_j_from_v(v)
-        if (prev_current is None) or (np.isclose(current, prev_current, rtol=5e-2) == False):
-            plt.arrow(v, sq1_cell.get_j_from_v(v), 2.0 - v, 0, color='C0', linestyle='--')
-        prev_current = current
+
+    if plot_arrow:
+        for v in volt:
+            current = sq1_cell.get_j_from_v(v)
+            if (prev_current is None) or (np.isclose(current, prev_current, rtol=5e-2) == False):
+                plt.arrow(v, sq1_cell.get_j_from_v(v), 2.0 - v, 0, color='C0', linestyle='--')
+            prev_current = current
 
     plt.plot(volt, sq2_cell.get_j_from_v(volt), '.-', label="cell 2")
 
     prev_current = None
-    for v in volt:
-        current = sq2_cell.get_j_from_v(v)
-        if (prev_current is None) or (np.isclose(current, prev_current, rtol=5e-2) == False):
-            plt.arrow(v, sq2_cell.get_j_from_v(v), 2.0 - v, 0, color='C1', linestyle='--')
-        prev_current = v
+    if plot_arrow:
+        for v in volt:
+            current = sq2_cell.get_j_from_v(v)
+            if (prev_current is None) or (np.isclose(current, prev_current, rtol=5e-2) == False):
+                plt.arrow(v, sq2_cell.get_j_from_v(v), 2.0 - v, 0, color='C1', linestyle='--')
+            prev_current = v
 
     plt.plot(volt, sq3_cell.get_j_from_v(volt), '.-', label="cell 3")
 
     prev_current = None
-    for v in volt:
-        current = sq3_cell.get_j_from_v(v)
-        if (prev_current is None) or (np.isclose(current, prev_current, rtol=5e-2) == False):
-            plt.arrow(v, sq3_cell.get_j_from_v(v), 2.0 - v, 0, color='C2', linestyle='--')
-        prev_current = v
+    if plot_arrow:
+        for v in volt:
+            current = sq3_cell.get_j_from_v(v)
+            if (prev_current is None) or (np.isclose(current, prev_current, rtol=5e-2) == False):
+                plt.arrow(v, sq3_cell.get_j_from_v(v), 2.0 - v, 0, color='C2', linestyle='--')
+            prev_current = v
 
     plt.ylim([-350, 0])
-    plt.xlim([-1.5, 2])
+    plt.xlim([-1.5, 4])
 
     plt.xlabel("voltage (V)")
     plt.ylabel("current (A/m^2)")
@@ -155,7 +159,6 @@ def with_reverse_diode():
     plt.savefig("./figs/with_rev_diode_iv_solved.pdf")
 
     plt.show()
-
 
 if __name__ == "__main__":
     no_reverse_diode()

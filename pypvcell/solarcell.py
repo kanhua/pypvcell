@@ -30,6 +30,19 @@ from scipy.optimize import newton, bisect
 thermal_volt = sc.k / sc.e
 
 
+def rev_diode(voltage):
+    rev_j01 = 4.46e-15
+    rev_bd_v = 0.1
+    return -rev_j01 * np.exp(sc.e * (-voltage - rev_bd_v) / (sc.k * 300) - 1)
+
+
+def rev_breakdown_diode(voltage):
+    rev_j01 = 4.46e-17
+    rev_bd_v = 6
+    return -rev_j01 * np.exp(sc.e * (-voltage - rev_bd_v) / (sc.k * 300) - 1)
+
+
+
 def guess_max_volt(rad_eta, jsc, j01, cell_T):
     """
     Get an estimate of the maximum voltage by given Jsc
@@ -136,11 +149,15 @@ class SQCell(SolarCell):
         Initialize a SQ solar cell.
         It loads the class and sets up J01 of the cell
 
-        :param eg: Band gap (eV)
-        :param cell_T: temperature (K)
+        :param eg:
+        :param cell_T:
+        :param rad_eta:
         :param n_c: refractive index of cell
         :param n_s: refractive index of ambient
+        :param approx:
+        :param plug_in_term: the term that added into I(V), "default_rev_breakdown": use default reverse breakdown diode
         """
+
 
         super().__init__()
 
@@ -156,7 +173,10 @@ class SQCell(SolarCell):
         self.desp = 'SQCell'
         self._construct()
         self.subcell = [self]
-        self.plug_in_term = plug_in_term
+        if (plug_in_term=="default_rev_breakdown"):
+            self.plug_in_term=rev_breakdown_diode
+        else:
+            self.plug_in_term = plug_in_term
 
     def _construct(self):
 
