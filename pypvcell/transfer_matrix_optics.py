@@ -64,7 +64,7 @@ def get_ntotal(mat_name, lambdas):
     :return: the refractive index (complex) coresponds to lambdas
     """
     fname = join(MAT_DIR, "%s%s.csv" % (MAT_PREFIX, mat_name))
-    fdata = np.loadtxt(fname, delimiter=',', skiprows=1, comments='#')
+    fdata = np.loadtxt(fname, delimiter=',', skiprows=1, comments='#', encoding='utf8')
 
     wl = fdata[:, 0]
     nr = fdata[:, 1]

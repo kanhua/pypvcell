@@ -144,7 +144,8 @@ class SQCell(SolarCell):
 
     """
 
-    def __init__(self, eg, cell_T, rad_eta=1, n_c=3.5, n_s=1, approx=False, plug_in_term=None):
+    def __init__(self, eg, cell_T, rad_eta=1, n_c=3.5, n_s=1, approx=False,
+                 plug_in_term='default_rev_breakdown'):
         """
         Initialize a SQ solar cell.
         It loads the class and sets up J01 of the cell
