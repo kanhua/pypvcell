@@ -144,21 +144,20 @@ class SQCell(SolarCell):
 
     """
 
-    def __init__(self, eg, cell_T, rad_eta=1, n_c=3.5, n_s=1, approx=False,
+    def __init__(self, eg:float, cell_T, rad_eta=1, n_c=3.5, n_s=1, approx=False,
                  plug_in_term='default_rev_breakdown'):
         """
-        Initialize a SQ solar cell.
+        Initialize a solar cell with Shockley-Queisser(SQ) Model
         It loads the class and sets up J01 of the cell
 
-        :param eg:
-        :param cell_T:
-        :param rad_eta:
+        :param eg: band gap in (eV)
+        :param cell_T: cell temperture
+        :param rad_eta: radiative efficiency in fraction
         :param n_c: refractive index of cell
         :param n_s: refractive index of ambient
-        :param approx:
+        :param approx: Set False to enable higher order terms for calculating J01
         :param plug_in_term: the term that added into I(V), "default_rev_breakdown": use default reverse breakdown diode
         """
-
 
         super().__init__()
 

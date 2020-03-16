@@ -1,5 +1,9 @@
 # -*- coding: utf-8 -*-
 """
+The code following code is copied from
+https://github.com/sbyrnes321/tmm/blob/master/tmm_core.py
+This file is shared under MIT license
+
 For information see the docstring of each function, and also see
 manual.pdf (should be included with the distribution, otherwise get it
 at http://sjbyrnes.com/fresnel_manual.pdf ). Physics background,
