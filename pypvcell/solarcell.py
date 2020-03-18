@@ -26,6 +26,7 @@ from .detail_balanced_MJ import calculate_j01_from_qe
 import numpy as np
 import scipy.constants as sc
 from scipy.optimize import newton, bisect
+from scipy.optimize import bisect
 
 thermal_volt = sc.k / sc.e
 
@@ -40,7 +41,6 @@ def rev_breakdown_diode(voltage):
     rev_j01 = 4.46e-17
     rev_bd_v = 6
     return -rev_j01 * np.exp(sc.e * (-voltage - rev_bd_v) / (sc.k * 300) - 1)
-
 
 
 def guess_max_volt(rad_eta, jsc, j01, cell_T):
@@ -144,7 +144,7 @@ class SQCell(SolarCell):
 
     """
 
-    def __init__(self, eg:float, cell_T, rad_eta=1, n_c=3.5, n_s=1, approx=False,
+    def __init__(self, eg: float, cell_T, rad_eta=1, n_c=3.5, n_s=1, approx=False,
                  plug_in_term='default_rev_breakdown'):
         """
         Initialize a solar cell with Shockley-Queisser(SQ) Model
@@ -173,8 +173,8 @@ class SQCell(SolarCell):
         self.desp = 'SQCell'
         self._construct()
         self.subcell = [self]
-        if (plug_in_term=="default_rev_breakdown"):
-            self.plug_in_term=rev_breakdown_diode
+        if (plug_in_term == "default_rev_breakdown"):
+            self.plug_in_term = rev_breakdown_diode
         else:
             self.plug_in_term = plug_in_term
 
@@ -444,8 +444,8 @@ class MJCell(SolarCell):
 
         curr_v, curr_i = self.get_iv()
 
-        if (type(voltage) == float) or (type(voltage)==int):
-            voltage=np.array([voltage])
+        if (type(voltage) == float) or (type(voltage) == int):
+            voltage = np.array([voltage])
 
         iter_num = 0
         interped_i = np.interp(voltage, curr_v, curr_i)
@@ -454,10 +454,9 @@ class MJCell(SolarCell):
             if iter_num >= max_iter:
                 break
 
-            from scipy.optimize import bisect
-            solved_vs = np.empty((len(self.subcell), len(voltage)*2))
+            solved_vs = np.empty((len(self.subcell), len(voltage) * 2))
             for subcell_idx, cell in enumerate(self.subcell):
-                if iter_num==0:
+                if iter_num == 0:
                     solved_iv = solve_v_from_j_adding_epsilon(cell.get_j_from_v, interped_i, bisect, epsilon=0.1)
                 else:
                     solved_iv = solve_v_from_j_adding_epsilon(cell.get_j_from_v, interped_i, bisect, epsilon=0)
@@ -468,17 +467,16 @@ class MJCell(SolarCell):
             solved_v_sum = np.sum(solved_vs, axis=0)
 
             # add solved result into new array
-            interped_i=np.interp(solved_v_sum,curr_v,curr_i)
+            interped_i = np.interp(solved_v_sum, curr_v, curr_i)
 
-            curr_v=np.concatenate((curr_v,solved_v_sum))
-            curr_i=np.concatenate((curr_i,interped_i))
+            curr_v = np.concatenate((curr_v, solved_v_sum))
+            curr_i = np.concatenate((curr_i, interped_i))
 
-            sorted_index=np.argsort(curr_v)
-            curr_v=curr_v[sorted_index]
-            curr_i=curr_i[sorted_index]
+            sorted_index = np.argsort(curr_v)
+            curr_v = curr_v[sorted_index]
+            curr_i = curr_i[sorted_index]
 
             iter_num += 1
-
 
         interped_i = np.interp(voltage, curr_v, curr_i)
 

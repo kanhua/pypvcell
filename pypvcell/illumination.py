@@ -16,7 +16,7 @@
 import numpy as np
 import os
 import scipy.constants as sc
-from pypvcell.spectrum import Spectrum
+from .spectrum import Spectrum
 import warnings
 
 

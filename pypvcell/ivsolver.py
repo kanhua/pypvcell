@@ -31,11 +31,7 @@ from scipy.interpolate import interp1d
 from scipy.optimize import newton_krylov, bisect
 import scipy.constants as sc
 from .spectrum import Spectrum
-import copy
 from .fom import max_power
-
-
-# from .solarcell import SolarCell
 
 
 def gen_rec_iv(j01, j02, n1, n2, temperature, rshunt, voltage, jsc=0):
@@ -50,13 +46,13 @@ def gen_rec_iv_by_rad_eta(j01, rad_eta, n1, temperature,
     """
     Calculate recombination current from voltage
 
-    :param j01:
+    :param j01: [A/m^2]
     :param rad_eta:
     :param n1:
     :param temperature:
     :param rshunt:
     :param voltage:
-    :param jsc:
+    :param jsc: [A/m^2], positive value if photocurrent is generated
     :param minus_one: True to add -1 in the exponential term
     :return:
     """

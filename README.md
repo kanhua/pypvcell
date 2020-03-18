@@ -12,6 +12,10 @@ Still in progress. Draft version is [here](https://kanhua.github.io/pypvcell/).
 
 To see Pypvcell in actions, visit [demo](./demos/). This examples for provided as Jupyter notebooks.
 
+## Other unit tests
+
+In [tests](./tests) folder, use ```all_utest.py``` to run all the unit tests.
+
 
 ## Installation
 

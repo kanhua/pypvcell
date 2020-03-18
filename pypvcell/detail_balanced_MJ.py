@@ -18,13 +18,13 @@ detalied balance calculation of many junction devices
 
 import numpy as np
 import copy
-from pypvcell.illumination import Illumination
-from pypvcell.fom import voc
-from pypvcell.ivsolver import calculate_j01, calculate_j02_from_rad_eff, \
-    gen_rec_iv, gen_rec_iv_with_rs_by_newton, solve_mj_iv, \
-    calculate_j01_from_qe, gen_rec_iv_by_rad_eta,solve_ms_mj_iv
-from pypvcell.fom import max_power
-from pypvcell.photocurrent import gen_step_qe, calc_jsc, calc_jsc_from_eg
+from .illumination import Illumination
+from .fom import voc
+from .ivsolver import calculate_j01, \
+    gen_rec_iv_with_rs_by_newton, solve_mj_iv, \
+    calculate_j01_from_qe, gen_rec_iv_by_rad_eta, solve_ms_mj_iv
+from .fom import max_power
+from .photocurrent import gen_step_qe, calc_jsc, calc_jsc_from_eg
 import scipy.constants as sc
 from pypvcell.spectrum import Spectrum
 
